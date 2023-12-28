@@ -9,3 +9,13 @@ init:
 # run development server
 runserver:
     DEBUG=true concurrently -n tailwind,django ".venv/bin/python manage.py tailwind start" "sleep 3 && .venv/bin/python manage.py runserver"
+
+# initialize zappa
+init-zappa:
+    .venv/bin/pip install zappa
+    .venv/bin/zappa init
+
+# deploy to aws lambda
+deploy-zappa: init-zappa
+    .venv/bin/python manage.py collectstatic --noinput
+    .venv/bin/zappa deploy || .venv/bin/zappa update

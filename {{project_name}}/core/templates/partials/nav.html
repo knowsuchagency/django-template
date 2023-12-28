@@ -1,41 +1,21 @@
-<nav class="navbar navbar-expand-lg bg-body-tertiary">
-    <div class="container-fluid">
-      <a class="navbar-brand" href="#">Home</a>
-      <button
-        class="navbar-toggler"
-        type="button"
-        data-bs-toggle="collapse"
-        data-bs-target="#navbarNav"
-        aria-controls="navbarNav"
-        aria-expanded="false"
-        aria-label="Toggle navigation"
-      >
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navbarNav">
-        {% comment %} <ul class="navbar-nav me-auto">
-          <li class="nav-item">
-            <a
-              class="nav-link {% if request.resolver_match.view_name == 'tokenize' %}active{% endif %}"
-              href="{% url 'tokenize' %}"
-              {% if request.resolver_match.view_name == 'tokenize' %}aria-current="page"{% endif %}
-              >Tokenize</a
-            >
-          </li>
-          <li class="nav-item">
-            <a
-              class="nav-link {% if request.resolver_match.view_name == 'match' %}active{% endif %}"
-              href="{% url 'match' %}"
-              {% if request.resolver_match.view_name == 'match' %}aria-current="page"{% endif %}
-              >Match</a
-            > {% endcomment %}
-          </li>
-        </ul>
-        <ul class="navbar-nav ms-auto">
-          <li class="nav-item"><a href="/admin" class="nav-link text-body-tertiary fw-bold">Admin</a></li>
-          <li class="nav-item"><a href="/api/docs" class="nav-link text-primary-emphasis fw-bold">API Docs</a></li>
-        </ul>
-      </div>
-    </div>
-  </nav>
-  
+<div class="navbar bg-base-100">
+  <div class="flex-1">
+    <a class="btn btn-ghost text-xl">Home</a>
+  </div>
+  <div class="flex-none">
+    <ul class="menu menu-horizontal px-1">
+      <li><a>Link</a></li>
+      <li>
+        <details>
+          <summary>
+            Parent
+          </summary>
+          <ul class="p-2 bg-base-100 rounded-t-none">
+            <li><a>Link 1</a></li>
+            <li><a>Link 2</a></li>
+          </ul>
+        </details>
+      </li>
+    </ul>
+  </div>
+</div>

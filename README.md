@@ -1,5 +1,10 @@
 Django Project Template
 
+## Requirements
+
+* [Just](https://github.com/casey/just)
+* [Copier](https://copier.readthedocs.io/en/stable/#quick-start)
+
 ## Usage
 
 ```sh

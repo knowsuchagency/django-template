@@ -1,0 +1,14 @@
+django~=5.0
+django-widget-tweaks~=1.5
+django-debug-toolbar~=4.2
+django-extensions~=3.2
+django-browser-reload~=1.6
+django-crispy-forms~=2.1
+whitenoise[brotli]~=6.6
+django-htmx~=1.16
+django-tailwind~=3.8
+django-ninja~=1.1
+gunicorn~=21.2
+
+# use pypi once https://github.com/django-crispy-forms/crispy-bootstrap5/issues/166 is resolved
+git+https://github.com/django-crispy-forms/crispy-bootstrap5.git@main#egg=crispy-bootstrap5

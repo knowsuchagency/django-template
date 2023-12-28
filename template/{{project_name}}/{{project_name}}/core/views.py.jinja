@@ -1,0 +1,10 @@
+from django.shortcuts import render
+from django.http import JsonResponse
+
+from {{project_name}}.route_decorator import Route
+
+route = Route()
+
+@route("/")
+def index(request):
+    return render(request, "index.html")

@@ -1,6 +1,6 @@
 # initialize development
 init:
-    pkgx python@3.12 -m venv .venv
+    pkgx python@3.11 -m venv .venv
     npm i -g concurrently
     .venv/bin/pip install -U pip
     .venv/bin/pip install -r requirements.txt

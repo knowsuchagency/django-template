@@ -18,6 +18,8 @@ from django.contrib import admin
 from django.urls import path, include
 from django.contrib.auth import views as auth_views
 
+
+from .settings import DEBUG
 from .api import api
 
 from {{project_name}}.core import views
@@ -25,8 +27,13 @@ from {{project_name}}.core import views
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/", api.urls),
-    path("__reload__/", include("django_browser_reload.urls")),
     path("accounts/", include("django.contrib.auth.urls")),
 ]
+
+if DEBUG:
+    urlpatterns += [
+        path('__debug__/', include("debug_toolbar.urls")),
+        path("__reload__/", include("django_browser_reload.urls")),
+    ]
 
 urlpatterns += views.route.patterns

@@ -20,7 +20,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-g!g@g=)c*trma$-&6!i=nydeb7=&wqcu=e*iqc@uw=r$uhf-z)"
+SECRET_KEY = os.getenv("SECRET_KEY", "django-insecure-g!g@g=)c*trma$-&6!i=nydeb7=&wqcu=e*iqc@uw=r$uhf-z)")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv("DEBUG", "true").lower().strip().startswith("t")
@@ -29,6 +29,11 @@ ALLOWED_HOSTS = [s for s in os.getenv("ALLOWED_HOSTS", "").split(" ") if s]
 
 if DEBUG:
     ALLOWED_HOSTS += ["*"]
+
+INTERNAL_IPS = [
+    "127.0.0.1",
+    "localhost",
+]
 
 # Application definition
 
@@ -42,31 +47,29 @@ INSTALLED_APPS = [
 ]
 
 INSTALLED_APPS += [
-    "django_browser_reload",
+    "django_extensions",
+    "tailwind",
     "widget_tweaks",
     "django_htmx",
     "crispy_forms",
     "crispy_bootstrap5",
     "{{project_name}}.core",
+    "{{project_name}}.theme",
 ]
 
 if DEBUG:
-    INSTALLED_APPS = ["debug_toolbar"] + INSTALLED_APPS
+    INSTALLED_APPS = ["debug_toolbar", *INSTALLED_APPS, "django_browser_reload"]
 
 MIDDLEWARE = [
-    m
-    for m in [
-        "django.middleware.security.SecurityMiddleware",
-        "django.contrib.sessions.middleware.SessionMiddleware",
-        "django.middleware.common.CommonMiddleware",
-        "debug_toolbar.middleware.DebugToolbarMiddleware" if DEBUG else "",
-        "django.middleware.csrf.CsrfViewMiddleware",
-        "django.contrib.auth.middleware.AuthenticationMiddleware",
-        "django.contrib.messages.middleware.MessageMiddleware",
-        "django.middleware.clickjacking.XFrameOptionsMiddleware",
-        "django_browser_reload.middleware.BrowserReloadMiddleware",
-    ]
-    if m
+    "django.middleware.security.SecurityMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "debug_toolbar.middleware.DebugToolbarMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "django_browser_reload.middleware.BrowserReloadMiddleware",
 ]
 
 ROOT_URLCONF = "{{project_name}}.urls"
@@ -147,3 +150,5 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 
 CRISPY_TEMPLATE_PACK = "bootstrap5"
+
+TAILWIND_APP_NAME = "{{project_name}}.theme"

@@ -1,4 +1,4 @@
-{{project_name}}
+Django Project Template
 
 ## Usage
 

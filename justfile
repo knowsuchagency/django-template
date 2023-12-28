@@ -2,6 +2,7 @@
 init:
     pkgx python@3.12 -m venv .venv
     npm i -g concurrently
+    .venv/bin/pip install -U pip
     .venv/bin/pip install -r requirements.txt
     .venv/bin/python manage.py tailwind install
 

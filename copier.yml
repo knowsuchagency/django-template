@@ -5,3 +5,5 @@ project_name:
 
 _exclude:
   - "__pycache__"
+  - ".venv"
+  - ".git"

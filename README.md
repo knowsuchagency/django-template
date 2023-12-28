@@ -3,7 +3,7 @@ Django Project Template
 ## Usage
 
 ```sh
-copier gh:knowsuchagency/django-template {{project_name}}
-cd {{project_name}}
+copier gh:knowsuchagency/django-template my_new_project
+cd my_new_project
 just init runserver
 ```

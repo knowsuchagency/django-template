@@ -4,6 +4,21 @@
   </div>
   <div class="navbar-end">
     <ul class="menu menu-horizontal px-1">
+      {% if DEBUG %}
+        <li class="text-lg">
+          <details>
+            <summary>Dev</summary>
+            <ul class="p-2 bg-base-100 rounded-t-none">
+              <li>
+                <a href="/api/docs">API Docs</a>
+              </li>
+              <li>
+                <a href="/admin">Admin</a>
+              </li>
+            </ul>
+          </details>
+        </li>
+      {% endif %}
       <li class="text-lg">
         {% if user.is_authenticated %}
           <form action="{% url 'logout' %}" method="post">

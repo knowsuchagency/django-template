@@ -10,6 +10,18 @@ init:
 runserver:
     DEBUG=true concurrently -n tailwind,django ".venv/bin/python manage.py tailwind start" "sleep 3 && .venv/bin/python manage.py runserver"
 
+# make migrations
+makemigrations:
+    .venv/bin/python manage.py makemigrations
+
+# migrate
+migrate:
+    .venv/bin/python manage.py migrate
+
+# create superuser
+createsuperuser:
+    .venv/bin/python manage.py createsuperuser
+
 # initialize zappa
 init-zappa:
     .venv/bin/pip install zappa

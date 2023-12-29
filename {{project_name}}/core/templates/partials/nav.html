@@ -1,20 +1,20 @@
 <div class="navbar bg-base-100">
-  <div class="flex-1">
-    <a class="btn btn-ghost text-xl">Home</a>
+  <div class="navbar-start">
+    <a href="/" class="btn btn-ghost text-xl">Home</a>
   </div>
-  <div class="flex-none">
+  <div class="navbar-end">
     <ul class="menu menu-horizontal px-1">
-      <li><a>Link</a></li>
-      <li>
-        <details>
-          <summary>
-            Parent
-          </summary>
-          <ul class="p-2 bg-base-100 rounded-t-none">
-            <li><a>Link 1</a></li>
-            <li><a>Link 2</a></li>
-          </ul>
-        </details>
+      <li class="text-lg">
+        {% if user.is_authenticated %}
+          <form action="{% url 'logout' %}" method="post">
+            {% csrf_token %}
+            <button type="submit">Logout</button>
+          </form>
+        {% else %}
+          {% if '/login' not in request.path %}
+            <a href="{% url 'login' %}">Login</a>
+          {% endif %}
+        {% endif %}
       </li>
     </ul>
   </div>

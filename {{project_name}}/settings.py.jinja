@@ -152,14 +152,12 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
-STATIC_URL = "/static/"
-
-# this variable is automatically set by Zappa when deployed
-if stage := os.getenv("ZAPPA_STAGE"):
+STATIC_URL = WHITENOISE_STATIC_PREFIX = "/static/"
+# set by Zappa in AWS Lambda
+if stage := os.getenv("STAGE"):
     STATIC_URL = f"/{stage}/static/"
 
 STATIC_ROOT = BASE_DIR / "staticfiles"
-WHITENOISE_STATIC_PREFIX = "/static/"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field

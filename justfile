@@ -29,9 +29,24 @@ createsuperuser:
 # initialize zappa
 init-zappa:
     .venv/bin/pip install zappa
-    .venv/bin/zappa init
+    .venv/bin/zappa init || echo "zappa already initialized"
 
 # deploy to aws lambda
-deploy-zappa: init-zappa
-    .venv/bin/python manage.py collectstatic --noinput
-    .venv/bin/zappa deploy || .venv/bin/zappa update
+deploy-zappa: init-zappa _assert_zappa_settings_env_vars
+    #!/bin/zsh
+    . .venv/bin/activate
+    python manage.py collectstatic --noinput
+    zappa deploy || zappa update
+
+_assert_zappa_settings_env_vars:
+    #!/usr/bin/env python3
+    import json
+    with open("zappa_settings.json") as f:
+        settings = json.load(f)
+        for stage, config in settings.items():
+            env_vars = config.get("aws_environment_variables", {})
+            env_vars.setdefault("SECRET_KEY", "changeme")
+            env_vars.setdefault("ALLOWED_HOSTS", "*")
+            config["aws_environment_variables"] = env_vars
+        with open("zappa_settings.json", "w") as f:
+            json.dump(settings, f, indent=4)

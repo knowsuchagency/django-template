@@ -26,6 +26,11 @@ resetdb:
 createsuperuser:
     .venv/bin/python manage.py createsuperuser
 
+# build theme and collect static files
+collectstatic:
+    .venv/bin/python manage.py tailwind build
+    .venv/bin/python manage.py collectstatic --noinput
+
 # initialize zappa
 init-zappa:
     .venv/bin/pip install zappa
@@ -35,8 +40,12 @@ init-zappa:
 deploy-zappa: init-zappa _assert_zappa_settings_env_vars
     #!/bin/zsh
     . .venv/bin/activate
-    python manage.py collectstatic --noinput
+    just collectstatic
     zappa deploy || zappa update
+
+# undeploy from aws lambda
+undeploy-zappa:
+    .venv/bin/zappa undeploy
 
 _assert_zappa_settings_env_vars:
     #!/usr/bin/env python3

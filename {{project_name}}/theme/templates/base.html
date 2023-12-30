@@ -14,8 +14,9 @@
         {% tailwind_css %}
       {% endblock %}
       {% block javascript %}
-        <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-        <script defer src="https://unpkg.com/htmx.org@^1" crossorigin="anonymous"></script>
+        {% comment %} <script defer src="https://unpkg.com/htmx.org@^1" crossorigin="anonymous"></script> {% endcomment %}
+        <script defer src="https://cdn.jsdelivr.net/npm/@imacrayon/alpine-ajax@0.4.0/dist/cdn.min.js"></script>
+        <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.11.1/dist/cdn.min.js"></script>
       {% endblock %}
     {% endblock %}
   </head>
@@ -35,5 +36,6 @@
 	  </div>
       {% endblock %}
     {% endblock %}
+    <script src="//instant.page/5.2.0" type="module" integrity="sha384-jnZyxPjiipYXnSU0ygqeac2q7CVYMbh84q0uHVRRxEtvFPiQYbXWUorga2aqZJ0z" defer></script>
   </body>
 </html>

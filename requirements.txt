@@ -9,6 +9,8 @@ django-htmx~=1.16
 django-tailwind~=3.8
 django-ninja~=1.1
 gunicorn~=21.2
+dj-database-url~=2.1
+python-decouple~=3.8
 
 # use pypi once https://github.com/django-crispy-forms/crispy-bootstrap5/issues/166 is resolved
 git+https://github.com/django-crispy-forms/crispy-bootstrap5.git@main#egg=crispy-bootstrap5

@@ -18,6 +18,10 @@ makemigrations:
 migrate:
     .venv/bin/python manage.py migrate
 
+# reset database
+resetdb:
+    .venv/bin/python manage.py reset_db
+
 # create superuser
 createsuperuser:
     .venv/bin/python manage.py createsuperuser

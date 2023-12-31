@@ -2,7 +2,7 @@ from urllib.parse import urlparse
 from django.conf import settings
 
 
-def htmx_middleware(get_response):
+def htmx_redirect_middleware(get_response):
     def middleware(request):
         response = get_response(request)
         if request.headers.get("HX-Request") and response.status_code == 302:

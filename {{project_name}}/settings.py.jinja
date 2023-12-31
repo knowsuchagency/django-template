@@ -79,6 +79,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "django_browser_reload.middleware.BrowserReloadMiddleware",
+    "{{project_name}}.core.middlewares.htmx_redirect_middleware",
 ]
 
 ROOT_URLCONF = "{{project_name}}.urls"

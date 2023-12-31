@@ -5,7 +5,7 @@
   <div class="navbar-end">
     <ul class="menu menu-horizontal px-1">
       {% if DEBUG %}
-        <li class="text-lg">
+        <li class="text-lg {% if '/login' in request.path %} mr-10 {%endif%}">
           <details>
             <summary>Dev</summary>
             <ul class="p-2 bg-base-100 rounded-t-none">

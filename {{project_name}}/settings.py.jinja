@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 import os
 import json
 from pathlib import Path
+from functools import partial
 
 from decouple import config
 from dj_database_url import parse as db_url
@@ -30,6 +31,8 @@ SECRET_KEY = config("SECRET_KEY")
 DEBUG = config("DEBUG", default=False, cast=bool)
 
 ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="", cast=str.split)
+
+STAGE = config("STAGE", default="")
 
 if DEBUG:
     ALLOWED_HOSTS += ["*"]
@@ -103,13 +106,15 @@ WSGI_APPLICATION = "{{project_name}}.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
-DATABASES = {
-    "default": config(
-        "DATABASE_URL",
-        default="sqlite:///" + str(BASE_DIR / "db.sqlite3"),
-        cast=db_url,
-    )
-}
+DATABASE_URL = config(
+    "DATABASE_URL",
+    default="sqlite:///" + str(BASE_DIR / "db.sqlite3"),
+    cast=partial(
+        db_url,
+        conn_max_age=600,
+        conn_health_checks=True,
+    ),
+)
 
 STORAGES = {
     "staticfiles": {
@@ -154,8 +159,8 @@ USE_TZ = True
 
 STATIC_URL = WHITENOISE_STATIC_PREFIX = "/static/"
 # set by Zappa in AWS Lambda
-if stage := os.getenv("STAGE"):
-    STATIC_URL = f"/{stage}/static/"
+if STAGE:
+    STATIC_URL = f"/{STAGE}/static/"
 
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
@@ -172,3 +177,7 @@ TAILWIND_APP_NAME = "{{project_name}}.theme"
 
 LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/"
+
+if STAGE:
+    LOGIN_REDIRECT_URL = f"/{STAGE}/"
+    LOGOUT_REDIRECT_URL = f"/{STAGE}/"

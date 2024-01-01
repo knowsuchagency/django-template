@@ -91,8 +91,6 @@ INSTALLED_APPS += [
     "tailwind",
     "widget_tweaks",
     "django_htmx",
-    "crispy_forms",
-    "crispy_bootstrap5",
     "{{project_name}}.accounts",
     "{{project_name}}.theme",
     "{{project_name}}.core",
@@ -219,10 +217,6 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
-
-CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
-
-CRISPY_TEMPLATE_PACK = "bootstrap5"
 
 TAILWIND_APP_NAME = "{{project_name}}.theme"
 

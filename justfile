@@ -8,8 +8,10 @@ init:
     which concurrently || npm i -g concurrently
     pip install -U pip
     pip install -r requirements.txt
-    echo "creating .env file with secret key"
-    echo "SECRET_KEY=$(openssl rand -hex 32)" >> .env
+    if [ ! -f .env ]; then
+        echo "creating .env file with secret key"
+        echo "SECRET_KEY=$(openssl rand -hex 32)" >> .env
+    fi
     direnv allow
     echo "initializing tailwind theme"
     python manage.py tailwind install

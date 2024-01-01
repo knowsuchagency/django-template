@@ -1,0 +1,14 @@
+{% load widget_tweaks %}
+
+
+{% with field=form_field %}
+<div class="form-control">
+  <label class="label">
+    <span class="label-text">{{ field.label }}</span>
+  </label>
+  {{ field|add_class:'input input-bordered' }}
+  {% for error in field.errors %}
+    <p class="text-error">{{ error }}</p>
+  {% endfor %}
+</div>
+{% endwith %}

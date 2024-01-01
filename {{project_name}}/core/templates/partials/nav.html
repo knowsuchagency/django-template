@@ -5,7 +5,7 @@
   <div class="navbar-end">
     <ul class="menu menu-horizontal px-1">
       {% if DEBUG %}
-        <li class="text-lg {% if '/login' in request.path %} mr-10 {%endif%}">
+        <li class="text-lg">
           <details>
             <summary>Dev</summary>
             <ul class="p-2 bg-base-100 rounded-t-none">
@@ -21,13 +21,15 @@
       {% endif %}
       <li class="text-lg">
         {% if user.is_authenticated %}
-          <form action="{% url 'logout' %}" method="post">
+          <form action="{% url 'account_logout' %}" method="post">
             {% csrf_token %}
             <button type="submit">Logout</button>
           </form>
         {% else %}
           {% if '/login' not in request.path %}
-            <a href="{% url 'login' %}">Login</a>
+            <a href="{% url 'account_login' %}">Login</a>
+          {% else %}
+            <a href="{% url 'account_signup' %}">Sign Up</a>
           {% endif %}
         {% endif %}
       </li>

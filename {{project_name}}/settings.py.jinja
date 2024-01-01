@@ -9,10 +9,10 @@ https://docs.djangoproject.com/en/5.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
-import os
-import json
 from pathlib import Path
 from functools import partial
+import json
+import os
 
 from decouple import config
 from dj_database_url import parse as db_url
@@ -32,7 +32,22 @@ DEBUG = config("DEBUG", default=False, cast=bool)
 
 ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="", cast=str.split)
 
-STAGE = config("STAGE", default="")
+def _set_stage(stage):
+    """
+    STAGE is set by Zappa in AWS Lambda
+
+    but we want it to be an empty string locally or when there is a certified domain
+    """
+    zappa_settings_path = BASE_DIR / "zappa_settings.json"
+    if not (zappa_settings_path.exists() and stage):
+        return ""
+    zappa_settings = json.loads(zappa_settings_path.read_text())
+    stage_settings = zappa_settings.get(stage, {})
+    if "domain" in stage_settings and "certificate_arn" in stage_settings:
+        return ""
+    return stage
+
+STAGE = config("STAGE", default="", cast=_set_stage)
 
 if DEBUG:
     ALLOWED_HOSTS += ["*"]
@@ -40,6 +55,11 @@ if DEBUG:
 INTERNAL_IPS = [
     "127.0.0.1",
     "localhost",
+]
+
+AUTHENTICATION_BACKENDS = [
+    "django.contrib.auth.backends.ModelBackend",
+    "allauth.account.auth_backends.AuthenticationBackend",
 ]
 
 # Application definition
@@ -54,6 +74,18 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
 ]
 
+ALLAUTH_APPS = [
+    "allauth",
+    "allauth.account",
+    "allauth.socialaccount",
+    "allauth.socialaccount.providers.apple",
+    "allauth.socialaccount.providers.google",
+    # "allauth.socialaccount.providers.github",
+    # "allauth.socialaccount.providers.instagram",
+    # "allauth.socialaccount.providers.linkedin",
+    # "allauth.socialaccount.providers.microsoft",
+]
+
 INSTALLED_APPS += [
     "django_extensions",
     "tailwind",
@@ -61,9 +93,12 @@ INSTALLED_APPS += [
     "django_htmx",
     "crispy_forms",
     "crispy_bootstrap5",
-    "{{project_name}}.core",
+    "{{project_name}}.accounts",
     "{{project_name}}.theme",
+    "{{project_name}}.core",
 ]
+
+INSTALLED_APPS += ALLAUTH_APPS
 
 if DEBUG:
     INSTALLED_APPS = ["debug_toolbar", *INSTALLED_APPS, "django_browser_reload"]
@@ -77,10 +112,21 @@ MIDDLEWARE = [
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
+    "allauth.account.middleware.AccountMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "django_browser_reload.middleware.BrowserReloadMiddleware",
     "{{project_name}}.core.middlewares.htmx_redirect_middleware",
 ]
+
+SOCIALACCOUNT_PROVIDERS = {
+    # "google": {
+    #     "APP": {
+    #         "client_id": "123",
+    #         "secret": "456",
+    #         "key": "",
+    #     },
+    # }
+}
 
 ROOT_URLCONF = "{{project_name}}.urls"
 
@@ -186,3 +232,5 @@ LOGOUT_REDIRECT_URL = "/"
 if STAGE:
     LOGIN_REDIRECT_URL = f"/{STAGE}/"
     LOGOUT_REDIRECT_URL = f"/{STAGE}/"
+
+AUTH_USER_MODEL = "accounts.User"

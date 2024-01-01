@@ -117,6 +117,10 @@ DATABASE_URL = config(
     ),
 )
 
+DATABASES = {
+    "default": DATABASE_URL,
+}
+
 STORAGES = {
     "staticfiles": {
         "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",

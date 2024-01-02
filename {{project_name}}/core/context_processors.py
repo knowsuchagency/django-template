@@ -6,4 +6,4 @@ def debug_context(request):
 
 
 def dev_context(request):
-    return {"DEV": settings.STAGE == "DEV"}
+    return {"DEV": settings.STAGE == "dev"}

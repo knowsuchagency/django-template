@@ -11,3 +11,4 @@ gunicorn~=21.2
 dj-database-url~=2.1
 python-decouple~=3.8
 psycopg2-binary~=2.9
+django-allauth~=0.59

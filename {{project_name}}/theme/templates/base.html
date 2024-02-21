@@ -11,11 +11,24 @@
     {% block javascript_and_css %}
       {% block css %}
         {% comment %} {% tailwind_css %} {% endcomment %}
+        {% comment %} picoss for basic global styling {% endcomment %}
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css" />
+        {% comment %} basscss for atomic css utilities i.e. margin, padding, etc. {% endcomment %}
+        <link href="https://unpkg.com/basscss@8.0.2/css/basscss.min.css" rel="stylesheet" />
+        {% comment %} shoelace for web components {% endcomment %}
+        <link rel="stylesheet" media="(prefers-color-scheme:light)" href="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.14.0/cdn/themes/light.css" />
+        <link rel="stylesheet" media="(prefers-color-scheme:dark)" href="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.14.0/cdn/themes/dark.css" onload="document.documentElement.classList.add('sl-theme-dark');" />
+        {% comment %} this prevents the flash of unstyled content {% endcomment %}
+        <style>
+          :not(:defined) {
+            visibility: hidden;
+          }
+        </style>
       {% endblock %}
       {% block javascript %}
         <script defer src="https://unpkg.com/htmx.org@^1" crossorigin="anonymous"></script>
         <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+        <script async type="module" src="https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.14.0/cdn/shoelace-autoloader.js"></script>
       {% endblock %}
     {% endblock %}
   </head>
@@ -26,7 +39,163 @@
       {% endblock %}
       {% block main %}
         <main class="container">
-          <h3>Hello world!</h3>
+          <h3>Hello world!!</h3>
+
+          <sl-tab-group>
+            <sl-tab slot="nav" panel="general">General</sl-tab>
+            <sl-tab slot="nav" panel="custom">Custom</sl-tab>
+            <sl-tab slot="nav" panel="advanced">Advanced</sl-tab>
+            <sl-tab slot="nav" panel="disabled" disabled>Disabled</sl-tab>
+
+            <sl-tab-panel name="general">This is the general tab panel.</sl-tab-panel>
+            <sl-tab-panel name="custom">This is the custom tab panel.</sl-tab-panel>
+            <sl-tab-panel name="advanced">This is the advanced tab panel.</sl-tab-panel>
+            <sl-tab-panel name="disabled">This is a disabled tab panel.</sl-tab-panel>
+          </sl-tab-group>
+
+          <sl-card class="card-overview">
+            <img slot="image" src="https://images.unsplash.com/photo-1559209172-0ff8f6d49ff7?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=500&q=80" alt="A kitten sits patiently between a terracotta pot and decorative grasses." />
+
+            <strong>Mittens</strong><br />
+            This kitten is as cute as he is playful. Bring him home today!<br />
+            <small>6 weeks old</small>
+
+            <div slot="footer">
+              <sl-button variant="primary" pill>More Info</sl-button>
+              <sl-rating></sl-rating>
+            </div>
+          </sl-card>
+
+          <sl-dropdown>
+            <sl-button slot="trigger" caret>Dropdown</sl-button>
+            <sl-menu>
+              <sl-menu-item>Dropdown Item 1</sl-menu-item>
+              <sl-menu-item>Dropdown Item 2</sl-menu-item>
+              <sl-menu-item>Dropdown Item 3</sl-menu-item>
+              <sl-divider></sl-divider>
+              <sl-menu-item disabled>Disabled</sl-menu-item>
+              <sl-divider></sl-divider>
+              <sl-menu-item>
+                Prefix<sl-icon slot="prefix" name="gift"></sl-icon>
+              </sl-menu-item>
+              <sl-menu-item>
+                Suffix Icon<sl-icon slot="suffix" name="heart"></sl-icon>
+              </sl-menu-item>
+            </sl-menu>
+          </sl-dropdown>
+
+          <sl-drawer label="Drawer" class="drawer-overview">
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit.<sl-button slot="footer" variant="primary">Close</sl-button>
+          </sl-drawer>
+
+          <sl-button>Open Drawer</sl-button>
+
+          <sl-tooltip content="This is a tooltip">
+            <sl-button class="mt2">Hover Me</sl-button>
+          </sl-tooltip>
+
+          <hr />
+
+          <sl-tag variant="primary">Primary</sl-tag>
+          <sl-tag variant="success">Success</sl-tag>
+          <sl-tag variant="neutral">Neutral</sl-tag>
+          <sl-tag variant="warning">Warning</sl-tag>
+          <sl-tag variant="danger" class="ml2">Danger</sl-tag>
+
+          <hr />
+
+          <div class="skeleton-overview">
+            <header>
+              <sl-skeleton></sl-skeleton>
+              <sl-skeleton></sl-skeleton>
+            </header>
+
+            <sl-skeleton></sl-skeleton>
+            <sl-skeleton></sl-skeleton>
+            <sl-skeleton></sl-skeleton>
+          </div>
+
+          <hr />
+
+          <sl-tree>
+            <sl-tree-item>
+              Deciduous<sl-tree-item>Birch</sl-tree-item>
+              <sl-tree-item>
+                Maple<sl-tree-item>Field maple</sl-tree-item>
+                <sl-tree-item>Red maple</sl-tree-item>
+                <sl-tree-item>Sugar maple</sl-tree-item>
+              </sl-tree-item>
+              <sl-tree-item>Oak</sl-tree-item>
+            </sl-tree-item>
+
+            <sl-tree-item>
+              Coniferous<sl-tree-item>Cedar</sl-tree-item>
+              <sl-tree-item>Pine</sl-tree-item>
+              <sl-tree-item>Spruce</sl-tree-item>
+            </sl-tree-item>
+
+            <sl-tree-item>
+              Non-trees<sl-tree-item>Bamboo</sl-tree-item>
+              <sl-tree-item>Cactus</sl-tree-item>
+              <sl-tree-item>Fern</sl-tree-item>
+            </sl-tree-item>
+          </sl-tree>
+
+          <script>
+            const drawer = document.querySelector('.drawer-overview')
+            const openButton = drawer.nextElementSibling
+            const closeButton = drawer.querySelector('sl-button[variant="primary"]')
+            
+            openButton.addEventListener('click', () => drawer.show())
+            closeButton.addEventListener('click', () => drawer.hide())
+          </script>
+
+          <style>
+            .card-overview {
+              max-width: 400px;
+            }
+            
+            .card-overview small {
+              color: var(--sl-color-neutral-500);
+            }
+            
+            .card-overview [slot='footer'] {
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+            }
+            
+            .skeleton-overview header {
+              display: flex;
+              align-items: center;
+              margin-bottom: 1rem;
+            }
+            
+            .skeleton-overview header sl-skeleton:last-child {
+              flex: 0 0 auto;
+              width: 30%;
+            }
+            
+            .skeleton-overview sl-skeleton {
+              margin-bottom: 1rem;
+            }
+            
+            .skeleton-overview sl-skeleton:nth-child(1) {
+              float: left;
+              width: 3rem;
+              height: 3rem;
+              margin-right: 1rem;
+              vertical-align: middle;
+            }
+            
+            .skeleton-overview sl-skeleton:nth-child(3) {
+              width: 95%;
+            }
+            
+            .skeleton-overview sl-skeleton:nth-child(4) {
+              width: 80%;
+            }
+          </style>
         </main>
       {% endblock %}
     {% endblock %}

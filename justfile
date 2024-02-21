@@ -27,6 +27,7 @@ makemigrations:
 # migrate
 migrate:
     .venv/bin/python manage.py migrate
+    .venv/bin/python manage.py createcachetable
 
 # reset database
 resetdb:

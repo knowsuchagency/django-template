@@ -31,6 +31,9 @@ DEBUG = config("DEBUG", default=False, cast=bool)
 
 ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="", cast=str.split)
 
+CSRF_TRUSTED_ORIGINS = config("CSRF_TRUSTED_ORIGINS", default="", cast=str.split)
+
+
 def _set_stage(stage):
     """
     STAGE is set by Zappa in AWS Lambda
@@ -90,7 +93,7 @@ INSTALLED_APPS += [
     "tailwind",
     "widget_tweaks",
     "django_htmx",
-    "{{project_name}}.accounts",
+    "crispy_forms",
     "{{project_name}}.theme",
     "{{project_name}}.core",
 ]
@@ -114,6 +117,15 @@ MIDDLEWARE = [
     "django_browser_reload.middleware.BrowserReloadMiddleware",
     "{{project_name}}.core.middlewares.htmx_redirect_middleware",
 ]
+
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.db.DatabaseCache",
+        "LOCATION": "django_cache",
+        # set the cache timeout to 30 days
+        "TIMEOUT": 60 * 60 * 24 * 30,
+    }
+}
 
 SOCIALACCOUNT_PROVIDERS = {
     # "google": {
@@ -226,4 +238,8 @@ if STAGE:
     LOGIN_REDIRECT_URL = f"/{STAGE}/"
     LOGOUT_REDIRECT_URL = f"/{STAGE}/"
 
-AUTH_USER_MODEL = "accounts.User"
+AUTH_USER_MODEL = "core.User"
+
+ACCOUNT_AUTHENTICATION_METHOD = "username_email"
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_LOGIN_ON_PASSWORD_RESET = True

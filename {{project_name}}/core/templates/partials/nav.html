@@ -1,38 +1,37 @@
-<div class="navbar bg-base-100">
-  <div class="navbar-start">
-    <a href="/" class="btn btn-ghost text-xl">Home</a>
-  </div>
-  <div class="navbar-end">
-    <ul class="menu menu-horizontal px-1">
-      {% if DEBUG %}
-        <li class="text-lg">
-          <details>
-            <summary>Dev</summary>
-            <ul class="p-2 bg-base-100 rounded-t-none">
-              <li>
-                <a href="/api/docs">API Docs</a>
-              </li>
-              <li>
-                <a href="/admin">Admin</a>
-              </li>
-            </ul>
-          </details>
-        </li>
+<nav class="container">
+  <ul>
+    <li>
+      <a href="/"><strong>Home</strong></a>
+    </li>
+  </ul>
+
+  <ul>
+    {% if user.is_authenticated %}
+      <form action="{% url 'account_logout' %}" method="post">
+        {% csrf_token %}
+        <a href="#" onclick="this.closest('form').submit();">Logout</a>
+      </form>
+    {% else %}
+      {% if '/login' not in request.path %}
+        <a href="{% url 'account_login' %}">Login</a>
+      {% else %}
+        <a href="{% url 'account_signup' %}">Sign Up</a>
       {% endif %}
-      <li class="text-lg">
-        {% if user.is_authenticated %}
-          <form action="{% url 'account_logout' %}" method="post">
-            {% csrf_token %}
-            <button type="submit">Logout</button>
-          </form>
-        {% else %}
-          {% if '/login' not in request.path %}
-            <a href="{% url 'account_login' %}">Login</a>
-          {% else %}
-            <a href="{% url 'account_signup' %}">Sign Up</a>
-          {% endif %}
-        {% endif %}
+    {% endif %}
+    {% if DEBUG %}
+      <li>
+        <details class="dropdown">
+          <summary>Dev</summary>
+          <ul dir="rtl">
+            <li>
+              <a href="/api/docs">API Docs</a>
+            </li>
+            <li>
+              <a href="/admin">Admin</a>
+            </li>
+          </ul>
+        </details>
       </li>
-    </ul>
-  </div>
-</div>
+    {% endif %}
+  </ul>
+</nav>

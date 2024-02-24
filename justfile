@@ -2,7 +2,7 @@
 init:
     #!/bin/zsh
     echo "creating virtual environment"
-    pkgx python@3.11 -m venv .venv
+    pkgx python@3.12 -m venv .venv
     . .venv/bin/activate
     echo "installing dependencies"
     which concurrently || npm i -g concurrently

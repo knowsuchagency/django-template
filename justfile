@@ -2,19 +2,17 @@
 init:
     #!/bin/zsh
     echo "creating virtual environment"
-    pkgx python@3.12 -m venv .venv
-    . .venv/bin/activate
+    uv venv -p 3.12
     echo "installing dependencies"
     which concurrently || npm i -g concurrently
-    pip install -U pip
-    pip install -r requirements.txt
+    uv pip install -r requirements.txt
     if [ ! -f .env ]; then
         echo "creating .env file with secret key"
         echo "SECRET_KEY=$(openssl rand -hex 32)" >> .env
     fi
     direnv allow
     echo "initializing tailwind theme"
-    python manage.py tailwind install
+    .venv/bin/python manage.py tailwind install
 
 # run development server
 runserver:

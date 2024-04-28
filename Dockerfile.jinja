@@ -26,8 +26,6 @@ RUN uv pip install -r /tmp/requirements.txt
 
 COPY . /code
 
-RUN .venv/bin/python manage.py tailwind install
-RUN .venv/bin/python manage.py tailwind build
 RUN .venv/bin/python manage.py collectstatic --noinput
 
 EXPOSE 8000

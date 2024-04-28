@@ -1,0 +1,16 @@
+{% raw %}{#def title='My Website' #}{% endraw %}
+
+<!doctype html>
+<html>
+  <head>
+    <title>{% raw %}{{ title }}{% endraw %}</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bulma@1.0.0/css/bulma.min.css"
+    />
+  </head>
+
+  <body>
+    {% raw %}{{ content }}{% endraw %}
+  </body>
+</html>

@@ -1,3 +1,9 @@
+# format/fix code
+format:
+    ruff check --fix
+    ruff format
+    npx prettier --write . --plugin=prettier-plugin-jinja-template
+
 # initialize development
 init:
     #!/bin/zsh
@@ -11,12 +17,11 @@ init:
         echo "SECRET_KEY=$(openssl rand -hex 32)" >> .env
     fi
     direnv allow
-    echo "initializing tailwind theme"
-    .venv/bin/python manage.py tailwind install
+    npm install --save-dev prettier prettier-plugin-jinja-template
 
 # run development server
 runserver:
-    DEBUG=true concurrently -n tailwind,django ".venv/bin/python manage.py tailwind start" "sleep 3 && .venv/bin/python manage.py runserver"
+    DEBUG=true .venv/bin/python manage.py runserver
 
 # make migrations
 makemigrations:
@@ -37,21 +42,4 @@ createsuperuser:
 
 # build theme and collect static files
 collectstatic:
-    .venv/bin/python manage.py tailwind build
     .venv/bin/python manage.py collectstatic --noinput
-
-# initialize zappa
-init-zappa:
-    .venv/bin/pip install zappa
-    .venv/bin/zappa init || echo "zappa already initialized"
-
-# deploy to aws lambda
-deploy-zappa: init-zappa
-    #!/bin/zsh
-    . .venv/bin/activate
-    just collectstatic
-    zappa deploy || zappa update
-
-# undeploy from aws lambda
-undeploy-zappa:
-    .venv/bin/zappa undeploy

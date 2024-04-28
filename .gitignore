@@ -161,3 +161,4 @@ cython_debug/
 
 staticfiles/
 .DS_Store
+node_modules/

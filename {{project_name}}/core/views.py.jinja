@@ -1,8 +1,23 @@
 from django.shortcuts import render
 from djecorator import Route
+from dj_component_view import ComponentView
 
 route = Route()
+
 
 @route("/")
 def index(request):
     return render(request, "index.html")
+
+
+@route("/components/greet", name="greet")
+class GreetView(ComponentView):
+    component = "Greeting"
+
+    def context(self, request):
+
+        method = request.GET if request.method == "GET" else request.POST
+        
+        return {
+            "name": method.get("name") or "world",
+        }

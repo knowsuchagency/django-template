@@ -1,3 +1,10 @@
 <Layout>
-  <Greeting name="world" />
+  <div class="container mt2">
+    <form hx-post="{{ url('greet') }}" hx-trigger="submit" hx-target="#target">
+      {% csrf_token %}
+      <input type="text" name="name" placeholder="Enter your name" />
+      <button type="submit">Greet</button>
+    </form>
+    <div id="target"></div>
+  </div>
 </Layout>

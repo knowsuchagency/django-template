@@ -224,6 +224,10 @@ USE_TZ = True
 
 STATIC_URL = WHITENOISE_STATIC_PREFIX = "/static/"
 
+STATICFILES_DIRS = [
+    BASE_DIR / "static",
+]
+
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
 def immutable_file_test(path, url):

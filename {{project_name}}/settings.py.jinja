@@ -17,6 +17,7 @@ from django.core.management.utils import get_random_secret_key
 
 from decouple import config
 from dj_database_url import parse as db_url
+from django_jinja.builtins import DEFAULT_EXTENSIONS
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -142,7 +143,7 @@ TEMPLATES = [
             "templates",
         ],
         "OPTIONS": {
-            "environment": "django_template_test.jinja2.environment",
+            "environment": "{{project_name}}.jinja2.environment",
             "context_processors": [
                 "django.template.context_processors.debug",
                 "django.template.context_processors.request",
@@ -151,12 +152,7 @@ TEMPLATES = [
             ],
             "autoescape": True,
             "auto_reload": DEBUG,
-            "extensions": [
-                "jinja2.ext.do",
-                "jinja2.ext.loopcontrols",
-                "jinja2.ext.i18n",
-                "jinja2_csrf.CSRFTokenExtension",
-            ],
+            "extensions": DEFAULT_EXTENSIONS,
         },
     },
 ]

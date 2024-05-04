@@ -13,11 +13,12 @@ def index(request):
 @route("/components/greet", name="greet")
 class GreetView(ComponentView):
     component = "Greeting"
+    methods = ["GET", "POST"]
 
-    def context(self, request):
+    def render(self, request):
 
         method = request.GET if request.method == "GET" else request.POST
-        
+
         return {
             "name": method.get("name") or "world",
         }

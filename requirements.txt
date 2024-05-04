@@ -15,5 +15,5 @@ jinja2~=3.1
 jinjax~=0.34
 django-unfold~=0.22
 djecorator~=1.0
-dj_component_view~=3.0
+dj_component_view~=8.0
 django-jinja~=2.11

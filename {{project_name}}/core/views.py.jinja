@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from djecorator import Route
-from dj_component_view import ComponentView
+from dj_component_view import component
 
 route = Route()
 
@@ -10,15 +10,11 @@ def index(request):
     return render(request, "index.html")
 
 
-@route("/components/greet", name="greet")
-class GreetView(ComponentView):
-    component = "Greeting"
-    methods = ["GET", "POST"]
+@route("/components/greet")
+@component("Greeting", methods=["GET", "POST"])
+def greet(request):
+    method = request.GET if request.method == "GET" else request.POST
 
-    def render(self, request):
-
-        method = request.GET if request.method == "GET" else request.POST
-
-        return {
-            "name": method.get("name") or "world",
-        }
+    return {
+        "name": method.get("name") or "world",
+    }

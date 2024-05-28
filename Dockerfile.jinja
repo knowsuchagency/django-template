@@ -30,4 +30,4 @@ RUN .venv/bin/python manage.py collectstatic --noinput
 
 EXPOSE 8000
 
-CMD [".venv/bin/granian", "--host", "0.0.0.0", "--port", "8080", "--interface", "wsgi", "{{project_name}}.wsgi:application"]
+CMD [".venv/bin/granian", "--host", "0.0.0.0", "--port", "8080", "--http2-keep-alive-timeout", "300", "--interface", "wsgi", "{{project_name}}.wsgi:application"]

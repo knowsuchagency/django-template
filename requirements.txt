@@ -17,3 +17,4 @@ django-unfold~=0.22
 djecorator~=1.0
 dj_component_view~=9.0
 django-jinja~=2.11
+granian~=1.4

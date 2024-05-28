@@ -30,4 +30,4 @@ RUN .venv/bin/python manage.py collectstatic --noinput
 
 EXPOSE 8000
 
-CMD [".venv/bin/gunicorn", "--bind", ":8080", "--workers", "3", "--threads", "2", "--max-requests", "1000", "--max-requests-jitter", "200", "--timeout", "0", "{{project_name}}.wsgi"]
+CMD [".venv/bin/granian", "--host", "0.0.0.0", "--port", "8080", "--interface", "wsgi", "{{project_name}}.wsgi:application"]

@@ -177,6 +177,17 @@ DATABASES = {
     "default": DATABASE_URL,
 }
 
+if "neon.tech" in DATABASE_URL:
+    DATABASES["default"]["CONN_MAX_AGE"] = None
+    DATABASES["default"]["POOL_OPTIONS"] = {
+        "POOL_SIZE": 5,
+        "MAX_OVERFLOW": 2,
+        "RECYCLE": 300,
+    }
+    DATABASES["default"]["OPTIONS"] = {
+        "sslmode": "require",
+    }
+
 STORAGES = {
     "staticfiles": {
         "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",

@@ -168,7 +168,7 @@ DATABASE_URL = config(
     default="sqlite:///" + str(BASE_DIR / "db.sqlite3"),
     cast=partial(
         db_url,
-        conn_max_age=600,
+        conn_max_age=240,
         conn_health_checks=True,
     ),
 )
@@ -179,9 +179,9 @@ DATABASES = {
 
 if "neon.tech" in DATABASE_URL:
     DATABASES["default"]["POOL_OPTIONS"] = {
-        "POOL_SIZE": 10,
-        "MAX_OVERFLOW": 5,
-        "RECYCLE": 180,
+        "POOL_SIZE": 5,
+        "MAX_OVERFLOW": 2,
+        "RECYCLE": 120,
     }
     DATABASES["default"]["OPTIONS"] = {
         "sslmode": "require",

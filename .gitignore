@@ -141,3 +141,5 @@ dist
 .pnp.*
 
 .ruff_cache/
+
+db.sqlite3

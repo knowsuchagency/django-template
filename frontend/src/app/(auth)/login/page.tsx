@@ -1,4 +1,9 @@
+'use client'
+
 import Link from "next/link";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { AllauthClient } from "@knowsuchagency/allauth-fetch";
 
 import { Icons } from "@/components/icons";
 import { Button } from "@/components/ui/button";
@@ -12,7 +17,36 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
+const backendBaseUrl = "http://localhost:8000";
+
+// Initialize the AllauthClient
+const allauthClient = new AllauthClient("app", backendBaseUrl);
+
 export default function LoginForm() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const router = useRouter();
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+
+    try {
+
+      const response = await allauthClient.login({ email, password });
+      if ('errors' in response) {
+        setError(response.errors[0]?.message || "Login failed");
+      } else if (response.meta.is_authenticated) {
+        // Redirect to home page after successful login
+        router.push("/");
+      }
+    } catch (err) {
+      setError("An error occurred during login");
+      console.error(err);
+    }
+  };
+
   return (
     <Card className="mx-auto max-w-sm">
       <CardHeader>
@@ -22,26 +56,7 @@ export default function LoginForm() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="grid gap-4">
-          <Button variant="outline" className="w-full">
-            <Icons.google className="w-4 h-4 mr-2" />
-            Login with Google
-          </Button>
-          <Button variant="outline" className="w-full">
-            <Icons.github className="w-4 h-4 mr-2" />
-            Login with GitHub
-          </Button>
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background px-2 text-muted-foreground">
-                Or continue with
-              </span>
-            </div>
-          </div>
-
+        <form onSubmit={handleSubmit} className="grid gap-4">
           <div className="grid gap-2">
             <Label htmlFor="email">Email</Label>
             <Input
@@ -49,6 +64,8 @@ export default function LoginForm() {
               type="email"
               placeholder="m@example.com"
               required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
             />
           </div>
           <div className="grid gap-2">
@@ -58,12 +75,19 @@ export default function LoginForm() {
                 Forgot your password?
               </Link>
             </div>
-            <Input id="password" type="password" required />
+            <Input
+              id="password"
+              type="password"
+              required
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
           </div>
+          {error && <p className="text-red-500 text-sm">{error}</p>}
           <Button type="submit" className="w-full">
             Login
           </Button>
-        </div>
+        </form>
         <div className="mt-4 text-center text-sm">
           Don&apos;t have an account?{" "}
           <Link href="/signup" className="underline">

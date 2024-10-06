@@ -52,3 +52,10 @@ collectstatic:
 # run frontend
 frontend:
     cd frontend && pnpm dev
+
+# run backend and frontend in development mode
+dev:
+    npx concurrently \
+        -n "django,nextjs" \
+        -c "blue,green" \
+        "just runserver" "cd frontend && pnpm dev"

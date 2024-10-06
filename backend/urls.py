@@ -25,6 +25,7 @@ from .api import api
 urlpatterns = [
     path("api/", api.urls),
     path("accounts/", include("allauth.urls")),
+    path("_allauth/", include("allauth.headless.urls")),
 ]
 
 if DEBUG:

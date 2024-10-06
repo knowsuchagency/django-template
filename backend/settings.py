@@ -58,6 +58,8 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "corsheaders",
+    "backend.core",
 ]
 
 ALLAUTH_APPS = [
@@ -77,6 +79,7 @@ INSTALLED_APPS += ALLAUTH_APPS
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -173,3 +176,20 @@ STATIC_URL = "static/"
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+# For development (allow all origins):
+CORS_ALLOW_ALL_ORIGINS = DEBUG
+
+# For production (specify allowed origins):
+CORS_ALLOWED_ORIGINS = [
+    "https://yourdomain.com",
+]
+
+# If you need to allow credentials (cookies, authorization headers, etc.):
+CORS_ALLOW_CREDENTIALS = True
+
+AUTH_USER_MODEL = "core.User"
+
+ACCOUNT_AUTHENTICATION_METHOD = "username_email"
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_LOGIN_ON_PASSWORD_RESET = True

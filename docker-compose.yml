@@ -4,7 +4,7 @@ services:
       context: .
       target: backend
     ports:
-      - "8000:8000"
+      - "${BACKEND_PORT:-8000}:8000"
     environment:
       DATABASE_URL: ${DATABASE_URL}
   frontend:
@@ -12,4 +12,4 @@ services:
       context: .
       target: frontend
     ports:
-      - "3000:3000"
+      - "${FRONTEND_PORT:-3000}:3000"

@@ -17,7 +17,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-const backendBaseUrl = "http://localhost:8000";
+// Replace the hardcoded backendBaseUrl with an environment variable
+const backendBaseUrl = process.env.NEXT_PUBLIC_BACKEND_BASE_URL || "http://localhost:8000";
 
 // Initialize the AllauthClient
 const allauthClient = new AllauthClient("app", backendBaseUrl);

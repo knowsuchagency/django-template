@@ -181,9 +181,10 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 CORS_ALLOW_ALL_ORIGINS = DEBUG
 
 # For production (specify allowed origins):
-CORS_ALLOWED_ORIGINS = [
-    "https://yourdomain.com",
-]
+# CORS_ALLOWED_ORIGINS = [
+#     "https://yourdomain.com",
+# ]
+CORS_ALLOWED_ORIGINS = config("CORS_ALLOWED_ORIGINS", default="", cast=str.split)
 
 # If you need to allow credentials (cookies, authorization headers, etc.):
 CORS_ALLOW_CREDENTIALS = True

@@ -1,8 +1,6 @@
 from ninja import NinjaAPI, Router
 
-api = NinjaAPI(
-    title="django_template_test",
-)
+api = NinjaAPI()
 
 v1 = Router()
 

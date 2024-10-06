@@ -22,8 +22,6 @@ from django.urls import path, include
 from .settings import DEBUG
 from .api import api
 
-from backend.core import views
-
 urlpatterns = [
     path("api/", api.urls),
     path("accounts/", include("allauth.urls")),

@@ -22,7 +22,7 @@ from django.urls import path, include
 from .settings import DEBUG
 from .api import api
 
-from web_template.core import views
+from backend.core import views
 
 urlpatterns = [
     path("api/", api.urls),
@@ -33,5 +33,3 @@ if DEBUG:
     urlpatterns += [
         path("admin/", admin.site.urls),
     ]
-
-urlpatterns += views.route.patterns

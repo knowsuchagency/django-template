@@ -9,7 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@knowsuchagency/allauth-fetch": "npm:@jsr/knowsuchagency__allauth-fetch@^0.5.2",
+    "@knowsuchagency/allauth-fetch": "npm:@jsr/knowsuchagency__allauth-fetch@^0.6.2",
     "@radix-ui/react-accordion": "^1.2.0",
     "@radix-ui/react-dialog": "^1.1.1",
     "@radix-ui/react-label": "^2.1.0",
@@ -35,7 +35,8 @@
     "tailwind-merge": "^2.4.0",
     "tailwindcss-animate": "^1.0.7",
     "unified": "^11.0.5",
-    "vaul": "^0.9.1"
+    "vaul": "^0.9.1",
+    "zustand": "5.0.0-rc.2"
   },
   "devDependencies": {
     "@tailwindcss/typography": "^0.5.13",

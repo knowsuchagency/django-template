@@ -8,9 +8,16 @@ import { siteConfig } from "@/lib/config";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { useAuthState } from "@/lib/auth";
 
 export default function Header() {
   const [addBorder, setAddBorder] = useState(false);
+  const { isAuthenticated, logout } = useAuthState(
+    // (state) => ({
+    //   isAuthenticated: state.isAuthenticated,
+    //   logout: state.logout,
+    // })
+  );
 
   useEffect(() => {
     const handleScroll = () => {
@@ -51,22 +58,33 @@ export default function Header() {
             </nav>
 
             <div className="gap-2 flex">
-              <Link
-                href="/login"
-                className={buttonVariants({ variant: "outline" })}
-              >
-                Login
-              </Link>
-              <Link
-                href="/signup"
-                className={cn(
-                  buttonVariants({ variant: "default" }),
-                  "w-full sm:w-auto text-background flex gap-2",
-                )}
-              >
-                <Icons.logo className="h-6 w-6" />
-                Get Started for Free
-              </Link>
+              {isAuthenticated ? (
+                <button
+                  onClick={logout}
+                  className={buttonVariants({ variant: "outline" })}
+                >
+                  Logout
+                </button>
+              ) : (
+                <>
+                  <Link
+                    href="/login"
+                    className={buttonVariants({ variant: "outline" })}
+                  >
+                    Login
+                  </Link>
+                  <Link
+                    href="/signup"
+                    className={cn(
+                      buttonVariants({ variant: "default" }),
+                      "w-full sm:w-auto text-background flex gap-2",
+                    )}
+                  >
+                    <Icons.logo className="h-6 w-6" />
+                    Get Started for Free
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         </div>

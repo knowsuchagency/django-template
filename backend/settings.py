@@ -17,6 +17,7 @@ from django.core.management.utils import get_random_secret_key
 
 from decouple import config
 from dj_database_url import parse as db_url
+from corsheaders.defaults import default_headers
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -188,6 +189,11 @@ CORS_ALLOWED_ORIGINS = config("CORS_ALLOWED_ORIGINS", default="", cast=str.split
 
 # If you need to allow credentials (cookies, authorization headers, etc.):
 CORS_ALLOW_CREDENTIALS = True
+
+CORS_ALLOW_HEADERS = (
+    *default_headers,
+    "x-session-token",
+)
 
 AUTH_USER_MODEL = "core.User"
 

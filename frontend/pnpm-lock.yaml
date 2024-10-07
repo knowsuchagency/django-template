@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@knowsuchagency/allauth-fetch':
-        specifier: npm:@jsr/knowsuchagency__allauth-fetch@^0.5.2
-        version: '@jsr/knowsuchagency__allauth-fetch@0.5.2'
+        specifier: npm:@jsr/knowsuchagency__allauth-fetch@^0.6.2
+        version: '@jsr/knowsuchagency__allauth-fetch@0.6.2'
       '@radix-ui/react-accordion':
         specifier: ^1.2.0
         version: 1.2.0(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -89,6 +89,9 @@ importers:
       vaul:
         specifier: ^0.9.1
         version: 0.9.1(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      zustand:
+        specifier: 5.0.0-rc.2
+        version: 5.0.0-rc.2(@types/react@18.3.3)(react@18.3.1)
     devDependencies:
       '@tailwindcss/typography':
         specifier: ^0.5.13
@@ -181,8 +184,8 @@ packages:
   '@jridgewell/trace-mapping@0.3.25':
     resolution: {integrity: sha512-vNk6aEwybGtawWmy/PzwnGDOjCkLWSD2wqvjGGAgOAwCGWySYXfYoxt00IJkTF+8Lb57DwOb3Aa0o9CApepiYQ==}
 
-  '@jsr/knowsuchagency__allauth-fetch@0.5.2':
-    resolution: {integrity: sha512-xapkR+ymoDndJF5TBSAr8oowq2YTJ9XvPq71ewKUVVxL8+yZmBiskSNqaOUrMDz6vpuFnCWwoJkl1nMYnNeXQw==, tarball: https://npm.jsr.io/~/11/@jsr/knowsuchagency__allauth-fetch/0.5.2.tgz}
+  '@jsr/knowsuchagency__allauth-fetch@0.6.2':
+    resolution: {integrity: sha512-0dDDX4IqcgDUaRfrFVoYg+BaFAcAoTCOrziUUKXpI+sWqUrEa/OdwjR3uMCZahGUYCL3xj6sKnHeGclHV0gKVg==, tarball: https://npm.jsr.io/~/11/@jsr/knowsuchagency__allauth-fetch/0.6.2.tgz}
 
   '@next/env@14.2.7':
     resolution: {integrity: sha512-OTx9y6I3xE/eih+qtthppwLytmpJVPM5PPoJxChFsbjIEFXIayG0h/xLzefHGJviAa3Q5+Fd+9uYojKkHDKxoQ==}
@@ -2441,6 +2444,24 @@ packages:
     resolution: {integrity: sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==}
     engines: {node: '>=10'}
 
+  zustand@5.0.0-rc.2:
+    resolution: {integrity: sha512-o2Nwuvnk8vQBX7CcHL8WfFkZNJdxB/VKeWw0tNglw8p4cypsZ3tRT7rTRTDNeUPFS0qaMBRSKe+fVwL5xpcE3A==}
+    engines: {node: '>=12.20.0'}
+    peerDependencies:
+      '@types/react': '>=18.0.0'
+      immer: '>=9.0.6'
+      react: '>=18.0.0'
+      use-sync-external-store: '>=1.2.0'
+    peerDependenciesMeta:
+      '@types/react':
+        optional: true
+      immer:
+        optional: true
+      react:
+        optional: true
+      use-sync-external-store:
+        optional: true
+
   zwitch@2.0.4:
     resolution: {integrity: sha512-bXE4cR/kVZhKZX/RjPEflHaKVhUVl85noU3v6b8apfQEc1x4A+zBxjZ4lN8LqGd6WZ3dl98pY4o717VFmoPp+A==}
 
@@ -2513,7 +2534,7 @@ snapshots:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.0
 
-  '@jsr/knowsuchagency__allauth-fetch@0.5.2': {}
+  '@jsr/knowsuchagency__allauth-fetch@0.6.2': {}
 
   '@next/env@14.2.7': {}
 
@@ -5271,5 +5292,10 @@ snapshots:
   yaml@2.5.0: {}
 
   yocto-queue@0.1.0: {}
+
+  zustand@5.0.0-rc.2(@types/react@18.3.3)(react@18.3.1):
+    optionalDependencies:
+      '@types/react': 18.3.3
+      react: 18.3.1
 
   zwitch@2.0.4: {}

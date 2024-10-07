@@ -14,4 +14,5 @@ dependencies = [
     "psycopg2-binary>=2.9.9",
     "python-decouple>=3.8",
     "django-cors-headers>=4.4.0",
+    "django-anymail[amazon-ses]>=12.0",
 ]

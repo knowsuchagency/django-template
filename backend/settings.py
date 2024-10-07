@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
+import os
 from pathlib import Path
 from functools import partial
 
@@ -178,13 +179,12 @@ STATIC_URL = "static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
+# CORS settings
+
 # For development (allow all origins):
 CORS_ALLOW_ALL_ORIGINS = DEBUG
 
 # For production (specify allowed origins):
-# CORS_ALLOWED_ORIGINS = [
-#     "https://yourdomain.com",
-# ]
 CORS_ALLOWED_ORIGINS = config("CORS_ALLOWED_ORIGINS", default="", cast=str.split)
 
 # If you need to allow credentials (cookies, authorization headers, etc.):
@@ -195,8 +195,21 @@ CORS_ALLOW_HEADERS = (
     "x-session-token",
 )
 
-AUTH_USER_MODEL = "core.User"
+# Auth settings
 
+AUTH_USER_MODEL = "core.User"
 ACCOUNT_AUTHENTICATION_METHOD = "username_email"
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_LOGIN_ON_PASSWORD_RESET = True
+ACCOUNT_LOGIN_ON_EMAIL_CONFIRMATION = True
+
+# Email settings
+
+EMAIL_BACKEND = "anymail.backends.amazon_ses.EmailBackend"
+EMAIL_HOST = "email-smtp.us-east-2.amazonaws.com"
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = config("AWS_ACCESS_KEY_ID", default="")
+EMAIL_HOST_PASSWORD = config("AWS_SECRET_ACCESS_KEY", default="")
+AWS_DEFAULT_REGION = os.environ["AWS_DEFAULT_REGION"] = config("AWS_DEFAULT_REGION", default="us-east-2")
+DEFAULT_FROM_EMAIL = "noreply@knowsuchagency.com"

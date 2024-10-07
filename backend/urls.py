@@ -19,16 +19,11 @@ from django.contrib import admin
 from django.urls import path, include
 
 
-from .settings import DEBUG
 from .api import api
 
 urlpatterns = [
+    path("admin/", admin.site.urls),
     path("api/", api.urls),
     path("accounts/", include("allauth.urls")),
     path("_allauth/", include("allauth.headless.urls")),
 ]
-
-if DEBUG:
-    urlpatterns += [
-        path("admin/", admin.site.urls),
-    ]

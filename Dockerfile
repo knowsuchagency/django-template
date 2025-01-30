@@ -1,4 +1,4 @@
-FROM python:3.12-slim AS backend
+FROM python:3.12-slim
 
 WORKDIR /app
 
@@ -12,17 +12,3 @@ COPY backend/ ./backend/
 COPY manage.py ./
 
 CMD ["uv", "run", "granian", "--host", "0.0.0.0", "--port", "8000", "--interface", "wsgi", "backend.wsgi:application"]
-
-FROM node:20-slim AS frontend
-
-WORKDIR /app
-
-COPY frontend/package.json frontend/pnpm-lock.yaml ./
-
-RUN npx pnpm install
-
-COPY frontend .
-
-RUN npm run build
-
-CMD ["npm", "run", "start"]

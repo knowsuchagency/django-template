@@ -2,14 +2,32 @@ services:
   backend:
     build:
       context: .
-      target: backend
     ports:
       - "${BACKEND_PORT:-8000}:8000"
     environment:
-      DATABASE_URL: ${DATABASE_URL}
-  frontend:
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/postgres
+    depends_on:
+      - postgres
+
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: postgres
+      POSTGRES_DB: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  migrations:
     build:
       context: .
-      target: frontend
-    ports:
-      - "${FRONTEND_PORT:-3000}:3000"
+    command: uv run manage.py migrate
+    environment:
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/postgres
+    depends_on:
+      - postgres
+
+volumes:
+  postgres_data:

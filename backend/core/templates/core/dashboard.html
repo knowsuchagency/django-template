@@ -1,0 +1,17 @@
+{% extends "core/base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-12">
+        <h2>Dashboard</h2>
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Welcome, {{ user.username }}!</h5>
+                <p class="card-text">This is your private dashboard. You can only see this page when logged in.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

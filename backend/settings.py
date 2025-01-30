@@ -44,7 +44,7 @@ CSRF_COOKIE_DOMAIN = config(
 )
 SESSION_COOKIE_DOMAIN = config(
     "SESSION_COOKIE_DOMAIN",
-    default="knowsuchagency.com",
+    default=".knowsuchagency.com",
     cast=str,
 )
 

@@ -1,6 +1,6 @@
-# Web Template
+# Django Template
 
-A simple web template for a Django backend and a React frontend.
+A simple Django template.
 
 ## Table of Contents
 
@@ -14,10 +14,8 @@ A simple web template for a Django backend and a React frontend.
 Before you begin, ensure you have the following installed:
 
 - Python 3.12
-- Node.js and pnpm
 - [uv](https://github.com/astral-sh/uv) (Python package manager)
 - [just](https://github.com/casey/just) (command runner)
-- [direnv](https://direnv.net/) (environment variable manager)
 
 ## Installation
 
@@ -32,17 +30,15 @@ Before you begin, ensure you have the following installed:
    ```
    just init
    ```
-   This will create a virtual environment, install dependencies, set up the .env file, and install frontend dependencies.
+   This will create a virtual environment, install dependencies, and set up the .env file.
 
 ## Development
 
-To run the development server for both backend and frontend:
+To run the development server:
 
 ```bash
-just dev
+just runserver
 ```
-
-This will start the Django server and the Next.js development server concurrently.
 
 ## Available Commands
 
@@ -56,6 +52,5 @@ Use `just <command>` to run the following commands:
 - `flush`: Flush the database
 - `createsuperuser`: Create a Django superuser
 - `collectstatic`: Collect static files
-- `frontend`: Run the Next.js development server
 
 For a full list of commands, run `just list`.

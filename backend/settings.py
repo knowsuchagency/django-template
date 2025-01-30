@@ -37,8 +37,16 @@ ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="*", cast=str.split)
 
 CSRF_TRUSTED_ORIGINS = config("CSRF_TRUSTED_ORIGINS", default="", cast=str.split)
 
-CSRF_COOKIE_DOMAIN = config("CSRF_COOKIE_DOMAIN", default=".knowsuchagency.com", cast=str)
-SESSION_COOKIE_DOMAIN = config("SESSION_COOKIE_DOMAIN", default="knowsuchagency.com", cast=str)
+CSRF_COOKIE_DOMAIN = config(
+    "CSRF_COOKIE_DOMAIN",
+    default=".knowsuchagency.com",
+    cast=str,
+)
+SESSION_COOKIE_DOMAIN = config(
+    "SESSION_COOKIE_DOMAIN",
+    default="knowsuchagency.com",
+    cast=str,
+)
 
 if DEBUG:
     ALLOWED_HOSTS += ["*"]

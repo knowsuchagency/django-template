@@ -6,7 +6,6 @@ list:
 format:
     uvx ruff check --fix
     uvx ruff format
-    npx prettier --write .
 
 # initialize development
 init:

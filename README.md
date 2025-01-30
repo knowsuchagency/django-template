@@ -22,8 +22,8 @@ Before you begin, ensure you have the following installed:
 1. Clone the repository:
 
    ```
-   git clone https://github.com/knowsuchagency/web_template.git
-   cd web_template
+   git clone https://github.com/knowsuchagency/django-template.git
+   cd django-template
    ```
 
 2. Initialize the development environment:

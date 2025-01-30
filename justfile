@@ -19,10 +19,6 @@ init:
         echo "creating .env file with secret key"
         echo "SECRET_KEY=$(openssl rand -hex 32)" >> .env
     fi
-    direnv allow
-    echo "installing frontend dependencies"
-    cd frontend
-    pnpm install
 
 # run development server
 runserver:
@@ -48,14 +44,3 @@ createsuperuser:
 # build theme and collect static files
 collectstatic:
     .venv/bin/python manage.py collectstatic --noinput
-
-# run frontend
-frontend:
-    cd frontend && pnpm dev
-
-# run backend and frontend in development mode
-dev:
-    npx concurrently \
-        -n "django,nextjs" \
-        -c "blue,green" \
-        "just runserver" "cd frontend && pnpm dev"

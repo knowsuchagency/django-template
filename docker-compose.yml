@@ -7,9 +7,3 @@ services:
       - "${BACKEND_PORT:-8000}:8000"
     environment:
       DATABASE_URL: ${DATABASE_URL}
-  frontend:
-    build:
-      context: .
-      target: frontend
-    ports:
-      - "${FRONTEND_PORT:-3000}:3000"

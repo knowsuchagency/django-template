@@ -37,8 +37,13 @@ ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="*", cast=str.split)
 
 CSRF_TRUSTED_ORIGINS = config("CSRF_TRUSTED_ORIGINS", default="", cast=str.split)
 
+CSRF_COOKIE_DOMAIN = config("CSRF_COOKIE_DOMAIN", default=".knowsuchagency.com", cast=str)
+SESSION_COOKIE_DOMAIN = config("SESSION_COOKIE_DOMAIN", default="knowsuchagency.com", cast=str)
+
 if DEBUG:
     ALLOWED_HOSTS += ["*"]
+    CSRF_COOKIE_DOMAIN = None
+    SESSION_COOKIE_DOMAIN = None
 
 INTERNAL_IPS = [
     "127.0.0.1",
@@ -211,5 +216,12 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = config("AWS_ACCESS_KEY_ID", default="")
 EMAIL_HOST_PASSWORD = config("AWS_SECRET_ACCESS_KEY", default="")
-AWS_DEFAULT_REGION = os.environ["AWS_DEFAULT_REGION"] = config("AWS_DEFAULT_REGION", default="us-east-2")
+AWS_DEFAULT_REGION = os.environ["AWS_DEFAULT_REGION"] = config(
+    "AWS_DEFAULT_REGION", default="us-east-2"
+)
 DEFAULT_FROM_EMAIL = "noreply@knowsuchagency.com"
+
+# Authentication settings
+LOGIN_REDIRECT_URL = "/"  # Redirect to landing page after login
+LOGOUT_REDIRECT_URL = "/"  # Redirect to landing page after logout
+LOGIN_URL = "/accounts/login/"  # Where to redirect if login is required

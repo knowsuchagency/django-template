@@ -3,6 +3,7 @@
 A simple web template for a Django backend and a React frontend.
 
 ## Table of Contents
+
 - [Prerequisites](#prerequisites)
 - [Installation](#installation)
 - [Development](#development)
@@ -11,6 +12,7 @@ A simple web template for a Django backend and a React frontend.
 ## Prerequisites
 
 Before you begin, ensure you have the following installed:
+
 - Python 3.12
 - Node.js and pnpm
 - [uv](https://github.com/astral-sh/uv) (Python package manager)
@@ -20,6 +22,7 @@ Before you begin, ensure you have the following installed:
 ## Installation
 
 1. Clone the repository:
+
    ```
    git clone https://github.com/knowsuchagency/web_template.git
    cd web_template

@@ -20,6 +20,8 @@ from decouple import config
 from dj_database_url import parse as db_url
 from corsheaders.defaults import default_headers
 
+from loguru import logger
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -32,23 +34,33 @@ SECRET_KEY = config("SECRET_KEY", default=get_random_secret_key())
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config("DEBUG", default=False, cast=bool)
+logger.info(f"DEBUG: {DEBUG}")
 
 ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="*", cast=str.split)
+logger.info(f"ALLOWED_HOSTS: {ALLOWED_HOSTS}")
 
 CSRF_TRUSTED_ORIGINS = config("CSRF_TRUSTED_ORIGINS", default="", cast=str.split)
+logger.info(f"CSRF_TRUSTED_ORIGINS: {CSRF_TRUSTED_ORIGINS}")
 
 CSRF_COOKIE_DOMAIN = config(
     "CSRF_COOKIE_DOMAIN",
     default=".knowsuchagency.com",
     cast=str,
 )
+logger.info(f"CSRF_COOKIE_DOMAIN: {CSRF_COOKIE_DOMAIN}")
+
 SESSION_COOKIE_DOMAIN = config(
     "SESSION_COOKIE_DOMAIN",
     default=".knowsuchagency.com",
     cast=str,
 )
+logger.info(f"SESSION_COOKIE_DOMAIN: {SESSION_COOKIE_DOMAIN}")
 
 CSRF_COOKIE_SETTINGS = config("CSRF_COOKIE_SETTINGS", default="Lax", cast=str)
+logger.info(f"CSRF_COOKIE_SETTINGS: {CSRF_COOKIE_SETTINGS}")
+
+CSRF_COOKIE_HTTPONLY = config("CSRF_COOKIE_HTTPONLY", default=False, cast=bool)
+logger.info(f"CSRF_COOKIE_HTTPONLY: {CSRF_COOKIE_HTTPONLY}")
 
 LOG_REQUESTS = config("LOG_REQUESTS", default=False, cast=bool)
 
@@ -56,17 +68,11 @@ if DEBUG:
     ALLOWED_HOSTS += ["*"]
     CSRF_COOKIE_DOMAIN = None
     SESSION_COOKIE_DOMAIN = None
-    CSRF_TRUSTED_ORIGINS = [
+    CSRF_TRUSTED_ORIGINS += [
         "http://localhost:8000",
         "http://localhost:8080",
         "http://127.0.0.1:8000",
         "http://127.0.0.1:8080",
-    ]
-    CORS_ALLOWED_ORIGINS = [
-        "http://localhost:8080",
-        "http://127.0.0.1:8080",
-        "http://localhost:8000",
-        "http://127.0.0.1:8000",
     ]
     CORS_ALLOW_CREDENTIALS = True
     CSRF_COOKIE_SECURE = False
@@ -217,9 +223,13 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # For development (allow all origins):
 CORS_ALLOW_ALL_ORIGINS = DEBUG
+logger.info(f"CORS_ALLOW_ALL_ORIGINS: {CORS_ALLOW_ALL_ORIGINS}")
 
 # For production (specify allowed origins):
 CORS_ALLOWED_ORIGINS = config("CORS_ALLOWED_ORIGINS", default="", cast=str.split)
+# assume our frontend should be able to make POST requests and fetch content from its domain
+CORS_ALLOWED_ORIGINS += CSRF_TRUSTED_ORIGINS
+logger.info(f"CORS_ALLOWED_ORIGINS: {CORS_ALLOWED_ORIGINS}")
 
 # If you need to allow credentials (cookies, authorization headers, etc.):
 CORS_ALLOW_CREDENTIALS = True
@@ -227,12 +237,23 @@ CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_HEADERS = (
     *default_headers,
     "x-session-token",
+    "content-type",
+    "x-csrftoken",
 )
+logger.info(f"CORS_ALLOW_HEADERS: {CORS_ALLOW_HEADERS}")
+
+CORS_EXPOSE_HEADERS = [
+    "content-type",
+    "x-session-token",
+    "x-csrftoken",
+]
+logger.info(f"CORS_EXPOSE_HEADERS: {CORS_EXPOSE_HEADERS}")
 
 # Auth settings
 
 AUTH_USER_MODEL = "core.User"
 ACCOUNT_AUTHENTICATION_METHOD = "username_email"
+ACCOUNT_USERNAME_REQUIRED = False
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_LOGIN_ON_PASSWORD_RESET = True
 ACCOUNT_LOGIN_ON_EMAIL_CONFIRMATION = True
@@ -248,9 +269,14 @@ EMAIL_HOST_PASSWORD = config("AWS_SECRET_ACCESS_KEY", default="")
 AWS_DEFAULT_REGION = os.environ["AWS_DEFAULT_REGION"] = config(
     "AWS_DEFAULT_REGION", default="us-east-2"
 )
-DEFAULT_FROM_EMAIL = "noreply@knowsuchagency.com"
+DEFAULT_FROM_EMAIL = "mail@knowsuchagency.com"
 
 # Authentication settings
 LOGIN_REDIRECT_URL = "/"  # Redirect to landing page after login
 LOGOUT_REDIRECT_URL = "/"  # Redirect to landing page after logout
 LOGIN_URL = "/accounts/login/"  # Where to redirect if login is required
+
+# Security settings
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+USE_X_FORWARDED_HOST = True
+SECURE_SSL_REDIRECT = not DEBUG

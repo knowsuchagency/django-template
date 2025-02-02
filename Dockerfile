@@ -11,4 +11,6 @@ RUN uv sync
 COPY backend/ ./backend/
 COPY manage.py ./
 
+ENV PYTHONUNBUFFERED=1
+
 CMD ["uv", "run", "granian", "--host", "0.0.0.0", "--port", "8000", "--interface", "wsgi", "backend.wsgi:application"]

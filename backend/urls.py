@@ -26,6 +26,7 @@ urlpatterns = [
     path("api/", api.urls),
     path("accounts/", include("allauth.urls")),
     path("_allauth/", include("allauth.headless.urls")),
+    path("__reload__/", include("django_browser_reload.urls")),
 ]
 
 urlpatterns += views.route.patterns

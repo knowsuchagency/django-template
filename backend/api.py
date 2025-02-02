@@ -1,6 +1,6 @@
 from ninja import NinjaAPI, Router
-from django.middleware.csrf import get_token
-from django.http import HttpResponse
+from django.views.decorators.csrf import ensure_csrf_cookie
+from django.http import JsonResponse
 
 api = NinjaAPI()
 
@@ -15,7 +15,6 @@ def add(request, a: int, b: int):
 
 
 @v1.post("/set-csrf-token")
+@ensure_csrf_cookie
 def set_csrf_token(request):
-    response = HttpResponse("CSRF token set")
-    response.set_cookie("csrftoken", get_token(request))
-    return response
+    return JsonResponse({"details": "CSRF cookie set"})

@@ -48,9 +48,9 @@ SESSION_COOKIE_DOMAIN = config(
     cast=str,
 )
 
-CSRF_COOKIE_SAMESITE = "Lax"
-CSRF_COOKIE_HTTPONLY = False
-SESSION_COOKIE_SAMESITE = "Lax"
+CSRF_COOKIE_SETTINGS = config("CSRF_COOKIE_SETTINGS", default="Lax", cast=str)
+
+LOG_REQUESTS = config("LOG_REQUESTS", default=False, cast=bool)
 
 if DEBUG:
     ALLOWED_HOSTS += ["*"]
@@ -65,7 +65,11 @@ if DEBUG:
     CORS_ALLOWED_ORIGINS = [
         "http://localhost:8080",
         "http://127.0.0.1:8080",
+        "http://localhost:8000",
+        "http://127.0.0.1:8000",
     ]
+    CORS_ALLOW_CREDENTIALS = True
+    CSRF_COOKIE_SECURE = False
 
 INTERNAL_IPS = [
     "127.0.0.1",
@@ -116,6 +120,9 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "allauth.account.middleware.AccountMiddleware",
 ]
+
+if DEBUG or LOG_REQUESTS:
+    MIDDLEWARE.append("backend.core.middleware.RequestLoggingMiddleware")
 
 CACHES = {
     "default": {

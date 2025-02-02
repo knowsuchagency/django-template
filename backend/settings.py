@@ -269,7 +269,7 @@ EMAIL_HOST_PASSWORD = config("AWS_SECRET_ACCESS_KEY", default="")
 AWS_DEFAULT_REGION = os.environ["AWS_DEFAULT_REGION"] = config(
     "AWS_DEFAULT_REGION", default="us-east-2"
 )
-DEFAULT_FROM_EMAIL = "mail@knowsuchagency.com"
+DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL", default="noreply@knowsuchagency.com")
 
 # Authentication settings
 LOGIN_REDIRECT_URL = "/"  # Redirect to landing page after login

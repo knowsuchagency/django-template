@@ -48,6 +48,10 @@ SESSION_COOKIE_DOMAIN = config(
     cast=str,
 )
 
+CSRF_COOKIE_SAMESITE = "Lax"
+CSRF_COOKIE_HTTPONLY = False
+SESSION_COOKIE_SAMESITE = "Lax"
+
 if DEBUG:
     ALLOWED_HOSTS += ["*"]
     CSRF_COOKIE_DOMAIN = None
@@ -56,6 +60,10 @@ if DEBUG:
         "http://localhost:8000",
         "http://localhost:8080",
         "http://127.0.0.1:8000",
+        "http://127.0.0.1:8080",
+    ]
+    CORS_ALLOWED_ORIGINS = [
+        "http://localhost:8080",
         "http://127.0.0.1:8080",
     ]
 

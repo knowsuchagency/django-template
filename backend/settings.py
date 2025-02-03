@@ -11,16 +11,16 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 import os
-from pathlib import Path
 from functools import partial
+from pathlib import Path
 
-from django.core.management.utils import get_random_secret_key
-
+import sentry_sdk
+from corsheaders.defaults import default_headers
 from decouple import config
 from dj_database_url import parse as db_url
-from corsheaders.defaults import default_headers
-
+from django.core.management.utils import get_random_secret_key
 from loguru import logger
+from sentry_sdk.integrations.django import DjangoIntegration
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -63,6 +63,22 @@ CSRF_COOKIE_HTTPONLY = config("CSRF_COOKIE_HTTPONLY", default=False, cast=bool)
 logger.info(f"CSRF_COOKIE_HTTPONLY: {CSRF_COOKIE_HTTPONLY}")
 
 LOG_REQUESTS = config("LOG_REQUESTS", default=False, cast=bool)
+
+SENTRY_DSN = config("SENTRY_DSN", default="")
+
+if SENTRY_DSN:
+    glitchtip_environment = "development" if DEBUG else "production"
+    sentry_sdk.init(
+        dsn=SENTRY_DSN,
+        integrations=[DjangoIntegration()],
+        auto_session_tracking=False,
+        traces_sample_rate=0.01,
+        release="1.0.0",
+        environment=glitchtip_environment,
+    )
+    logger.info(f"Sentry initialized for environment: {glitchtip_environment}")
+else:
+    logger.info("No Glitchtip DSN provided, skipping Sentry initialization")
 
 if DEBUG:
     ALLOWED_HOSTS += ["*"]

@@ -18,3 +18,8 @@ def add(request, a: int, b: int):
 @ensure_csrf_cookie
 def set_csrf_token(request):
     return JsonResponse({"details": "CSRF cookie set"})
+
+
+@v1.get("/sentry-debug")
+def sentry_debug(request):
+    raise Exception("This is a test exception for Sentry")

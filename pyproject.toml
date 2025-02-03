@@ -17,6 +17,7 @@ dependencies = [
     "django-anymail[amazon-ses]>=12.0",
     "loguru>=0.7.3",
     "django-browser-reload>=1.17.0",
+    "sentry-sdk>=2.20.0",
 ]
 
 [dependency-groups]

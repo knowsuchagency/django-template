@@ -297,4 +297,3 @@ LOGIN_URL = "/accounts/login/"  # Where to redirect if login is required
 # Security settings
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 USE_X_FORWARDED_HOST = True
-SECURE_SSL_REDIRECT = not DEBUG

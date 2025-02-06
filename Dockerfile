@@ -18,4 +18,6 @@ COPY manage.py ./
 
 ENV PYTHONUNBUFFERED=1
 
+RUN uv run python manage.py collectstatic --noinput
+
 CMD ["uv", "run", "granian", "--host", "0.0.0.0", "--port", "8000", "--interface", "wsgi", "backend.wsgi:application"]

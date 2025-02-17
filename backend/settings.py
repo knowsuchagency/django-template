@@ -34,33 +34,31 @@ SECRET_KEY = config("SECRET_KEY", default=get_random_secret_key())
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config("DEBUG", default=False, cast=bool)
-logger.info(f"DEBUG: {DEBUG}")
 
 ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="*", cast=str.split)
-logger.info(f"ALLOWED_HOSTS: {ALLOWED_HOSTS}")
 
 CSRF_TRUSTED_ORIGINS = config("CSRF_TRUSTED_ORIGINS", default="", cast=str.split)
-logger.info(f"CSRF_TRUSTED_ORIGINS: {CSRF_TRUSTED_ORIGINS}")
 
 CSRF_COOKIE_DOMAIN = config(
     "CSRF_COOKIE_DOMAIN",
     default=".knowsuchagency.com",
     cast=str,
 )
-logger.info(f"CSRF_COOKIE_DOMAIN: {CSRF_COOKIE_DOMAIN}")
 
 SESSION_COOKIE_DOMAIN = config(
     "SESSION_COOKIE_DOMAIN",
     default=".knowsuchagency.com",
     cast=str,
 )
-logger.info(f"SESSION_COOKIE_DOMAIN: {SESSION_COOKIE_DOMAIN}")
 
-CSRF_COOKIE_SETTINGS = config("CSRF_COOKIE_SETTINGS", default="Lax", cast=str)
-logger.info(f"CSRF_COOKIE_SETTINGS: {CSRF_COOKIE_SETTINGS}")
+CSRF_COOKIE_SAMESITE = config("CSRF_COOKIE_SAMESITE", default="None", cast=str)
+
+CSRF_COOKIE_SECURE = config("CSRF_COOKIE_SECURE", default=True, cast=bool)
 
 CSRF_COOKIE_HTTPONLY = config("CSRF_COOKIE_HTTPONLY", default=False, cast=bool)
-logger.info(f"CSRF_COOKIE_HTTPONLY: {CSRF_COOKIE_HTTPONLY}")
+
+if DEBUG:
+    logger.info(f"CSRF_COOKIE_HTTPONLY: {CSRF_COOKIE_HTTPONLY}")
 
 LOG_REQUESTS = config("LOG_REQUESTS", default=False, cast=bool)
 
@@ -89,9 +87,19 @@ if DEBUG:
         "http://localhost:8080",
         "http://127.0.0.1:8000",
         "http://127.0.0.1:8080",
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
     ]
     CORS_ALLOW_CREDENTIALS = True
     CSRF_COOKIE_SECURE = False
+
+if DEBUG:
+    logger.info(f"CSRF_COOKIE_SECURE: {CSRF_COOKIE_SECURE}")
+    logger.info(f"CSRF_COOKIE_SAMESITE: {CSRF_COOKIE_SAMESITE}")
+    logger.info(f"SESSION_COOKIE_DOMAIN: {SESSION_COOKIE_DOMAIN}")
+    logger.info(f"CSRF_COOKIE_DOMAIN: {CSRF_COOKIE_DOMAIN}")
+    logger.info(f"ALLOWED_HOSTS: {ALLOWED_HOSTS}")
+    logger.info(f"CSRF_TRUSTED_ORIGINS: {CSRF_TRUSTED_ORIGINS}")
 
 INTERNAL_IPS = [
     "127.0.0.1",
@@ -249,13 +257,15 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # For development (allow all origins):
 CORS_ALLOW_ALL_ORIGINS = DEBUG
-logger.info(f"CORS_ALLOW_ALL_ORIGINS: {CORS_ALLOW_ALL_ORIGINS}")
+if DEBUG:
+    logger.info(f"CORS_ALLOW_ALL_ORIGINS: {CORS_ALLOW_ALL_ORIGINS}")
 
 # For production (specify allowed origins):
 CORS_ALLOWED_ORIGINS = config("CORS_ALLOWED_ORIGINS", default="", cast=str.split)
 # assume our frontend should be able to make POST requests and fetch content from its domain
 CORS_ALLOWED_ORIGINS += CSRF_TRUSTED_ORIGINS
-logger.info(f"CORS_ALLOWED_ORIGINS: {CORS_ALLOWED_ORIGINS}")
+if DEBUG:
+    logger.info(f"CORS_ALLOWED_ORIGINS: {CORS_ALLOWED_ORIGINS}")
 
 # If you need to allow credentials (cookies, authorization headers, etc.):
 CORS_ALLOW_CREDENTIALS = True
@@ -266,14 +276,16 @@ CORS_ALLOW_HEADERS = (
     "content-type",
     "x-csrftoken",
 )
-logger.info(f"CORS_ALLOW_HEADERS: {CORS_ALLOW_HEADERS}")
+if DEBUG:
+    logger.info(f"CORS_ALLOW_HEADERS: {CORS_ALLOW_HEADERS}")
 
 CORS_EXPOSE_HEADERS = [
     "content-type",
     "x-session-token",
     "x-csrftoken",
 ]
-logger.info(f"CORS_EXPOSE_HEADERS: {CORS_EXPOSE_HEADERS}")
+if DEBUG:
+    logger.info(f"CORS_EXPOSE_HEADERS: {CORS_EXPOSE_HEADERS}")
 
 # Auth settings
 

@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en">
 
 <head>
   <meta charset="UTF-8" />
@@ -7,6 +7,19 @@
   <title>{% block title %}My Site{% endblock %}</title>
   <link href="https://cdn.jsdelivr.net/npm/daisyui@5" rel="stylesheet" type="text/css" />
   <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <script>
+    // Set theme based on user's system preference
+    function setThemeFromSystemPreference() {
+      const prefersDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      document.documentElement.setAttribute('data-theme', prefersDarkMode ? 'dark' : 'light');
+    }
+
+    // Set theme on initial load
+    setThemeFromSystemPreference();
+
+    // Update theme if system preference changes
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', setThemeFromSystemPreference);
+  </script>
   {% block head_scripts %}{% endblock %}
 </head>
 

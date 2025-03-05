@@ -57,6 +57,15 @@ CSRF_COOKIE_SECURE = config("CSRF_COOKIE_SECURE", default=True, cast=bool)
 
 CSRF_COOKIE_HTTPONLY = config("CSRF_COOKIE_HTTPONLY", default=False, cast=bool)
 
+# Set session cookie to be accessible via HTTP only (prevents JavaScript access)
+SESSION_COOKIE_HTTPONLY = True
+
+# Store CSRF token in cookie instead of session for DEBUG mode
+CSRF_USE_SESSIONS = False
+
+# Set CSRF cookie age to 1 week (in seconds)
+CSRF_COOKIE_AGE = 604800
+
 if DEBUG:
     logger.info(f"CSRF_COOKIE_HTTPONLY: {CSRF_COOKIE_HTTPONLY}")
 
@@ -92,6 +101,14 @@ if DEBUG:
     ]
     CORS_ALLOW_CREDENTIALS = True
     CSRF_COOKIE_SECURE = False
+    CSRF_USE_SESSIONS = False  # Store CSRF token in cookie instead of session
+    CSRF_COOKIE_SAMESITE = "Lax"  # Use Lax instead of None in DEBUG mode
+    SESSION_COOKIE_SECURE = False
+    SESSION_COOKIE_SAMESITE = "Lax"
+
+    # In DEBUG mode, make CSRF protection less restrictive
+    CSRF_COOKIE_NAME = "csrftoken"
+    CSRF_HEADER_NAME = "HTTP_X_CSRFTOKEN"
 
 if DEBUG:
     logger.info(f"CSRF_COOKIE_SECURE: {CSRF_COOKIE_SECURE}")
@@ -295,6 +312,11 @@ ACCOUNT_USERNAME_REQUIRED = False
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_LOGIN_ON_PASSWORD_RESET = True
 ACCOUNT_LOGIN_ON_EMAIL_CONFIRMATION = True
+
+# Ensure django-allauth properly handles CSRF
+ACCOUNT_CSRF_COOKIE_NAME = "csrftoken"  # Match Django's default CSRF cookie name
+ACCOUNT_PRESERVE_CSRF_TOKEN = True  # Preserve CSRF token across requests
+ACCOUNT_SESSION_REMEMBER = True  # Keep logged in users authenticated between sessions
 
 # Email settings
 

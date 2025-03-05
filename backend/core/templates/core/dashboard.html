@@ -3,14 +3,12 @@
 {% block title %}Dashboard{% endblock %}
 
 {% block content %}
-<div class="row">
-    <div class="col-md-12">
-        <h2>Dashboard</h2>
-        <div class="card">
-            <div class="card-body">
-                <h5 class="card-title">Welcome, {{ user.username }}!</h5>
-                <p class="card-text">This is your private dashboard. You can only see this page when logged in.</p>
-            </div>
+<div class="w-full">
+    <h2 class="text-3xl font-bold mb-4">Dashboard</h2>
+    <div class="card w-full bg-base-200 shadow-xl">
+        <div class="card-body">
+            <h2 class="card-title">Welcome, {{ user.username }}!</h2>
+            <p>This is your private dashboard. You can only see this page when logged in.</p>
         </div>
     </div>
 </div>

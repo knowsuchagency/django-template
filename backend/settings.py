@@ -140,6 +140,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "corsheaders",
     "django_browser_reload",
+    "widget_tweaks",
     "backend.core",
 ]
 

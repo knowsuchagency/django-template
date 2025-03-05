@@ -2,14 +2,57 @@
 
 {% block title %}Dashboard{% endblock %}
 
+{% block head_scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+
 {% block content %}
 <div class="w-full">
     <h2 class="text-3xl font-bold mb-4">Dashboard</h2>
-    <div class="card w-full bg-base-200 shadow-xl">
+    <div class="card w-full bg-base-200 shadow-xl mb-6">
         <div class="card-body">
             <h2 class="card-title">Welcome, {{ user.username }}!</h2>
             <p>This is your private dashboard. You can only see this page when logged in.</p>
         </div>
     </div>
+
+    <div class="card w-full bg-base-200 shadow-xl">
+        <div class="card-body">
+            <h2 class="card-title">Your Activity</h2>
+            <div class="w-full h-64">
+                <canvas id="activityChart"></canvas>
+            </div>
+        </div>
+    </div>
 </div>
+{% endblock %}
+
+{% block body_scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const ctx = document.getElementById('activityChart').getContext('2d');
+        const chart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['January', 'February', 'March', 'April', 'May', 'June'],
+                datasets: [{
+                    label: 'Activity',
+                    data: [12, 19, 3, 5, 2, 3],
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    });
+</script>
 {% endblock %}

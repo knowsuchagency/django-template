@@ -39,15 +39,20 @@ ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="*", cast=str.split)
 
 CSRF_TRUSTED_ORIGINS = config("CSRF_TRUSTED_ORIGINS", default="", cast=str.split)
 
+# CSRF_COOKIE_DOMAIN should not include protocol, just domain
+# Example: www.knowsuchagency.com or .knowsuchagency.com (with dot for subdomains)
+# Set to None to use the current domain automatically
 CSRF_COOKIE_DOMAIN = config(
     "CSRF_COOKIE_DOMAIN",
-    default=".knowsuchagency.com",
+    default=None,
     cast=str,
 )
 
+# SESSION_COOKIE_DOMAIN also should not include protocol
+# Usually only needed for subdomain sharing
 SESSION_COOKIE_DOMAIN = config(
     "SESSION_COOKIE_DOMAIN",
-    default=".knowsuchagency.com",
+    default=None,
     cast=str,
 )
 
@@ -109,6 +114,9 @@ if DEBUG:
     # In DEBUG mode, make CSRF protection less restrictive
     CSRF_COOKIE_NAME = "csrftoken"
     CSRF_HEADER_NAME = "HTTP_X_CSRFTOKEN"
+
+elif not (CSRF_COOKIE_DOMAIN and SESSION_COOKIE_DOMAIN):
+    raise ValueError("CSRF_COOKIE_DOMAIN and SESSION_COOKIE_DOMAIN must be set in production")
 
 if DEBUG:
     logger.info(f"CSRF_COOKIE_SECURE: {CSRF_COOKIE_SECURE}")

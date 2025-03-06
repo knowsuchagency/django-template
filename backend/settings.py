@@ -35,9 +35,9 @@ SECRET_KEY = config("SECRET_KEY", default=get_random_secret_key())
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config("DEBUG", default=False, cast=bool)
 
-ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="*", cast=str.split)
+ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="*", cast=partial(str.split, sep=","))
 
-CSRF_TRUSTED_ORIGINS = config("CSRF_TRUSTED_ORIGINS", default="", cast=str.split)
+CSRF_TRUSTED_ORIGINS = config("CSRF_TRUSTED_ORIGINS", default="", cast=partial(str.split, sep=","))
 
 # CSRF_COOKIE_DOMAIN should not include protocol, just domain
 # Example: www.knowsuchagency.com or .knowsuchagency.com (with dot for subdomains)

@@ -1,8 +1,6 @@
-import json
 import pprint
 import re
-from typing import Any, List
-from urllib.parse import urlparse
+from typing import List
 
 from django.conf import settings
 from django.http import HttpRequest, HttpResponse

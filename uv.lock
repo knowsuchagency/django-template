@@ -35,6 +35,7 @@ dependencies = [
     { name = "django-browser-reload" },
     { name = "django-cors-headers" },
     { name = "django-ninja" },
+    { name = "django-unfold" },
     { name = "django-widget-tweaks" },
     { name = "djecorator" },
     { name = "granian" },
@@ -59,6 +60,7 @@ requires-dist = [
     { name = "django-browser-reload", specifier = ">=1.17.0" },
     { name = "django-cors-headers", specifier = ">=4.4.0" },
     { name = "django-ninja", specifier = ">=1.3.0" },
+    { name = "django-unfold", specifier = ">=0.50.0" },
     { name = "django-widget-tweaks", specifier = ">=1.5.0" },
     { name = "djecorator", specifier = ">=1.2.0" },
     { name = "granian", specifier = ">=1.6.0" },
@@ -246,6 +248,18 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/9c/77/89ee4ebaa5151b7d85cebaf8d6ec0b9e5074326c3ad8259c763763306d51/django_ninja-1.3.0.tar.gz", hash = "sha256:5b320e2dc0f41a6032bfa7e1ebc33559ae1e911a426f0c6be6674a50b20819be", size = 3702324 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/00/72/fd2589323b40893d3224e174eeec0c4ce5a42c7d2d384d11ba269ad4d050/django_ninja-1.3.0-py3-none-any.whl", hash = "sha256:f58096b6c767d1403dfd6c49743f82d780d7b9688d9302ecab316ac1fa6131bb", size = 2423381 },
+]
+
+[[package]]
+name = "django-unfold"
+version = "0.50.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "django" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/44/7d/562150b96d7576ce58002b93d35f6d90b7e43855bab44410002e92764d07/django_unfold-0.50.0.tar.gz", hash = "sha256:a1bae37aa876d0b93aa62785b68fd34c886170fdfe9099f529fe8bd777fca3fa", size = 1019833 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/75/57/3cf842e17dec60496fcdd2bc80e23581ba74d2c24a7a7c3b7532be9a2ddd/django_unfold-0.50.0-py3-none-any.whl", hash = "sha256:b0ff65d1b1f776bd7f9be302dfa026ad4d350469eae847a5888d1db55fdce0df", size = 1106759 },
 ]
 
 [[package]]

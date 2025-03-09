@@ -20,6 +20,7 @@ dependencies = [
     "sentry-sdk>=2.20.0",
     "whitenoise>=6.8.2",
     "django-widget-tweaks>=1.5.0",
+    "django-unfold>=0.50.0",
 ]
 
 [dependency-groups]

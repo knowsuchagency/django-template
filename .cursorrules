@@ -5,3 +5,32 @@ Use `uv` as the package manager.
 We use daisyui version 5 for the UI, which is based on tailwind version 4.
 
 django-widget-tweaks is used to customize django form widgets.
+
+We use djecorator to define routes using decorators i.e.:
+
+```python
+from djecorator import Route
+from django.shortcuts import render
+
+route = Route()
+
+
+@route("/")
+def landing(request):
+    return render(request, "core/landing.html")
+
+
+@route("/dashboard/", login_required=True)
+def dashboard(request):
+    return render(request, "core/dashboard.html")
+```
+
+...
+
+```python
+from backend.core import views
+
+...
+
+urlpatterns += views.route.patterns
+```

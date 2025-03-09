@@ -72,6 +72,37 @@ SESSION_COOKIE_DOMAIN = config(
     cast=str,
 )
 
+# Auto-derive cookie domains from CSRF_TRUSTED_ORIGINS if not explicitly set
+if CSRF_TRUSTED_ORIGINS and (
+    CSRF_COOKIE_DOMAIN is None or SESSION_COOKIE_DOMAIN is None
+):
+    # Extract domain from first trusted origin (remove scheme)
+    import re
+    from urllib.parse import urlparse
+
+    for origin in CSRF_TRUSTED_ORIGINS:
+        parsed_url = urlparse(origin)
+        domain = parsed_url.netloc
+
+        # Handle wildcard domains (convert *.example.com to .example.com)
+        domain = domain.replace("*.", ".")
+
+        if domain:
+            # Set cookie domains if not explicitly configured
+            if CSRF_COOKIE_DOMAIN is None:
+                CSRF_COOKIE_DOMAIN = domain
+                logger.info(
+                    f"Auto-set CSRF_COOKIE_DOMAIN to {domain} from CSRF_TRUSTED_ORIGINS"
+                )
+
+            if SESSION_COOKIE_DOMAIN is None:
+                SESSION_COOKIE_DOMAIN = domain
+                logger.info(
+                    f"Auto-set SESSION_COOKIE_DOMAIN to {domain} from CSRF_TRUSTED_ORIGINS"
+                )
+
+            break
+
 CSRF_COOKIE_SAMESITE = config("CSRF_COOKIE_SAMESITE", default="None", cast=str)
 
 CSRF_COOKIE_SECURE = config("CSRF_COOKIE_SECURE", default=True, cast=bool)

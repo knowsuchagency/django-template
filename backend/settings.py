@@ -22,6 +22,10 @@ from django.core.management.utils import get_random_secret_key
 from loguru import logger
 from sentry_sdk.integrations.django import DjangoIntegration
 
+def parse_comma_separated_list(string, sep=","):
+    """Parse a comma-separated string into a list, filtering out empty strings."""
+    return [s for s in string.split(sep) if s]
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -35,9 +39,9 @@ SECRET_KEY = config("SECRET_KEY", default=get_random_secret_key())
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config("DEBUG", default=False, cast=bool)
 
-ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="*", cast=partial(str.split, sep=","))
+ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="*", cast=parse_comma_separated_list)
 
-CSRF_TRUSTED_ORIGINS = config("CSRF_TRUSTED_ORIGINS", default="", cast=partial(str.split, sep=","))
+CSRF_TRUSTED_ORIGINS = config("CSRF_TRUSTED_ORIGINS", default="", cast=parse_comma_separated_list)
 
 # CSRF_COOKIE_DOMAIN should not include protocol, just domain
 # Example: www.knowsuchagency.com or .knowsuchagency.com (with dot for subdomains)
@@ -93,7 +97,8 @@ else:
     logger.info("No Glitchtip DSN provided, skipping Sentry initialization")
 
 if DEBUG:
-    ALLOWED_HOSTS += ["*"]
+    if "*" not in ALLOWED_HOSTS:
+        ALLOWED_HOSTS += ["*"]
     CSRF_COOKIE_DOMAIN = None
     SESSION_COOKIE_DOMAIN = None
     CSRF_TRUSTED_ORIGINS += [
@@ -287,7 +292,7 @@ if DEBUG:
     logger.info(f"CORS_ALLOW_ALL_ORIGINS: {CORS_ALLOW_ALL_ORIGINS}")
 
 # For production (specify allowed origins):
-CORS_ALLOWED_ORIGINS = config("CORS_ALLOWED_ORIGINS", default="", cast=str.split)
+CORS_ALLOWED_ORIGINS = config("CORS_ALLOWED_ORIGINS", default="", cast=parse_comma_separated_list)
 # assume our frontend should be able to make POST requests and fetch content from its domain
 CORS_ALLOWED_ORIGINS += CSRF_TRUSTED_ORIGINS
 if DEBUG:

@@ -75,9 +75,7 @@ SESSION_COOKIE_DOMAIN = config(
 )
 
 # Auto-derive cookie domains from CSRF_TRUSTED_ORIGINS if not explicitly set
-if CSRF_TRUSTED_ORIGINS and (
-    CSRF_COOKIE_DOMAIN is None or SESSION_COOKIE_DOMAIN is None
-):
+if CSRF_TRUSTED_ORIGINS and not (CSRF_COOKIE_DOMAIN and SESSION_COOKIE_DOMAIN):
     # Extract domain from first trusted origin (remove scheme)
     from urllib.parse import urlparse
 

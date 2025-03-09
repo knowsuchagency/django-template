@@ -62,7 +62,7 @@ CSRF_TRUSTED_ORIGINS = config(
 CSRF_COOKIE_DOMAIN = config(
     "CSRF_COOKIE_DOMAIN",
     default=None,
-    cast=str,
+    cast=lambda x: str(x) if x else None,
 )
 
 # SESSION_COOKIE_DOMAIN also should not include protocol
@@ -71,7 +71,7 @@ CSRF_COOKIE_DOMAIN = config(
 SESSION_COOKIE_DOMAIN = config(
     "SESSION_COOKIE_DOMAIN",
     default=None,
-    cast=str,
+    cast=lambda x: str(x) if x else None,
 )
 
 # Auto-derive cookie domains from CSRF_TRUSTED_ORIGINS if not explicitly set
@@ -90,13 +90,13 @@ if CSRF_TRUSTED_ORIGINS and not (CSRF_COOKIE_DOMAIN and SESSION_COOKIE_DOMAIN):
             # Set cookie domains if not explicitly configured
             if CSRF_COOKIE_DOMAIN is None:
                 CSRF_COOKIE_DOMAIN = domain
-                logger.info(
+                logger.warning(
                     f"Auto-set CSRF_COOKIE_DOMAIN to {domain} from CSRF_TRUSTED_ORIGINS"
                 )
 
             if SESSION_COOKIE_DOMAIN is None:
                 SESSION_COOKIE_DOMAIN = domain
-                logger.info(
+                logger.warning(
                     f"Auto-set SESSION_COOKIE_DOMAIN to {domain} from CSRF_TRUSTED_ORIGINS"
                 )
 

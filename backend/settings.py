@@ -39,8 +39,14 @@ SECRET_KEY = config("SECRET_KEY", default=get_random_secret_key())
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config("DEBUG", default=False, cast=bool)
 
+# ALLOWED_HOSTS defines which host/domain names the Django site can serve
+# Example values: ['knowsuchagency.com', 'www.knowsuchagency.com', 'localhost', '127.0.0.1']
+# Default '*' allows all hosts in development, but should be restricted in production
 ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="*", cast=parse_comma_separated_list)
 
+# CSRF_TRUSTED_ORIGINS defines the origins that are trusted for CSRF-protected requests
+# Example values: ['https://knowsuchagency.com', 'https://www.knowsuchagency.com']
+# Must include the scheme (https:// or http://)
 CSRF_TRUSTED_ORIGINS = config("CSRF_TRUSTED_ORIGINS", default="", cast=parse_comma_separated_list)
 
 # CSRF_COOKIE_DOMAIN should not include protocol, just domain
@@ -54,6 +60,7 @@ CSRF_COOKIE_DOMAIN = config(
 
 # SESSION_COOKIE_DOMAIN also should not include protocol
 # Usually only needed for subdomain sharing
+# Example: .knowsuchagency.com (with dot for subdomains) or knowsuchagency.com
 SESSION_COOKIE_DOMAIN = config(
     "SESSION_COOKIE_DOMAIN",
     default=None,

@@ -1,10 +1,11 @@
 from django.contrib import admin
+from unfold.admin import ModelAdmin
 
 from .models import User, StockTicker
 
 
 @admin.register(User)
-class UserAdmin(admin.ModelAdmin):
+class UserAdmin(ModelAdmin):
     fields = list_display = [
         "username",
         "email",
@@ -16,7 +17,7 @@ class UserAdmin(admin.ModelAdmin):
 
 
 @admin.register(StockTicker)
-class StockTickerAdmin(admin.ModelAdmin):
+class StockTickerAdmin(ModelAdmin):
     list_display = [
         "symbol",
         "company_name",

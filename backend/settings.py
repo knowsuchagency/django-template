@@ -69,9 +69,6 @@ CSRF_COOKIE_HTTPONLY = config("CSRF_COOKIE_HTTPONLY", default=False, cast=bool)
 # Set session cookie to be accessible via HTTP only (prevents JavaScript access)
 SESSION_COOKIE_HTTPONLY = True
 
-# Store CSRF token in cookie instead of session for DEBUG mode
-CSRF_USE_SESSIONS = False
-
 # Set CSRF cookie age to 1 week (in seconds)
 CSRF_COOKIE_AGE = 604800
 
@@ -111,14 +108,9 @@ if DEBUG:
     ]
     CORS_ALLOW_CREDENTIALS = True
     CSRF_COOKIE_SECURE = False
-    CSRF_USE_SESSIONS = False  # Store CSRF token in cookie instead of session
     CSRF_COOKIE_SAMESITE = "Lax"  # Use Lax instead of None in DEBUG mode
     SESSION_COOKIE_SECURE = False
     SESSION_COOKIE_SAMESITE = "Lax"
-
-    # In DEBUG mode, make CSRF protection less restrictive
-    CSRF_COOKIE_NAME = "csrftoken"
-    CSRF_HEADER_NAME = "HTTP_X_CSRFTOKEN"
 
 elif not (CSRF_COOKIE_DOMAIN and SESSION_COOKIE_DOMAIN):
     raise ValueError("CSRF_COOKIE_DOMAIN and SESSION_COOKIE_DOMAIN must be set in production")

@@ -60,7 +60,7 @@ requires-dist = [
     { name = "django-cors-headers", specifier = ">=4.4.0" },
     { name = "django-ninja", specifier = ">=1.3.0" },
     { name = "django-widget-tweaks", specifier = ">=1.5.0" },
-    { name = "djecorator", specifier = ">=1.1.0" },
+    { name = "djecorator", specifier = ">=1.2.0" },
     { name = "granian", specifier = ">=1.6.0" },
     { name = "loguru", specifier = ">=0.7.3" },
     { name = "psycopg2-binary", specifier = ">=2.9.9" },
@@ -259,14 +259,14 @@ wheels = [
 
 [[package]]
 name = "djecorator"
-version = "1.1.0"
+version = "1.2.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "django" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/a8/98/b062cb3b055fb837c4d43e1fecd1ff2616ebd4d37f471aee19c067b14673/djecorator-1.1.0.tar.gz", hash = "sha256:31785a611b69d4f688f370caff9fd67336def64b02c005fa5df05fff3da23622", size = 3529 }
+sdist = { url = "https://files.pythonhosted.org/packages/43/42/ee30677f5345e57a249617019985194d5ebf6f22957ba605e931b34a22d2/djecorator-1.2.0.tar.gz", hash = "sha256:597597a01fe8ebd3604933d06e3edd7a357e6c59f31536f5e515f0bd451bb55f", size = 5382 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/ea/fe/8d87c4f366fa6fc13e6b3a4f41ec1c9c6b007c101db8445c44267834ec39/djecorator-1.1.0-py2.py3-none-any.whl", hash = "sha256:3b4336dfe4835522fe66a0705c3d819fd39523a209e97e27501dd9302c82d220", size = 2538 },
+    { url = "https://files.pythonhosted.org/packages/34/f6/1951effb9d30980a197bd50c07059ff9e41d77e74be235d0886265ef9a3d/djecorator-1.2.0-py2.py3-none-any.whl", hash = "sha256:1d977a9fa8ed0f8a2c0619be30a4b14a9f7f8da9f540b8b4852539cced475ce1", size = 3177 },
 ]
 
 [[package]]

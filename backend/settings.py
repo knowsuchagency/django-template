@@ -154,10 +154,6 @@ if DEBUG:
     SESSION_COOKIE_SECURE = False
     SESSION_COOKIE_SAMESITE = "Lax"
 
-elif not (CSRF_COOKIE_DOMAIN and SESSION_COOKIE_DOMAIN):
-    raise ValueError(
-        "CSRF_COOKIE_DOMAIN and SESSION_COOKIE_DOMAIN must be set in production"
-    )
 
 if DEBUG or LOG_SETTINGS:
     logger.info(f"CSRF_COOKIE_SECURE: {CSRF_COOKIE_SECURE}")
@@ -219,6 +215,7 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "allauth.account.middleware.AccountMiddleware",
     "django_browser_reload.middleware.BrowserReloadMiddleware",
+    "backend.core.middleware.DomainSecurityMiddleware",
 ]
 
 if DEBUG or LOG_REQUESTS:

@@ -8,6 +8,7 @@ A simple Django template.
 - [Installation](#installation)
 - [Development](#development)
 - [Available Commands](#available-commands)
+- [Security Features](#security-features)
 
 ## Prerequisites
 
@@ -54,3 +55,23 @@ Use `just <command>` to run the following commands:
 - `collectstatic`: Collect static files
 
 For a full list of commands, run `just list`.
+
+## Security Features
+
+### Wildcard CSRF Trusted Origins
+
+This template includes a custom CSRF middleware that supports wildcard patterns in the `CSRF_TRUSTED_ORIGINS` setting. This allows you to trust multiple subdomains without having to list each one individually.
+
+Example configuration in `.env`:
+
+```
+CSRF_TRUSTED_ORIGINS=https://*.example.com,https://example.com,http://localhost:8000
+```
+
+This will trust:
+
+- Any subdomain of example.com (e.g., app.example.com, api.example.com)
+- The root domain example.com
+- localhost:8000
+
+To use this feature, the custom middleware is already configured in the project's settings.

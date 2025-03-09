@@ -1,8 +1,15 @@
 import json
 import pprint
-from typing import Any
+import re
+from typing import Any, List
+from urllib.parse import urlparse
 
+from django.conf import settings
 from django.http import HttpRequest, HttpResponse
+from django.middleware.csrf import CsrfViewMiddleware
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class RequestLoggingMiddleware:
@@ -37,3 +44,111 @@ class RequestLoggingMiddleware:
         print("\n" + "=" * 50 + " REQUEST METADATA " + "=" * 50)
         pprint.pprint(request_data, indent=2, width=120)
         print("=" * 120 + "\n")
+
+
+class WildcardCSRFMiddleware(CsrfViewMiddleware):
+    """
+    Extends Django's CSRF middleware to support wildcard patterns in CSRF_TRUSTED_ORIGINS.
+
+    This allows configurations like:
+        CSRF_TRUSTED_ORIGINS = ['https://*.knowsuchagency.com']
+
+    Which will match any subdomain of knowsuchagency.com.
+    """
+
+    def _get_trusted_origins(self) -> List[str]:
+        """
+        Return the list of trusted origins, some of which may contain wildcards.
+        """
+        return getattr(settings, "CSRF_TRUSTED_ORIGINS", [])
+
+    def _process_wildcard_patterns(self, request_origin: str) -> bool:
+        """
+        Check if the request origin matches any of our wildcard patterns in CSRF_TRUSTED_ORIGINS.
+
+        For example, if CSRF_TRUSTED_ORIGINS contains 'https://*.knowsuchagency.com',
+        and the request origin is 'https://subdomain.knowsuchagency.com', this should match.
+        """
+        trusted_origins = self._get_trusted_origins()
+
+        for trusted_origin in trusted_origins:
+            # Skip if this isn't a wildcard pattern
+            if "*" not in trusted_origin:
+                continue
+
+            # Convert the wildcard pattern to a regex pattern
+            # First, escape all special regex characters
+            pattern = re.escape(trusted_origin)
+
+            # Then replace the escaped wildcard with a regex pattern for any subdomain
+            # The pattern "[^.]+\." matches any sequence of characters that aren't dots,
+            # followed by a dot, which is exactly what we want for a subdomain
+            pattern = pattern.replace("\\*", "[^.]+")
+
+            # Add start and end anchors
+            pattern = f"^{pattern}$"
+
+            # Check if the request origin matches our pattern
+            if re.match(pattern, request_origin):
+                return True
+
+        return False
+
+    def process_view(self, request, callback, callback_args, callback_kwargs):
+        """
+        Override the process_view method to check for wildcard matches before
+        falling back to the standard CSRF validation.
+        """
+        # Skip CSRF checks for CSRF exempt views
+        if getattr(callback, "csrf_exempt", False):
+            return None
+
+        # Get the request origin
+        request_origin = request.META.get("HTTP_ORIGIN")
+
+        # If there's an origin header and it matches one of our wildcard patterns,
+        # temporarily allow this request
+        if request_origin and self._process_wildcard_patterns(request_origin):
+            # Mark this request as having passed CSRF validation
+            request.META["_dont_enforce_csrf_checks"] = True
+            return None
+
+        # Otherwise, use the standard CSRF validation
+        return super().process_view(request, callback, callback_args, callback_kwargs)
+
+
+class DomainSecurityMiddleware:
+    """
+    Middleware that checks if CSRF_COOKIE_DOMAIN and SESSION_COOKIE_DOMAIN
+    are properly set in production environments.
+
+    Instead of raising an exception at startup which breaks builds,
+    this middleware raises the exception at runtime when processing a request.
+    """
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+        # Log a warning at startup, but don't fail the build
+        self._log_domain_warning()
+
+    def _log_domain_warning(self):
+        """Log a warning at startup if domain settings are missing."""
+        if not settings.DEBUG and not (
+            settings.CSRF_COOKIE_DOMAIN and settings.SESSION_COOKIE_DOMAIN
+        ):
+            logger.warning(
+                "SECURITY WARNING: CSRF_COOKIE_DOMAIN and/or SESSION_COOKIE_DOMAIN "
+                "are not set in production. This will raise an exception during request processing."
+            )
+
+    def __call__(self, request: HttpRequest) -> HttpResponse:
+        # In production, if domains aren't set, raise an exception
+        if not settings.DEBUG and not (
+            settings.CSRF_COOKIE_DOMAIN and settings.SESSION_COOKIE_DOMAIN
+        ):
+            raise ValueError(
+                "CSRF_COOKIE_DOMAIN and SESSION_COOKIE_DOMAIN must be set in production"
+            )
+
+        response = self.get_response(request)
+        return response

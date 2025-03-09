@@ -22,9 +22,11 @@ from django.core.management.utils import get_random_secret_key
 from loguru import logger
 from sentry_sdk.integrations.django import DjangoIntegration
 
+
 def parse_comma_separated_list(string, sep=","):
     """Parse a comma-separated string into a list, filtering out empty strings."""
     return [s for s in string.split(sep) if s]
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -39,9 +41,20 @@ SECRET_KEY = config("SECRET_KEY", default=get_random_secret_key())
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config("DEBUG", default=False, cast=bool)
 
+LOG_SETTINGS = config("LOG_SETTINGS", default=False, cast=bool)
+
+# ALLOWED_HOSTS defines which host/domain names the Django site can serve
+# Example values: ['knowsuchagency.com', 'www.knowsuchagency.com', 'localhost', '127.0.0.1']
+# Default '*' allows all hosts in development, but should be restricted in production
 ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="*", cast=parse_comma_separated_list)
 
-CSRF_TRUSTED_ORIGINS = config("CSRF_TRUSTED_ORIGINS", default="", cast=parse_comma_separated_list)
+# CSRF_TRUSTED_ORIGINS defines the origins that are trusted for CSRF-protected requests
+# Example values: ['https://knowsuchagency.com', 'https://www.knowsuchagency.com']
+# Wildcard subdomains are also supported: ['https://*.knowsuchagency.com'] will match any subdomain
+# Must include the scheme (https:// or http://)
+CSRF_TRUSTED_ORIGINS = config(
+    "CSRF_TRUSTED_ORIGINS", default="", cast=parse_comma_separated_list
+)
 
 # CSRF_COOKIE_DOMAIN should not include protocol, just domain
 # Example: www.knowsuchagency.com or .knowsuchagency.com (with dot for subdomains)
@@ -49,16 +62,45 @@ CSRF_TRUSTED_ORIGINS = config("CSRF_TRUSTED_ORIGINS", default="", cast=parse_com
 CSRF_COOKIE_DOMAIN = config(
     "CSRF_COOKIE_DOMAIN",
     default=None,
-    cast=str,
+    cast=lambda x: str(x) if x else None,
 )
 
 # SESSION_COOKIE_DOMAIN also should not include protocol
 # Usually only needed for subdomain sharing
+# Example: .knowsuchagency.com (with dot for subdomains) or knowsuchagency.com
 SESSION_COOKIE_DOMAIN = config(
     "SESSION_COOKIE_DOMAIN",
     default=None,
-    cast=str,
+    cast=lambda x: str(x) if x else None,
 )
+
+# Auto-derive cookie domains from CSRF_TRUSTED_ORIGINS if not explicitly set
+if CSRF_TRUSTED_ORIGINS and not (CSRF_COOKIE_DOMAIN and SESSION_COOKIE_DOMAIN):
+    # Extract domain from first trusted origin (remove scheme)
+    from urllib.parse import urlparse
+
+    for origin in CSRF_TRUSTED_ORIGINS:
+        parsed_url = urlparse(origin)
+        domain = parsed_url.netloc
+
+        # Handle wildcard domains (convert *.example.com to .example.com)
+        domain = domain.replace("*.", ".")
+
+        if domain:
+            # Set cookie domains if not explicitly configured
+            if CSRF_COOKIE_DOMAIN is None:
+                CSRF_COOKIE_DOMAIN = domain
+                logger.warning(
+                    f"Auto-set CSRF_COOKIE_DOMAIN to {domain} from CSRF_TRUSTED_ORIGINS"
+                )
+
+            if SESSION_COOKIE_DOMAIN is None:
+                SESSION_COOKIE_DOMAIN = domain
+                logger.warning(
+                    f"Auto-set SESSION_COOKIE_DOMAIN to {domain} from CSRF_TRUSTED_ORIGINS"
+                )
+
+            break
 
 CSRF_COOKIE_SAMESITE = config("CSRF_COOKIE_SAMESITE", default="None", cast=str)
 
@@ -69,13 +111,10 @@ CSRF_COOKIE_HTTPONLY = config("CSRF_COOKIE_HTTPONLY", default=False, cast=bool)
 # Set session cookie to be accessible via HTTP only (prevents JavaScript access)
 SESSION_COOKIE_HTTPONLY = True
 
-# Store CSRF token in cookie instead of session for DEBUG mode
-CSRF_USE_SESSIONS = False
-
 # Set CSRF cookie age to 1 week (in seconds)
 CSRF_COOKIE_AGE = 604800
 
-if DEBUG:
+if DEBUG or LOG_SETTINGS:
     logger.info(f"CSRF_COOKIE_HTTPONLY: {CSRF_COOKIE_HTTPONLY}")
 
 LOG_REQUESTS = config("LOG_REQUESTS", default=False, cast=bool)
@@ -111,19 +150,12 @@ if DEBUG:
     ]
     CORS_ALLOW_CREDENTIALS = True
     CSRF_COOKIE_SECURE = False
-    CSRF_USE_SESSIONS = False  # Store CSRF token in cookie instead of session
     CSRF_COOKIE_SAMESITE = "Lax"  # Use Lax instead of None in DEBUG mode
     SESSION_COOKIE_SECURE = False
     SESSION_COOKIE_SAMESITE = "Lax"
 
-    # In DEBUG mode, make CSRF protection less restrictive
-    CSRF_COOKIE_NAME = "csrftoken"
-    CSRF_HEADER_NAME = "HTTP_X_CSRFTOKEN"
 
-elif not (CSRF_COOKIE_DOMAIN and SESSION_COOKIE_DOMAIN):
-    raise ValueError("CSRF_COOKIE_DOMAIN and SESSION_COOKIE_DOMAIN must be set in production")
-
-if DEBUG:
+if DEBUG or LOG_SETTINGS:
     logger.info(f"CSRF_COOKIE_SECURE: {CSRF_COOKIE_SECURE}")
     logger.info(f"CSRF_COOKIE_SAMESITE: {CSRF_COOKIE_SAMESITE}")
     logger.info(f"SESSION_COOKIE_DOMAIN: {SESSION_COOKIE_DOMAIN}")
@@ -177,12 +209,13 @@ MIDDLEWARE = [
     "django.contrib.sessions.middleware.SessionMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
-    "django.middleware.csrf.CsrfViewMiddleware",
+    "backend.core.middleware.WildcardCSRFMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "allauth.account.middleware.AccountMiddleware",
     "django_browser_reload.middleware.BrowserReloadMiddleware",
+    "backend.core.middleware.DomainSecurityMiddleware",
 ]
 
 if DEBUG or LOG_REQUESTS:
@@ -288,14 +321,16 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # For development (allow all origins):
 CORS_ALLOW_ALL_ORIGINS = DEBUG
-if DEBUG:
+if DEBUG or LOG_SETTINGS:
     logger.info(f"CORS_ALLOW_ALL_ORIGINS: {CORS_ALLOW_ALL_ORIGINS}")
 
 # For production (specify allowed origins):
-CORS_ALLOWED_ORIGINS = config("CORS_ALLOWED_ORIGINS", default="", cast=parse_comma_separated_list)
+CORS_ALLOWED_ORIGINS = config(
+    "CORS_ALLOWED_ORIGINS", default="", cast=parse_comma_separated_list
+)
 # assume our frontend should be able to make POST requests and fetch content from its domain
 CORS_ALLOWED_ORIGINS += CSRF_TRUSTED_ORIGINS
-if DEBUG:
+if DEBUG or LOG_SETTINGS:
     logger.info(f"CORS_ALLOWED_ORIGINS: {CORS_ALLOWED_ORIGINS}")
 
 # If you need to allow credentials (cookies, authorization headers, etc.):
@@ -307,7 +342,7 @@ CORS_ALLOW_HEADERS = (
     "content-type",
     "x-csrftoken",
 )
-if DEBUG:
+if DEBUG or LOG_SETTINGS:
     logger.info(f"CORS_ALLOW_HEADERS: {CORS_ALLOW_HEADERS}")
 
 CORS_EXPOSE_HEADERS = [
@@ -315,7 +350,7 @@ CORS_EXPOSE_HEADERS = [
     "x-session-token",
     "x-csrftoken",
 ]
-if DEBUG:
+if DEBUG or LOG_SETTINGS:
     logger.info(f"CORS_EXPOSE_HEADERS: {CORS_EXPOSE_HEADERS}")
 
 # Auth settings

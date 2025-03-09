@@ -1,4 +1,4 @@
-Use `uv` as the package manager.
+Use `uv` as the package manager. Any terminal command using python should start with `uv run` as that will ensure it runs within the appropriate virtual environment.
 
 `just` is the command runner.
 

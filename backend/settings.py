@@ -22,9 +22,11 @@ from django.core.management.utils import get_random_secret_key
 from loguru import logger
 from sentry_sdk.integrations.django import DjangoIntegration
 
+
 def parse_comma_separated_list(string, sep=","):
     """Parse a comma-separated string into a list, filtering out empty strings."""
     return [s for s in string.split(sep) if s]
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -46,8 +48,11 @@ ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="*", cast=parse_comma_separated_
 
 # CSRF_TRUSTED_ORIGINS defines the origins that are trusted for CSRF-protected requests
 # Example values: ['https://knowsuchagency.com', 'https://www.knowsuchagency.com']
+# Wildcard subdomains are also supported: ['https://*.knowsuchagency.com'] will match any subdomain
 # Must include the scheme (https:// or http://)
-CSRF_TRUSTED_ORIGINS = config("CSRF_TRUSTED_ORIGINS", default="", cast=parse_comma_separated_list)
+CSRF_TRUSTED_ORIGINS = config(
+    "CSRF_TRUSTED_ORIGINS", default="", cast=parse_comma_separated_list
+)
 
 # CSRF_COOKIE_DOMAIN should not include protocol, just domain
 # Example: www.knowsuchagency.com or .knowsuchagency.com (with dot for subdomains)
@@ -120,7 +125,9 @@ if DEBUG:
     SESSION_COOKIE_SAMESITE = "Lax"
 
 elif not (CSRF_COOKIE_DOMAIN and SESSION_COOKIE_DOMAIN):
-    raise ValueError("CSRF_COOKIE_DOMAIN and SESSION_COOKIE_DOMAIN must be set in production")
+    raise ValueError(
+        "CSRF_COOKIE_DOMAIN and SESSION_COOKIE_DOMAIN must be set in production"
+    )
 
 if DEBUG:
     logger.info(f"CSRF_COOKIE_SECURE: {CSRF_COOKIE_SECURE}")
@@ -176,7 +183,7 @@ MIDDLEWARE = [
     "django.contrib.sessions.middleware.SessionMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
-    "django.middleware.csrf.CsrfViewMiddleware",
+    "backend.core.middleware.WildcardCSRFMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
@@ -291,7 +298,9 @@ if DEBUG:
     logger.info(f"CORS_ALLOW_ALL_ORIGINS: {CORS_ALLOW_ALL_ORIGINS}")
 
 # For production (specify allowed origins):
-CORS_ALLOWED_ORIGINS = config("CORS_ALLOWED_ORIGINS", default="", cast=parse_comma_separated_list)
+CORS_ALLOWED_ORIGINS = config(
+    "CORS_ALLOWED_ORIGINS", default="", cast=parse_comma_separated_list
+)
 # assume our frontend should be able to make POST requests and fetch content from its domain
 CORS_ALLOWED_ORIGINS += CSRF_TRUSTED_ORIGINS
 if DEBUG:

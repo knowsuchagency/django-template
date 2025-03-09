@@ -41,6 +41,8 @@ SECRET_KEY = config("SECRET_KEY", default=get_random_secret_key())
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config("DEBUG", default=False, cast=bool)
 
+LOG_SETTINGS = config("LOG_SETTINGS", default=False, cast=bool)
+
 # ALLOWED_HOSTS defines which host/domain names the Django site can serve
 # Example values: ['knowsuchagency.com', 'www.knowsuchagency.com', 'localhost', '127.0.0.1']
 # Default '*' allows all hosts in development, but should be restricted in production
@@ -77,7 +79,6 @@ if CSRF_TRUSTED_ORIGINS and (
     CSRF_COOKIE_DOMAIN is None or SESSION_COOKIE_DOMAIN is None
 ):
     # Extract domain from first trusted origin (remove scheme)
-    import re
     from urllib.parse import urlparse
 
     for origin in CSRF_TRUSTED_ORIGINS:
@@ -115,7 +116,7 @@ SESSION_COOKIE_HTTPONLY = True
 # Set CSRF cookie age to 1 week (in seconds)
 CSRF_COOKIE_AGE = 604800
 
-if DEBUG:
+if DEBUG or LOG_SETTINGS:
     logger.info(f"CSRF_COOKIE_HTTPONLY: {CSRF_COOKIE_HTTPONLY}")
 
 LOG_REQUESTS = config("LOG_REQUESTS", default=False, cast=bool)
@@ -160,7 +161,7 @@ elif not (CSRF_COOKIE_DOMAIN and SESSION_COOKIE_DOMAIN):
         "CSRF_COOKIE_DOMAIN and SESSION_COOKIE_DOMAIN must be set in production"
     )
 
-if DEBUG:
+if DEBUG or LOG_SETTINGS:
     logger.info(f"CSRF_COOKIE_SECURE: {CSRF_COOKIE_SECURE}")
     logger.info(f"CSRF_COOKIE_SAMESITE: {CSRF_COOKIE_SAMESITE}")
     logger.info(f"SESSION_COOKIE_DOMAIN: {SESSION_COOKIE_DOMAIN}")
@@ -325,7 +326,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 # For development (allow all origins):
 CORS_ALLOW_ALL_ORIGINS = DEBUG
-if DEBUG:
+if DEBUG or LOG_SETTINGS:
     logger.info(f"CORS_ALLOW_ALL_ORIGINS: {CORS_ALLOW_ALL_ORIGINS}")
 
 # For production (specify allowed origins):
@@ -334,7 +335,7 @@ CORS_ALLOWED_ORIGINS = config(
 )
 # assume our frontend should be able to make POST requests and fetch content from its domain
 CORS_ALLOWED_ORIGINS += CSRF_TRUSTED_ORIGINS
-if DEBUG:
+if DEBUG or LOG_SETTINGS:
     logger.info(f"CORS_ALLOWED_ORIGINS: {CORS_ALLOWED_ORIGINS}")
 
 # If you need to allow credentials (cookies, authorization headers, etc.):
@@ -346,7 +347,7 @@ CORS_ALLOW_HEADERS = (
     "content-type",
     "x-csrftoken",
 )
-if DEBUG:
+if DEBUG or LOG_SETTINGS:
     logger.info(f"CORS_ALLOW_HEADERS: {CORS_ALLOW_HEADERS}")
 
 CORS_EXPOSE_HEADERS = [
@@ -354,7 +355,7 @@ CORS_EXPOSE_HEADERS = [
     "x-session-token",
     "x-csrftoken",
 ]
-if DEBUG:
+if DEBUG or LOG_SETTINGS:
     logger.info(f"CORS_EXPOSE_HEADERS: {CORS_EXPOSE_HEADERS}")
 
 # Auth settings

@@ -116,7 +116,6 @@ def remove_sample_data(apps, schema_editor):
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ("core", "0002_stockticker"),
     ]

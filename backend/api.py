@@ -1,26 +1,17 @@
 from datetime import date, timedelta
 from typing import List, Optional
-from ninja import NinjaAPI, Router, Schema
+from ninja import NinjaAPI, Router
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.http import JsonResponse
 
 from backend.core.models import StockTicker
+from backend.schemas import StockTickerOut
 
 api = NinjaAPI()
 
 v1 = Router()
 
 api.add_router("/v1", v1)
-
-
-class StockTickerOut(Schema):
-    symbol: str
-    company_name: str
-    price: float
-    change: float
-    percent_change: float
-    volume: int
-    date: date
 
 
 @v1.get("/add")

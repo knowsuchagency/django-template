@@ -10,7 +10,7 @@ def landing(request):
     return render(request, "core/landing.html")
 
 
-@login_required
 @route("/dashboard/")
+@login_required
 def dashboard(request):
     return render(request, "core/dashboard.html")

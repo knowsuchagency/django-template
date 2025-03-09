@@ -43,3 +43,7 @@ createsuperuser:
 # build theme and collect static files
 collectstatic:
     .venv/bin/python manage.py collectstatic --noinput
+
+# run tests
+test:
+    uv run python manage.py test backend.core.tests

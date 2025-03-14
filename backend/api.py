@@ -32,7 +32,7 @@ def add(request, a: int, b: int):
     return {"result": a + b}
 
 
-@v1.post("/hello")
+@v1.post("/greet")
 def greet(request, name: str = "world"):
     return {"message": f"Hello, {name}!"}
 

@@ -32,6 +32,11 @@ def add(request, a: int, b: int):
     return {"result": a + b}
 
 
+@v1.post("/hello")
+def greet(request, name: str = "world"):
+    return {"message": f"Hello, {name}!"}
+
+
 @v1.get("/stocks", response=List[StockTickerOut])
 def get_stocks(request, symbol: Optional[str] = None, days: int = 7):
     """

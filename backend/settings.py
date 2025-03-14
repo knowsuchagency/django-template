@@ -353,8 +353,8 @@ CORS_ALLOW_CREDENTIALS = True
 
 CORS_ALLOW_HEADERS = (
     *default_headers,
-    "X-Session-Token",
     "content-type",
+    "X-Session-Token",
     "X-CSRFToken",
 )
 if DEBUG or LOG_SETTINGS:
@@ -363,7 +363,7 @@ if DEBUG or LOG_SETTINGS:
 CORS_EXPOSE_HEADERS = [
     "content-type",
     "X-Session-Token",
-    "X-Session-Token",
+    "X-CSRFToken",
 ]
 if DEBUG or LOG_SETTINGS:
     logger.info(f"CORS_EXPOSE_HEADERS: {CORS_EXPOSE_HEADERS}")

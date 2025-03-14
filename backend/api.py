@@ -1,20 +1,33 @@
 from datetime import date, timedelta
 from typing import List, Optional
+
 from ninja import NinjaAPI, Router
+from ninja.security import django_auth
+from ninja.responses import Response
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.http import JsonResponse
+from django.middleware.csrf import get_token
 
 from backend.core.models import StockTicker
 from backend.schemas import StockTickerOut
 
-api = NinjaAPI()
+api = NinjaAPI(auth=django_auth, csrf=False)
 
 v1 = Router()
 
 api.add_router("/v1", v1)
 
+@v1.get("/csrf-token", auth=None)
+@ensure_csrf_cookie
+def get_csrf_token(request):
+    """
+    Endpoint to set CSRF cookie and return the token
+    """
+    token = get_token(request)
+    return Response({"token": token})
 
-@v1.get("/add")
+
+@v1.post("/add", auth=None)
 def add(request, a: int, b: int):
     return {"result": a + b}
 
@@ -36,10 +49,6 @@ def get_stocks(request, symbol: Optional[str] = None, days: int = 7):
     return queryset
 
 
-@v1.post("/set-csrf-token")
-@ensure_csrf_cookie
-def set_csrf_token(request):
-    return JsonResponse({"details": "CSRF cookie set"})
 
 
 @v1.get("/sentry-debug")

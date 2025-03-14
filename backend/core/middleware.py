@@ -131,7 +131,7 @@ class DomainSecurityMiddleware:
 
     def _log_domain_warning(self):
         """Log a warning at startup if domain settings are missing."""
-        if not settings.DEBUG and not (
+        if not (
             settings.CSRF_COOKIE_DOMAIN and settings.SESSION_COOKIE_DOMAIN
         ):
             logger.warning(
@@ -140,8 +140,7 @@ class DomainSecurityMiddleware:
             )
 
     def __call__(self, request: HttpRequest) -> HttpResponse:
-        # In production, if domains aren't set, raise an exception
-        if not settings.DEBUG and not (
+        if not (
             settings.CSRF_COOKIE_DOMAIN and settings.SESSION_COOKIE_DOMAIN
         ):
             raise ValueError(

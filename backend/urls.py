@@ -17,6 +17,7 @@ Including another URLconf
 
 from django.contrib import admin
 from django.urls import path, include
+from debug_toolbar.toolbar import debug_toolbar_urls
 
 from backend.core import views
 from .api import api
@@ -30,3 +31,4 @@ urlpatterns = [
 ]
 
 urlpatterns += views.route.patterns
+urlpatterns += debug_toolbar_urls()

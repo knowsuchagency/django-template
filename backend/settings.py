@@ -46,7 +46,7 @@ LOG_SETTINGS = config("LOG_SETTINGS", default=False, cast=bool)
 # ALLOWED_HOSTS defines which host/domain names the Django site can serve
 # Example values: ['knowsuchagency.com', 'www.knowsuchagency.com', 'localhost', '127.0.0.1']
 # Default '*' allows all hosts in development, but should be restricted in production
-ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="*", cast=parse_comma_separated_list)
+ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="", cast=parse_comma_separated_list)
 
 # CSRF_TRUSTED_ORIGINS defines the origins that are trusted for CSRF-protected requests
 # Example values: ['https://knowsuchagency.com', 'https://www.knowsuchagency.com']
@@ -102,14 +102,20 @@ if CSRF_TRUSTED_ORIGINS and not (CSRF_COOKIE_DOMAIN and SESSION_COOKIE_DOMAIN):
 
             break
 
+# Controls the value of the SameSite flag on the CSRF cookie
+# 'None' allows cross-site requests which is needed for API calls from different domains
 CSRF_COOKIE_SAMESITE = config("CSRF_COOKIE_SAMESITE", default="None", cast=str)
 
+# When True, the CSRF cookie will only be sent over HTTPS connections
+# Should be True in production for security
 CSRF_COOKIE_SECURE = config("CSRF_COOKIE_SECURE", default=True, cast=bool)
 
+# When True, JavaScript cannot access the CSRF cookie
+# Set to False to allow JavaScript frameworks to obtain the CSRF token
 CSRF_COOKIE_HTTPONLY = config("CSRF_COOKIE_HTTPONLY", default=False, cast=bool)
 
 # Set session cookie to be accessible via HTTP only (prevents JavaScript access)
-SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_HTTPONLY = False
 
 # Set CSRF cookie age to 1 week (in seconds)
 CSRF_COOKIE_AGE = 604800
@@ -135,24 +141,19 @@ if SENTRY_DSN:
 else:
     logger.info("No Glitchtip DSN provided, skipping Sentry initialization")
 
-if DEBUG:
-    if "*" not in ALLOWED_HOSTS:
-        ALLOWED_HOSTS += ["*"]
-    CSRF_COOKIE_DOMAIN = None
-    SESSION_COOKIE_DOMAIN = None
-    CSRF_TRUSTED_ORIGINS += [
-        "http://localhost:8000",
-        "http://localhost:8080",
-        "http://127.0.0.1:8000",
-        "http://127.0.0.1:8080",
-        "http://localhost:3000",
-        "http://127.0.0.1:3000",
-    ]
-    CORS_ALLOW_CREDENTIALS = True
-    CSRF_COOKIE_SECURE = False
-    CSRF_COOKIE_SAMESITE = "Lax"  # Use Lax instead of None in DEBUG mode
-    SESSION_COOKIE_SECURE = False
-    SESSION_COOKIE_SAMESITE = "Lax"
+SESSION_COOKIE_SAMESITE = config("SESSION_COOKIE_SAMESITE", default="None", cast=str)
+SESSION_COOKIE_SECURE = config("SESSION_COOKIE_SECURE", default=True, cast=bool)
+
+CSRF_TRUSTED_ORIGINS += [
+    "http://localhost:8000",
+    "http://localhost:8080",
+    "http://127.0.0.1:8000",
+    "http://127.0.0.1:8080",
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "https://*.lovable.app",
+    "https://*.ngrok-free.app",
+]
 
 
 if DEBUG or LOG_SETTINGS:
@@ -162,6 +163,8 @@ if DEBUG or LOG_SETTINGS:
     logger.info(f"CSRF_COOKIE_DOMAIN: {CSRF_COOKIE_DOMAIN}")
     logger.info(f"ALLOWED_HOSTS: {ALLOWED_HOSTS}")
     logger.info(f"CSRF_TRUSTED_ORIGINS: {CSRF_TRUSTED_ORIGINS}")
+    logger.info(f"SESSION_COOKIE_SAMESITE: {SESSION_COOKIE_SAMESITE}")
+    logger.info(f"SESSION_COOKIE_SECURE: {SESSION_COOKIE_SECURE}")
 
 INTERNAL_IPS = [
     "127.0.0.1",
@@ -187,6 +190,7 @@ INSTALLED_APPS = [
     "corsheaders",
     "django_browser_reload",
     "widget_tweaks",
+    "debug_toolbar",
     "backend.core",
 ]
 
@@ -207,10 +211,10 @@ INSTALLED_APPS += ALLAUTH_APPS
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
+    "debug_toolbar.middleware.DebugToolbarMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
-    "backend.core.middleware.WildcardCSRFMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
@@ -218,6 +222,9 @@ MIDDLEWARE = [
     "django_browser_reload.middleware.BrowserReloadMiddleware",
     "backend.core.middleware.DomainSecurityMiddleware",
 ]
+
+if not DEBUG:
+    MIDDLEWARE.append("backend.core.middleware.WildcardCSRFMiddleware")
 
 if DEBUG or LOG_REQUESTS:
     MIDDLEWARE.append("backend.core.middleware.RequestLoggingMiddleware")
@@ -321,7 +328,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # CORS settings
 
 # For development (allow all origins):
-CORS_ALLOW_ALL_ORIGINS = DEBUG
+CORS_ALLOW_ALL_ORIGINS = config("CORS_ALLOW_ALL_ORIGINS", default=False, cast=bool)
 if DEBUG or LOG_SETTINGS:
     logger.info(f"CORS_ALLOW_ALL_ORIGINS: {CORS_ALLOW_ALL_ORIGINS}")
 
@@ -329,6 +336,13 @@ if DEBUG or LOG_SETTINGS:
 CORS_ALLOWED_ORIGINS = config(
     "CORS_ALLOWED_ORIGINS", default="", cast=parse_comma_separated_list
 )
+
+CORS_ALLOWED_ORIGIN_REGEXES = config(
+    "CORS_ALLOWED_ORIGIN_REGEXES", default="", cast=parse_comma_separated_list
+)
+if DEBUG or LOG_SETTINGS:
+    logger.info(f"CORS_ALLOWED_ORIGIN_REGEXES: {CORS_ALLOWED_ORIGIN_REGEXES}")
+
 # assume our frontend should be able to make POST requests and fetch content from its domain
 CORS_ALLOWED_ORIGINS += CSRF_TRUSTED_ORIGINS
 if DEBUG or LOG_SETTINGS:
@@ -339,17 +353,17 @@ CORS_ALLOW_CREDENTIALS = True
 
 CORS_ALLOW_HEADERS = (
     *default_headers,
-    "x-session-token",
+    "X-Session-Token",
     "content-type",
-    "x-csrftoken",
+    "X-CSRFToken",
 )
 if DEBUG or LOG_SETTINGS:
     logger.info(f"CORS_ALLOW_HEADERS: {CORS_ALLOW_HEADERS}")
 
 CORS_EXPOSE_HEADERS = [
     "content-type",
-    "x-session-token",
-    "x-csrftoken",
+    "X-Session-Token",
+    "X-Session-Token",
 ]
 if DEBUG or LOG_SETTINGS:
     logger.info(f"CORS_EXPOSE_HEADERS: {CORS_EXPOSE_HEADERS}")
@@ -362,6 +376,12 @@ ACCOUNT_USERNAME_REQUIRED = False
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_LOGIN_ON_PASSWORD_RESET = True
 ACCOUNT_LOGIN_ON_EMAIL_CONFIRMATION = True
+
+# Disable email verification
+ACCOUNT_EMAIL_VERIFICATION = "none"
+ACCOUNT_CONFIRM_EMAIL_ON_GET = False
+ACCOUNT_EMAIL_CONFIRMATION_AUTHENTICATED_REDIRECT_URL = "/"
+ACCOUNT_EMAIL_CONFIRMATION_ANONYMOUS_REDIRECT_URL = "/"
 
 # Ensure django-allauth properly handles CSRF
 ACCOUNT_CSRF_COOKIE_NAME = "csrftoken"  # Match Django's default CSRF cookie name

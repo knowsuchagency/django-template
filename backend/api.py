@@ -5,7 +5,6 @@ from ninja import NinjaAPI, Router
 from ninja.security import django_auth
 from ninja.responses import Response
 from django.views.decorators.csrf import ensure_csrf_cookie
-from django.http import JsonResponse
 from django.middleware.csrf import get_token
 
 from backend.core.models import StockTicker
@@ -16,6 +15,7 @@ api = NinjaAPI(auth=django_auth, csrf=False)
 v1 = Router()
 
 api.add_router("/v1", v1)
+
 
 @v1.get("/csrf-token", auth=None)
 @ensure_csrf_cookie
@@ -52,8 +52,6 @@ def get_stocks(request, symbol: Optional[str] = None, days: int = 7):
         queryset = queryset.filter(symbol=symbol.upper())
 
     return queryset
-
-
 
 
 @v1.get("/sentry-debug")

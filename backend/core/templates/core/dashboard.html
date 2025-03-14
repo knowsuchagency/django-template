@@ -7,41 +7,45 @@
 {% endblock %}
 
 {% block content %}
-<div class="w-full">
-    <h2 class="text-3xl font-bold mb-4">Dashboard</h2>
-    <div class="card w-full bg-base-200 shadow-xl mb-6">
-        <div class="card-body">
-            <h2 class="card-title">Welcome, {{ user.username }}!</h2>
-            <p>This is your private dashboard. You can only see this page when logged in.</p>
-        </div>
-    </div>
+<section>
+    <header>
+        <h2>Dashboard</h2>
+    </header>
 
-    <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
-        <div class="card bg-base-200 shadow-xl">
-            <div class="card-body">
-                <h2 class="card-title">Stock Prices</h2>
-                <div class="form-control mb-4">
-                    <select id="stockSelector" class="select select-bordered w-full max-w-xs">
-                        <option value="">All Stocks</option>
-                        <!-- Options will be populated dynamically -->
-                    </select>
-                </div>
-                <div class="w-full h-64">
-                    <canvas id="stockChart"></canvas>
-                </div>
-            </div>
-        </div>
+    <article>
+        <header>
+            <h3>Welcome, {{ user.username }}!</h3>
+        </header>
+        <p>This is your private dashboard. You can only see this page when logged in.</p>
+    </article>
 
-        <div class="card bg-base-200 shadow-xl">
-            <div class="card-body">
-                <h2 class="card-title">Trading Volume</h2>
-                <div class="w-full h-64">
-                    <canvas id="volumeChart"></canvas>
-                </div>
+    <div class="grid">
+        <article>
+            <header>
+                <h3>Stock Prices</h3>
+            </header>
+            <div>
+                <label for="stockSelector">Select Stock</label>
+                <select id="stockSelector">
+                    <option value="">All Stocks</option>
+                    <!-- Options will be populated dynamically -->
+                </select>
             </div>
-        </div>
+            <div>
+                <canvas id="stockChart"></canvas>
+            </div>
+        </article>
+
+        <article>
+            <header>
+                <h3>Trading Volume</h3>
+            </header>
+            <div>
+                <canvas id="volumeChart"></canvas>
+            </div>
+        </article>
     </div>
-</div>
+</section>
 {% endblock %}
 
 {% block body_scripts %}

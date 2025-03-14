@@ -5,8 +5,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>{% block title %}My Site{% endblock %}</title>
-  <link href="https://cdn.jsdelivr.net/npm/daisyui@5" rel="stylesheet" type="text/css" />
-  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <!-- <link href="https://cdn.jsdelivr.net/npm/daisyui@5" rel="stylesheet" type="text/css" />
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script> -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
   <script>
     // Set theme based on user's system preference
     function setThemeFromSystemPreference() {
@@ -23,36 +24,27 @@
   {% block head_scripts %}{% endblock %}
 </head>
 
-<body class="min-h-screen">
-  <div class="navbar bg-base-300">
-    <div class="navbar-start">
-      <a class="btn btn-ghost normal-case text-xl" href="{% url 'landing' %}">My Site</a>
-    </div>
-    <div class="navbar-center">
-      <!-- Center content if needed -->
-    </div>
-    <div class="navbar-end">
-      <ul class="menu menu-horizontal px-1">
+<body>
+  <header class="container">
+    <nav>
+      <ul>
+        <li><strong><a href="{% url 'landing' %}">My Site</a></strong></li>
+      </ul>
+      <ul>
         {% if user.is_authenticated %}
-        <li>
-          <a href="{% url 'dashboard' %}">Dashboard</a>
-        </li>
-        <li>
-          <a href="{% url 'account_logout' %}">Logout</a>
-        </li>
+        <li><a href="{% url 'dashboard' %}">Dashboard</a></li>
+        <li><a href="{% url 'account_logout' %}">Logout</a></li>
         {% else %}
-        <li>
-          <a href="{% url 'account_login' %}">Login</a>
-        </li>
-        <li>
-          <a href="{% url 'account_signup' %}">Sign Up</a>
-        </li>
+        <li><a href="{% url 'account_login' %}">Login</a></li>
+        <li><a href="{% url 'account_signup' %}">Sign Up</a></li>
         {% endif %}
       </ul>
-    </div>
-  </div>
+    </nav>
+  </header>
 
-  <main class="container mx-auto px-4 py-8">{% block content %} {% endblock %}</main>
+  <main class="container">
+    {% block content %} {% endblock %}
+  </main>
 
   {% block body_scripts %}{% endblock %}
 </body>

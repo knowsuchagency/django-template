@@ -3,22 +3,18 @@
 {% block title %}Welcome{% endblock %}
 
 {% block content %}
-<div class="hero min-h-[70vh]">
-    <div class="hero-content text-center">
-        <div class="max-w-md">
-            <h1 class="text-5xl font-bold">Welcome to My Site</h1>
-            <p class="py-6">
-                This is a simple demo site showing how to integrate Django with authentication and DaisyUI.
-            </p>
-            <div class="flex justify-center gap-2">
-                {% if user.is_authenticated %}
-                <a href="{% url 'dashboard' %}" class="btn btn-primary">Go to Dashboard</a>
-                {% else %}
-                <a href="{% url 'account_login' %}" class="btn btn-primary">Login</a>
-                <a href="{% url 'account_signup' %}" class="btn btn-outline">Sign Up</a>
-                {% endif %}
-            </div>
-        </div>
+<section class="container">
+    <hgroup>
+        <h1>Welcome to My Site</h1>
+        <p>This is a simple demo site showing how to integrate Django with authentication and PicoCSS.</p>
+    </hgroup>
+    <div class="grid">
+        {% if user.is_authenticated %}
+        <a href="{% url 'dashboard' %}" role="button">Go to Dashboard</a>
+        {% else %}
+        <a href="{% url 'account_login' %}" role="button">Login</a>
+        <a href="{% url 'account_signup' %}" role="button" class="secondary outline">Sign Up</a>
+        {% endif %}
     </div>
-</div>
+</section>
 {% endblock %}

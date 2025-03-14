@@ -2,7 +2,7 @@ Use `uv` as the package manager. Any terminal command using python should start 
 
 `just` is the command runner.
 
-We use daisyui version 5 for the UI, which is based on tailwind version 4.
+We use picocss v2 for template styling.
 
 django-widget-tweaks is used to customize django form widgets.
 

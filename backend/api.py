@@ -2,7 +2,7 @@ from datetime import date, timedelta
 from typing import List, Optional
 
 from ninja import NinjaAPI, Router
-from ninja.security import django_auth
+from ninja.security.apikey import APIKeyCookie
 from ninja.responses import Response
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.middleware.csrf import get_token
@@ -10,7 +10,21 @@ from django.middleware.csrf import get_token
 from backend.core.models import StockTicker
 from backend.schemas import StockTickerOut
 
-api = NinjaAPI(auth=django_auth, csrf=False)
+
+class SessionAuthWithoutCSRF(APIKeyCookie):
+    """
+    Authentication class that uses Django's session authentication but doesn't enforce CSRF checks.
+    """
+
+    param_name = "session"
+
+    def authenticate(self, request, key=None):
+        if request.user and request.user.is_authenticated:
+            return request.user
+        return None
+
+
+api = NinjaAPI(auth=SessionAuthWithoutCSRF())
 
 v1 = Router()
 

@@ -31,6 +31,10 @@ def get_csrf_token(request):
 def add(request, a: int, b: int):
     return {"result": a + b}
 
+@v1.post("/hello")
+def hello(request):
+    return {"message": "Hello, world!"}
+
 
 @v1.post("/greet")
 def greet(request, name: str = "world"):

@@ -46,4 +46,4 @@ collectstatic:
 
 # run tests
 test:
-    uv run python manage.py test backend.core.tests
+    uv run python manage.py test src.core.tests

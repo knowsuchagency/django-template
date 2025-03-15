@@ -28,7 +28,7 @@ def dashboard(request):
 ...
 
 ```python
-from backend.core import views
+from src.core import views
 
 ...
 

@@ -7,7 +7,7 @@ from ninja.responses import Response
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.middleware.csrf import get_token
 
-from backend.core.models import StockTicker
+from src.core.models import StockTicker
 
 from .schemas import StockTickerOut, AddOutput, GreetOutput
 

@@ -163,7 +163,7 @@ INSTALLED_APPS = [
     "django_browser_reload",
     "widget_tweaks",
     "debug_toolbar",
-    "backend.core",
+    "src.core",
 ]
 
 ALLAUTH_APPS = [
@@ -195,10 +195,10 @@ MIDDLEWARE = [
 ]
 
 if not DEBUG:
-    MIDDLEWARE.append("backend.core.middleware.WildcardCSRFMiddleware")
+    MIDDLEWARE.append("src.core.middleware.WildcardCSRFMiddleware")
 
 if DEBUG or LOG_REQUESTS:
-    MIDDLEWARE.append("backend.core.middleware.RequestLoggingMiddleware")
+    MIDDLEWARE.append("src.core.middleware.RequestLoggingMiddleware")
 
 CACHES = {
     "default": {
@@ -209,7 +209,7 @@ CACHES = {
     }
 }
 
-ROOT_URLCONF = "backend.urls"
+ROOT_URLCONF = "src.urls"
 
 TEMPLATES = [
     {
@@ -227,7 +227,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = "backend.wsgi.application"
+WSGI_APPLICATION = "src.wsgi.application"
 
 
 # Database

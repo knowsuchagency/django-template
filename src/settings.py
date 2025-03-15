@@ -114,7 +114,7 @@ else:
     logger.info("No Glitchtip DSN provided, skipping Sentry initialization")
 
 SESSION_COOKIE_SAMESITE = config("SESSION_COOKIE_SAMESITE", default="Lax", cast=str)
-SESSION_COOKIE_SECURE = config("SESSION_COOKIE_SECURE", default=False, cast=bool)
+SESSION_COOKIE_SECURE = config("SESSION_COOKIE_SECURE", default=DEBUG, cast=bool)
 
 CSRF_TRUSTED_ORIGINS += [
     "http://localhost:8000",

@@ -24,7 +24,7 @@ def get_csrf_token(request):
     Endpoint to set CSRF cookie and return the token
     """
     token = get_token(request)
-    return Response({"token": token})
+    return Response(token)
 
 
 @v1.post("/add", auth=None)

@@ -351,6 +351,15 @@ if DEBUG or LOG_SETTINGS:
 # If you need to allow credentials (cookies, authorization headers, etc.):
 CORS_ALLOW_CREDENTIALS = True
 
+CORS_ALLOW_METHODS = (
+    "DELETE",
+    "GET",
+    "OPTIONS",
+    "PATCH",
+    "POST",
+    "PUT",
+)
+
 CORS_ALLOW_HEADERS = (
     *default_headers,
     "content-type",

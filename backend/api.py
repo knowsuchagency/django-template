@@ -10,7 +10,7 @@ from django.middleware.csrf import get_token
 from backend.core.models import StockTicker
 from backend.schemas import StockTickerOut
 
-api = NinjaAPI(auth=django_auth, csrf=False)
+api = NinjaAPI(auth=django_auth)
 
 v1 = Router()
 

@@ -76,7 +76,7 @@ SESSION_COOKIE_DOMAIN = config(
 
 # Controls the value of the SameSite flag on the CSRF cookie
 # 'None' allows cross-site requests which is needed for API calls from different domains
-CSRF_COOKIE_SAMESITE = config("CSRF_COOKIE_SAMESITE", default="None", cast=str)
+CSRF_COOKIE_SAMESITE = config("CSRF_COOKIE_SAMESITE", default="Lax", cast=str)
 
 # When True, the CSRF cookie will only be sent over HTTPS connections
 # Should be True in production for security
@@ -113,8 +113,8 @@ if SENTRY_DSN:
 else:
     logger.info("No Glitchtip DSN provided, skipping Sentry initialization")
 
-SESSION_COOKIE_SAMESITE = config("SESSION_COOKIE_SAMESITE", default="None", cast=str)
-SESSION_COOKIE_SECURE = config("SESSION_COOKIE_SECURE", default=True, cast=bool)
+SESSION_COOKIE_SAMESITE = config("SESSION_COOKIE_SAMESITE", default="Lax", cast=str)
+SESSION_COOKIE_SECURE = config("SESSION_COOKIE_SECURE", default=False, cast=bool)
 
 CSRF_TRUSTED_ORIGINS += [
     "http://localhost:8000",

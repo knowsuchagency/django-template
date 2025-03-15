@@ -187,6 +187,7 @@ MIDDLEWARE = [
     "django.contrib.sessions.middleware.SessionMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
@@ -194,8 +195,8 @@ MIDDLEWARE = [
     "django_browser_reload.middleware.BrowserReloadMiddleware",
 ]
 
-if not DEBUG:
-    MIDDLEWARE.append("src.core.middleware.WildcardCSRFMiddleware")
+# if not DEBUG:
+#     MIDDLEWARE.append("src.core.middleware.WildcardCSRFMiddleware")
 
 if DEBUG or LOG_REQUESTS:
     MIDDLEWARE.append("src.core.middleware.RequestLoggingMiddleware")

@@ -11,3 +11,11 @@ class StockTickerOut(Schema):
     percent_change: float
     volume: int
     date: date
+
+
+class AddOutput(Schema):
+    result: int
+
+
+class GreetOutput(Schema):
+    message: str

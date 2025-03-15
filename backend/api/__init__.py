@@ -8,7 +8,8 @@ from django.views.decorators.csrf import ensure_csrf_cookie
 from django.middleware.csrf import get_token
 
 from backend.core.models import StockTicker
-from backend.schemas import StockTickerOut
+
+from .schemas import StockTickerOut, AddOutput, GreetOutput
 
 api = NinjaAPI(auth=django_auth)
 
@@ -27,12 +28,12 @@ def get_csrf_token(request):
     return Response({"token": token})
 
 
-@v1.post("/add", auth=None)
+@v1.post("/add", auth=None, response=AddOutput)
 def add(request, a: int, b: int):
     return {"result": a + b}
 
 
-@v1.post("/greet")
+@v1.post("/greet", response=GreetOutput)
 def greet(request, name: str = "world"):
     return {"message": f"Hello, {name}!"}
 

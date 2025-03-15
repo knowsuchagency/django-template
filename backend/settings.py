@@ -74,34 +74,6 @@ SESSION_COOKIE_DOMAIN = config(
     cast=lambda x: str(x) if x else None,
 )
 
-# Auto-derive cookie domains from CSRF_TRUSTED_ORIGINS if not explicitly set
-if CSRF_TRUSTED_ORIGINS and not (CSRF_COOKIE_DOMAIN and SESSION_COOKIE_DOMAIN):
-    # Extract domain from first trusted origin (remove scheme)
-    from urllib.parse import urlparse
-
-    for origin in CSRF_TRUSTED_ORIGINS:
-        parsed_url = urlparse(origin)
-        domain = parsed_url.netloc
-
-        # Handle wildcard domains (convert *.example.com to .example.com)
-        domain = domain.replace("*.", ".")
-
-        if domain:
-            # Set cookie domains if not explicitly configured
-            if CSRF_COOKIE_DOMAIN is None:
-                CSRF_COOKIE_DOMAIN = domain
-                logger.warning(
-                    f"Auto-set CSRF_COOKIE_DOMAIN to {domain} from CSRF_TRUSTED_ORIGINS"
-                )
-
-            if SESSION_COOKIE_DOMAIN is None:
-                SESSION_COOKIE_DOMAIN = domain
-                logger.warning(
-                    f"Auto-set SESSION_COOKIE_DOMAIN to {domain} from CSRF_TRUSTED_ORIGINS"
-                )
-
-            break
-
 # Controls the value of the SameSite flag on the CSRF cookie
 # 'None' allows cross-site requests which is needed for API calls from different domains
 CSRF_COOKIE_SAMESITE = config("CSRF_COOKIE_SAMESITE", default="None", cast=str)
@@ -220,7 +192,6 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "allauth.account.middleware.AccountMiddleware",
     "django_browser_reload.middleware.BrowserReloadMiddleware",
-    "backend.core.middleware.DomainSecurityMiddleware",
 ]
 
 if not DEBUG:

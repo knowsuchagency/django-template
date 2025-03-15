@@ -113,39 +113,3 @@ class WildcardCSRFMiddleware(CsrfViewMiddleware):
 
         # Otherwise, use the standard CSRF validation
         return super().process_view(request, callback, callback_args, callback_kwargs)
-
-
-class DomainSecurityMiddleware:
-    """
-    Middleware that checks if CSRF_COOKIE_DOMAIN and SESSION_COOKIE_DOMAIN
-    are properly set in production environments.
-
-    Instead of raising an exception at startup which breaks builds,
-    this middleware raises the exception at runtime when processing a request.
-    """
-
-    def __init__(self, get_response):
-        self.get_response = get_response
-        # Log a warning at startup, but don't fail the build
-        self._log_domain_warning()
-
-    def _log_domain_warning(self):
-        """Log a warning at startup if domain settings are missing."""
-        if not (
-            settings.CSRF_COOKIE_DOMAIN and settings.SESSION_COOKIE_DOMAIN
-        ):
-            logger.warning(
-                "SECURITY WARNING: CSRF_COOKIE_DOMAIN and/or SESSION_COOKIE_DOMAIN "
-                "are not set in production. This will raise an exception during request processing."
-            )
-
-    def __call__(self, request: HttpRequest) -> HttpResponse:
-        if not (
-            settings.CSRF_COOKIE_DOMAIN and settings.SESSION_COOKIE_DOMAIN
-        ):
-            raise ValueError(
-                "CSRF_COOKIE_DOMAIN and SESSION_COOKIE_DOMAIN must be set in production"
-            )
-
-        response = self.get_response(request)
-        return response

@@ -1,17 +1,31 @@
 from datetime import date, timedelta
 from typing import List, Optional
 
-from ninja import NinjaAPI, Router
-from ninja.security import django_auth
-from ninja.responses import Response
-from django.views.decorators.csrf import ensure_csrf_cookie
+from django.conf import settings
 from django.middleware.csrf import get_token
+from django.views.decorators.csrf import ensure_csrf_cookie
+from ninja import NinjaAPI, Router
+from ninja.responses import Response
+from ninja.security import django_auth
 
 from src.core.models import StockTicker
 
-from .schemas import StockTickerOut, AddOutput, GreetOutput
+from .schemas import AddOutput, GreetOutput, StockTickerOut
 
-api = NinjaAPI(auth=django_auth)
+
+def simple_auth(request):
+    """
+    Custom authentication function that uses Django's session to authenticate users.
+    Returns the authenticated user or None.
+
+    This is exists so we can use our app within Lovable's preview environment.
+    """
+    return request.user and request.user.is_authenticated
+
+
+api = NinjaAPI(
+    auth=simple_auth if settings.DEBUG else django_auth,
+)
 
 v1 = Router()
 

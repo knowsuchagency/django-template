@@ -55,3 +55,9 @@ Use `just <command>` to run the following commands:
 - `collectstatic`: Collect static files
 
 For a full list of commands, run `just list`.
+
+## Notes
+
+To use Lovable's built-in preview window, you'll need to note the request's actual unique origin i.e. `https://id-preview--d9666ffa-29be-443f-9013-25d5cd5c1beb.lovable.app` and add it to `CSRF_TRUSTED_ORIGINS`. 
+
+It won't be what you might expect i.e. `https://preview--django-template-frontend-67.lovable.app`.

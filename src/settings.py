@@ -87,7 +87,7 @@ CSRF_COOKIE_SECURE = config("CSRF_COOKIE_SECURE", default=True, cast=bool)
 CSRF_COOKIE_HTTPONLY = config("CSRF_COOKIE_HTTPONLY", default=False, cast=bool)
 
 # Set session cookie to be accessible via HTTP only (prevents JavaScript access)
-SESSION_COOKIE_HTTPONLY = False
+SESSION_COOKIE_HTTPONLY = config("SESSION_COOKIE_HTTPONLY", default=False, cast=bool)
 
 # Set CSRF cookie age to 1 week (in seconds)
 CSRF_COOKIE_AGE = 604800

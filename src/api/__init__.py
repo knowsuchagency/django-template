@@ -53,15 +53,12 @@ def greet(request, name: str = "world"):
 
 
 @v1.get("/stocks", response=List[StockTickerOut])
-def get_stocks(request, symbol: Optional[str] = None, days: int = 7):
+def get_stocks(request, symbol: Optional[str] = None):
     """
     Get stock ticker data.
     If symbol is provided, returns data for that specific stock.
-    Days parameter controls how many days of historical data to return (default 7).
     """
-    start_date = date.today() - timedelta(days=days - 1)
-
-    queryset = StockTicker.objects.filter(date__gte=start_date)
+    queryset = StockTicker.objects
 
     if symbol:
         queryset = queryset.filter(symbol=symbol.upper())

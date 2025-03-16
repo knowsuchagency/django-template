@@ -6,11 +6,12 @@ services:
       - "${BACKEND_PORT:-8000}:8000"
     environment:
       DATABASE_URL: ${DATABASE_URL:-postgresql://postgres:postgres@postgres:5432/postgres}
-      CSRF_COOKIE_DOMAIN: ${CSRF_COOKIE_DOMAIN}
-      SESSION_COOKIE_DOMAIN: ${SESSION_COOKIE_DOMAIN}
       CSRF_TRUSTED_ORIGINS: ${CSRF_TRUSTED_ORIGINS}
-      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS}
-      DEBUG: ${DEBUG:-false}
+      SENTRY_DSN: ${SENTRY_DSN}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      AWS_REGION: ${AWS_REGION:-us-east-2}
+      DEBUG: ${DEBUG:-true}
       LOG_REQUESTS: ${LOG_REQUESTS:-true}
     depends_on:
       - postgres

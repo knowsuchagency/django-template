@@ -15,10 +15,9 @@ from .schemas import AddOutput, GreetOutput, StockTickerOut
 
 def simple_auth(request):
     """
-    Custom authentication function that uses Django's session to authenticate users.
-    Returns the authenticated user or None.
-
     This is exists so we can use our app within Lovable's preview environment.
+
+    Make sure to add the request's actual unique origin i.e. `https://id-preview--d9666ffa-29be-443f-9013-25d5cd5c1beb.lovable.app` to `CSRF_TRUSTED_ORIGINS`.
     """
     return request.user and request.user.is_authenticated
 

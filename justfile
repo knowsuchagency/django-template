@@ -15,8 +15,8 @@ init:
     echo "installing dependencies"
     uv sync
     if [ ! -f .env ]; then
-        echo "creating .env file with secret key"
-        echo "SECRET_KEY=$(openssl rand -hex 32)" >> .env
+        echo "creating .env file from template"
+        cp .env.template .env
     fi
 
 # run development server

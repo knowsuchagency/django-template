@@ -383,9 +383,9 @@ AWS_DEFAULT_REGION = os.environ["AWS_DEFAULT_REGION"] = config(
 DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL", default="noreply@knowsuchagency.com")
 
 # Authentication settings
-LOGIN_REDIRECT_URL = "/"  # Redirect to landing page after login
-LOGOUT_REDIRECT_URL = "/"  # Redirect to landing page after logout
-LOGIN_URL = "/accounts/login/"  # Where to redirect if login is required
+LOGIN_REDIRECT_URL = config("LOGIN_REDIRECT_URL", default="/")    # Redirect to landing page after login
+LOGOUT_REDIRECT_URL = config("LOGOUT_REDIRECT_URL", default="/")  # Redirect to landing page after logout
+LOGIN_URL = config("LOGIN_URL", default="/accounts/login/")  # Where to redirect if login is required
 
 # Security settings
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")

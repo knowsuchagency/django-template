@@ -17,6 +17,7 @@ Before you begin, ensure you have the following installed:
 - Python 3.12
 - [uv](https://github.com/astral-sh/uv) (Python package manager)
 - [just](https://github.com/casey/just) (command runner)
+- [onepassword cli](https://developer.1password.com/docs/cli/get-started/) (onepassword cli)
 
 ## Installation
 

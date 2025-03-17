@@ -8,16 +8,18 @@ format:
     uvx ruff format
 
 # initialize development
-init:
+init schema:
     #!/bin/zsh
     echo "creating virtual environment"
     uv venv -p 3.12
     echo "installing dependencies"
     uv sync
-    if [ ! -f .env ]; then
-        echo "creating .env file from template"
-        cp .env.template .env
-    fi
+    echo "creating .env file from template"
+    op inject -i .env.template -o .env
+    # replace $schema with the schema name
+    sed -i '' "s/\$schema/{{schema}}/g" .env
+    cat .env
+    direnv allow
 
 # run development server
 runserver:

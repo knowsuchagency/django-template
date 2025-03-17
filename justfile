@@ -18,6 +18,8 @@ init schema:
     op inject -i .env.template -o .env
     # replace $schema with the schema name
     sed -i '' "s/\$schema/{{schema}}/g" .env
+    # replace shared\ with shared in .env
+    sed -i '' "s/shared\\\\/shared/g" .env
     cat .env
     direnv allow
 

@@ -23,8 +23,3 @@ dependencies = [
     "django-unfold>=0.50.0",
     "django-debug-toolbar>=5.0.1",
 ]
-
-[dependency-groups]
-dev = [
-    "pywatchman>=2.0.0",
-]

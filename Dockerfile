@@ -1,4 +1,4 @@
-FROM python:3.12-slim as base
+FROM python:3.12-slim AS base
 
 WORKDIR /app
 
@@ -20,10 +20,10 @@ COPY src/ ./src/
 COPY manage.py ./
 
 # Worker stage
-FROM base as worker
+FROM base AS worker
 CMD ["uv", "run", "python", "manage.py", "rqworker", "default"]
 
 # Web stage
-FROM base as web
+FROM base AS web
 RUN uv run python manage.py collectstatic --noinput
 CMD ["uv", "run", "granian", "--host", "0.0.0.0", "--port", "8000", "--interface", "wsgi", "src.wsgi:application"]

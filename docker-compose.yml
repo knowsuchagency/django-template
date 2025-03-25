@@ -14,7 +14,7 @@ services:
       AWS_REGION: ${AWS_REGION:-us-east-2}
       DEBUG: ${DEBUG:-true}
       LOG_REQUESTS: ${LOG_REQUESTS:-true}
-      REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379}
     depends_on:
       - postgres
       - redis
@@ -25,15 +25,13 @@ services:
       target: worker
     environment:
       DATABASE_URL: ${DATABASE_URL:-postgresql://postgres:postgres@postgres:5432/postgres}
-      REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379}
     depends_on:
       - postgres
       - redis
 
   redis:
     image: redis:7-alpine
-    ports:
-      - "6379:6379"
 
   postgres:
     image: postgres:16
@@ -41,8 +39,6 @@ services:
       POSTGRES_PASSWORD: postgres
       POSTGRES_USER: postgres
       POSTGRES_DB: postgres
-    ports:
-      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
 

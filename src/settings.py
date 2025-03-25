@@ -206,20 +206,16 @@ MIDDLEWARE = [
     "django_browser_reload.middleware.BrowserReloadMiddleware",
 ]
 
-# if not DEBUG:
-#     MIDDLEWARE.append("src.core.middleware.WildcardCSRFMiddleware")
-
 if LOG_REQUESTS:
     MIDDLEWARE.append("src.core.middleware.RequestLoggingMiddleware")
 
 REDIS_URL = config("REDIS_URL", default="redis://localhost:6379")
-LOGICAL_PARTITION = 0 if not DEBUG else 1
 CACHE_PREFIX = config("CACHE_PREFIX", default="django_cache")
 
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": f"{REDIS_URL}/{LOGICAL_PARTITION}",
+        "LOCATION": f"{REDIS_URL}/0",
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
             "COMPRESSOR": "django_redis.compressors.zlib.ZlibCompressor",

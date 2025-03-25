@@ -7,6 +7,8 @@ from django_redis import get_redis_connection
 from django_rq import job
 from ninja import Router
 
+from .schemas import JobResult
+
 
 router = Router()
 
@@ -20,13 +22,14 @@ def test_rq_job():
     pprint(result)
     return result
 
+
 @router.post("/test", auth=None, summary="Submit Test Job")
 def test_rq(request):
     job = test_rq_job.delay()
     return {"message": "Job queued", "job_id": job.id}
 
 
-@router.get("/result", auth=None, summary="Get Job Result")
+@router.get("/result", response=JobResult, summary="Get Job Result")
 def result(request, job_id: str):
     connection = get_redis_connection()
     job = rq.job.Job.fetch(job_id, connection=connection)
@@ -34,4 +37,4 @@ def result(request, job_id: str):
     result = job.result
     if isinstance(result, Exception):
         result = str(result)
-    return {"job_id": job.id, "status": status, "result": result}
+    return JobResult(job_id=job.id, status=status, result=result)

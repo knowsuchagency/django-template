@@ -6,7 +6,7 @@ from django.contrib.auth import get_user_model
 from datetime import date
 from django_redis import get_redis_connection
 
-from src.core.models import StockTicker
+from core.models import StockTicker
 
 User = get_user_model()
 

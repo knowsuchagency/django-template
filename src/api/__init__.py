@@ -7,8 +7,10 @@ from django.views.decorators.csrf import ensure_csrf_cookie
 from ninja import NinjaAPI, Router
 from ninja.responses import Response
 from ninja.security import django_auth
+from django_rq import job
 
-from src.core.models import StockTicker
+from core.models import StockTicker
+from utils import test_rq_job
 
 from .schemas import AddOutput, GreetOutput, StockTickerOut
 
@@ -68,3 +70,13 @@ def get_stocks(request, symbol: Optional[str] = None):
 @v1.get("/sentry-debug")
 def sentry_debug(request):
     raise Exception("This is a test exception for Sentry")
+
+
+
+
+@v1.get("/test-rq", auth=None)
+def test_rq(request):
+
+    test_rq_job.delay()
+
+    return Response({"message": "Job queued"})

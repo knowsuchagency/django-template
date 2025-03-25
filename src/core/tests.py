@@ -1,7 +1,4 @@
-from django.test import TestCase, override_settings, Client
-from django.http import HttpResponse
-from django.views.decorators.csrf import csrf_protect, ensure_csrf_cookie
-from django.urls import path
+from django.test import TestCase, Client
 from django.contrib.auth import get_user_model
 from datetime import date
 from django_redis import get_redis_connection
@@ -86,7 +83,7 @@ class APITests(TestCase):
 
     def test_add_endpoint(self):
         """Test add numbers endpoint"""
-        response = self.client.post("/api/v1/add?a=5&b=3")
+        response = self.client.post("/api/v1/example/add?a=5&b=3")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()["result"], 8)
 
@@ -96,12 +93,12 @@ class APITests(TestCase):
         self.client.login(username="testuser", password="testpass123")
 
         # Test default greeting
-        response = self.client.post("/api/v1/greet")
+        response = self.client.post("/api/v1/example/greet")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()["message"], "Hello, world!")
 
         # Test custom greeting
-        response = self.client.post("/api/v1/greet?name=Alice")
+        response = self.client.post("/api/v1/example/greet?name=Alice")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()["message"], "Hello, Alice!")
 
@@ -110,13 +107,13 @@ class APITests(TestCase):
         self.client.login(username="testuser", password="testpass123")
 
         # Test getting all stocks
-        response = self.client.get("/api/v1/stocks")
+        response = self.client.get("/api/v1/example/stocks")
         self.assertEqual(response.status_code, 200)
         data = response.json()
         self.assertEqual(len(data), 2)
 
         # Test getting specific stock
-        response = self.client.get("/api/v1/stocks?symbol=AAPL")
+        response = self.client.get("/api/v1/example/stocks?symbol=AAPL")
         self.assertEqual(response.status_code, 200)
         data = response.json()
         self.assertEqual(len(data), 1)

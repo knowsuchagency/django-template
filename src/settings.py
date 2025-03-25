@@ -21,6 +21,8 @@ from dj_database_url import parse as db_url
 from django.core.management.utils import get_random_secret_key
 from loguru import logger
 from sentry_sdk.integrations.django import DjangoIntegration
+from sentry_sdk.integrations.redis import RedisIntegration
+from sentry_sdk.integrations.rq import RqIntegration
 
 
 def parse_comma_separated_list(string, sep=","):
@@ -103,7 +105,7 @@ if SENTRY_DSN:
     glitchtip_environment = "development" if DEBUG else "production"
     sentry_sdk.init(
         dsn=SENTRY_DSN,
-        integrations=[DjangoIntegration()],
+        integrations=[DjangoIntegration(), RedisIntegration(), RqIntegration(),],
         auto_session_tracking=False,
         traces_sample_rate=0.01,
         release="1.0.0",
@@ -163,6 +165,7 @@ INSTALLED_APPS = [
     "django_browser_reload",
     "widget_tweaks",
     "debug_toolbar",
+    "django_rq",
     "src.core",
 ]
 
@@ -201,14 +204,36 @@ MIDDLEWARE = [
 if LOG_REQUESTS:
     MIDDLEWARE.append("src.core.middleware.RequestLoggingMiddleware")
 
+REDIS_URL = config("REDIS_URL", default="redis://localhost:6379")
+CACHE_PREFIX = config("CACHE_PREFIX", default="django_cache")
+
 CACHES = {
     "default": {
-        "BACKEND": "django.core.cache.backends.db.DatabaseCache",
-        "LOCATION": "django_cache",
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": f"{REDIS_URL}/0",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+            "COMPRESSOR": "django_redis.compressors.zlib.ZlibCompressor",
+        },
         # set the cache timeout to 30 days
         "TIMEOUT": 60 * 60 * 24 * 30,
+        "KEY_PREFIX": CACHE_PREFIX,
     }
 }
+
+RQ_QUEUES = {
+    "default": {
+        "USE_REDIS_CACHE": "default",
+    }
+}
+
+SESSION_ENGINE = "django.contrib.sessions.backends.cache"
+SESSION_CACHE_ALIAS = "default"
+
+DJANGO_REDIS_IGNORE_EXCEPTIONS = config("DJANGO_REDIS_IGNORE_EXCEPTIONS", default=True, cast=bool)
+DJANGO_REDIS_LOG_IGNORED_EXCEPTIONS = config("DJANGO_REDIS_LOG_IGNORED_EXCEPTIONS", default=True, cast=bool)
+
+RQ_SHOW_ADMIN_LINK = True
 
 ROOT_URLCONF = "src.urls"
 

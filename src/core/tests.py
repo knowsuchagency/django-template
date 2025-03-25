@@ -4,8 +4,9 @@ from django.views.decorators.csrf import csrf_protect, ensure_csrf_cookie
 from django.urls import path
 from django.contrib.auth import get_user_model
 from datetime import date
+from django_redis import get_redis_connection
 
-from src.core.models import StockTicker
+from core.models import StockTicker
 
 User = get_user_model()
 
@@ -18,6 +19,9 @@ class ViewTests(TestCase):
             password="testpass123",
             email="test@example.com",  # Required for custom User model
         )
+
+    def tearDown(self):
+        get_redis_connection("default").flushall()
 
     def test_landing_page(self):
         """Test that landing page is accessible"""
@@ -70,6 +74,9 @@ class APITests(TestCase):
             market_cap=3120000000000,
             date=date.today(),
         )
+
+    def tearDown(self):
+        get_redis_connection("default").flushall()
 
     def test_csrf_token_endpoint(self):
         """Test CSRF token endpoint"""

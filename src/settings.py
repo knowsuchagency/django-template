@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 import os
 from functools import partial
 from pathlib import Path
+import platform
 
 import sentry_sdk
 from corsheaders.defaults import default_headers
@@ -28,6 +29,9 @@ from sentry_sdk.integrations.rq import RqIntegration
 def parse_comma_separated_list(string, sep=","):
     """Parse a comma-separated string into a list, filtering out empty strings."""
     return [s for s in string.split(sep) if s]
+
+
+RUNNING_ON_MAC = platform.system() == "Darwin"
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -94,25 +98,29 @@ SESSION_COOKIE_HTTPONLY = config("SESSION_COOKIE_HTTPONLY", default=False, cast=
 # Set CSRF cookie age to 1 week (in seconds)
 CSRF_COOKIE_AGE = 604800
 
-if DEBUG or LOG_SETTINGS:
+if LOG_SETTINGS:
     logger.info(f"CSRF_COOKIE_HTTPONLY: {CSRF_COOKIE_HTTPONLY}")
 
 LOG_REQUESTS = config("LOG_REQUESTS", default=False, cast=bool)
 
 SENTRY_DSN = config("SENTRY_DSN", default="")
 
-if SENTRY_DSN:
+if SENTRY_DSN and not RUNNING_ON_MAC:
     glitchtip_environment = "development" if DEBUG else "production"
     sentry_sdk.init(
         dsn=SENTRY_DSN,
-        integrations=[DjangoIntegration(), RedisIntegration(), RqIntegration(),],
+        integrations=[
+            DjangoIntegration(),
+            RedisIntegration(),
+            RqIntegration(),
+        ],
         auto_session_tracking=False,
         traces_sample_rate=0.01,
         release="1.0.0",
         environment=glitchtip_environment,
     )
     logger.info(f"Sentry initialized for environment: {glitchtip_environment}")
-else:
+elif not SENTRY_DSN:
     logger.info("No Glitchtip DSN provided, skipping Sentry initialization")
 
 SESSION_COOKIE_SAMESITE = config("SESSION_COOKIE_SAMESITE", default="None", cast=str)
@@ -130,7 +138,7 @@ CSRF_TRUSTED_ORIGINS += [
 ]
 
 
-if DEBUG or LOG_SETTINGS:
+if LOG_SETTINGS:
     logger.info(f"CSRF_COOKIE_SECURE: {CSRF_COOKIE_SECURE}")
     logger.info(f"CSRF_COOKIE_SAMESITE: {CSRF_COOKIE_SAMESITE}")
     logger.info(f"SESSION_COOKIE_DOMAIN: {SESSION_COOKIE_DOMAIN}")
@@ -232,8 +240,12 @@ RQ_QUEUES = {
 SESSION_ENGINE = "django.contrib.sessions.backends.cache"
 SESSION_CACHE_ALIAS = "default"
 
-DJANGO_REDIS_IGNORE_EXCEPTIONS = config("DJANGO_REDIS_IGNORE_EXCEPTIONS", default=True, cast=bool)
-DJANGO_REDIS_LOG_IGNORED_EXCEPTIONS = config("DJANGO_REDIS_LOG_IGNORED_EXCEPTIONS", default=True, cast=bool)
+DJANGO_REDIS_IGNORE_EXCEPTIONS = config(
+    "DJANGO_REDIS_IGNORE_EXCEPTIONS", default=True, cast=bool
+)
+DJANGO_REDIS_LOG_IGNORED_EXCEPTIONS = config(
+    "DJANGO_REDIS_LOG_IGNORED_EXCEPTIONS", default=True, cast=bool
+)
 
 RQ_SHOW_ADMIN_LINK = True
 
@@ -328,7 +340,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 CORS_ALLOW_ALL_ORIGINS = config("CORS_ALLOW_ALL_ORIGINS", default=False, cast=bool)
 
-if DEBUG or LOG_SETTINGS:
+if LOG_SETTINGS:
     logger.info(f"CORS_ALLOW_ALL_ORIGINS: {CORS_ALLOW_ALL_ORIGINS}")
 
 # For production (specify allowed origins):
@@ -339,12 +351,12 @@ CORS_ALLOWED_ORIGINS = config(
 CORS_ALLOWED_ORIGIN_REGEXES = config(
     "CORS_ALLOWED_ORIGIN_REGEXES", default="", cast=parse_comma_separated_list
 )
-if DEBUG or LOG_SETTINGS:
+if LOG_SETTINGS:
     logger.info(f"CORS_ALLOWED_ORIGIN_REGEXES: {CORS_ALLOWED_ORIGIN_REGEXES}")
 
 # assume our frontend should be able to make POST requests and fetch content from its domain
 CORS_ALLOWED_ORIGINS += CSRF_TRUSTED_ORIGINS
-if DEBUG or LOG_SETTINGS:
+if LOG_SETTINGS:
     logger.info(f"CORS_ALLOWED_ORIGINS: {CORS_ALLOWED_ORIGINS}")
 
 # If you need to allow credentials (cookies, authorization headers, etc.):
@@ -365,7 +377,7 @@ CORS_ALLOW_HEADERS = (
     "X-Session-Token",
     "X-CSRFToken",
 )
-if DEBUG or LOG_SETTINGS:
+if LOG_SETTINGS:
     logger.info(f"CORS_ALLOW_HEADERS: {CORS_ALLOW_HEADERS}")
 
 CORS_EXPOSE_HEADERS = [
@@ -373,7 +385,7 @@ CORS_EXPOSE_HEADERS = [
     "X-Session-Token",
     "X-CSRFToken",
 ]
-if DEBUG or LOG_SETTINGS:
+if LOG_SETTINGS:
     logger.info(f"CORS_EXPOSE_HEADERS: {CORS_EXPOSE_HEADERS}")
 
 # Auth settings
@@ -410,9 +422,15 @@ AWS_DEFAULT_REGION = os.environ["AWS_DEFAULT_REGION"] = config(
 DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL", default="noreply@knowsuchagency.com")
 
 # Authentication settings
-LOGIN_REDIRECT_URL = config("LOGIN_REDIRECT_URL", default="/")    # Redirect to landing page after login
-LOGOUT_REDIRECT_URL = config("LOGOUT_REDIRECT_URL", default="/")  # Redirect to landing page after logout
-LOGIN_URL = config("LOGIN_URL", default="/accounts/login/")  # Where to redirect if login is required
+LOGIN_REDIRECT_URL = config(
+    "LOGIN_REDIRECT_URL", default="/"
+)  # Redirect to landing page after login
+LOGOUT_REDIRECT_URL = config(
+    "LOGOUT_REDIRECT_URL", default="/"
+)  # Redirect to landing page after logout
+LOGIN_URL = config(
+    "LOGIN_URL", default="/accounts/login/"
+)  # Where to redirect if login is required
 
 # Security settings
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")

@@ -58,3 +58,7 @@ test:
 # run rq worker
 worker:
     uv run python manage.py rqworker default
+
+# view rq stats
+@rqstats:
+    LOG_SETTINGS=false uv run python manage.py rqstats

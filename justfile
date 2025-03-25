@@ -57,7 +57,7 @@ test:
 
 # run rq worker
 worker:
-    uv run python manage.py rqworker default
+    uv run python manage.py rqworker default --with-scheduler
 
 # view rq stats
 @rqstats:

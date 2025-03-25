@@ -198,7 +198,7 @@ MIDDLEWARE = [
 # if not DEBUG:
 #     MIDDLEWARE.append("src.core.middleware.WildcardCSRFMiddleware")
 
-if DEBUG or LOG_REQUESTS:
+if LOG_REQUESTS:
     MIDDLEWARE.append("src.core.middleware.RequestLoggingMiddleware")
 
 CACHES = {

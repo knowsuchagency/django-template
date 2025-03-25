@@ -13,7 +13,6 @@ COPY pyproject.toml uv.lock ./
 
 RUN uv sync
 
-# Set Python path to include the src directory
 ENV PYTHONPATH=src
 ENV PYTHONUNBUFFERED=1
 

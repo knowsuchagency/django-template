@@ -50,4 +50,7 @@ collectstatic:
 
 # run tests
 test:
+    #!/bin/bash
+    export DATABASE_URL=sqlite:///:memory:
+    export LOG_REQUESTS=false
     uv run python manage.py test src.core.tests

@@ -214,6 +214,8 @@ CACHES = {
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
             "COMPRESSOR": "django_redis.compressors.zlib.ZlibCompressor",
+            "SOCKET_CONNECT_TIMEOUT": 10,
+            "SOCKET_TIMEOUT": 10,
         },
         # set the cache timeout to 30 days
         "TIMEOUT": 60 * 60 * 24 * 30,

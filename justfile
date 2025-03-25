@@ -54,3 +54,7 @@ test:
     export DATABASE_URL=sqlite:///:memory:
     export LOG_REQUESTS=false
     uv run python manage.py test src.core.tests
+
+# run rq worker
+worker:
+    uv run python manage.py rqworker default

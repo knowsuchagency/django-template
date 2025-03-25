@@ -1,10 +1,11 @@
 import random
 import time
+from datetime import datetime, timedelta
 from pprint import pprint
 
 import rq
 from django_redis import get_redis_connection
-from django_rq import job
+from django_rq import job, get_queue
 from ninja import Router
 
 from .schemas import JobResult
@@ -20,6 +21,12 @@ def test_rq_job():
     time.sleep(seconds)
     result = {"message": "Job completed", "seconds": seconds}
     pprint(result)
+
+    # Schedule the next run in 5 seconds
+    queue = get_queue("default")
+    next_run = datetime.now() + timedelta(seconds=5)
+    queue.enqueue_at(next_run, test_rq_job)
+
     return result
 
 

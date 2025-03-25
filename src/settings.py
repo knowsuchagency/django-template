@@ -201,14 +201,29 @@ MIDDLEWARE = [
 if LOG_REQUESTS:
     MIDDLEWARE.append("src.core.middleware.RequestLoggingMiddleware")
 
+REDIS_URL = config("REDIS_URL", default="redis://localhost:6379")
+CACHE_PREFIX = config("CACHE_PREFIX", default="django_cache")
+
 CACHES = {
     "default": {
-        "BACKEND": "django.core.cache.backends.db.DatabaseCache",
-        "LOCATION": "django_cache",
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": f"{REDIS_URL}/0",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+            "COMPRESSOR": "django_redis.compressors.zlib.ZlibCompressor",
+        },
         # set the cache timeout to 30 days
         "TIMEOUT": 60 * 60 * 24 * 30,
+        "KEY_PREFIX": CACHE_PREFIX,
     }
 }
+
+SESSION_ENGINE = "django.contrib.sessions.backends.cache"
+SESSION_CACHE_ALIAS = "default"
+
+DJANGO_REDIS_IGNORE_EXCEPTIONS = config("DJANGO_REDIS_IGNORE_EXCEPTIONS", default=True, cast=bool)
+DJANGO_REDIS_LOG_IGNORED_EXCEPTIONS = config("DJANGO_REDIS_LOG_IGNORED_EXCEPTIONS", default=True, cast=bool)
+
 
 ROOT_URLCONF = "src.urls"
 

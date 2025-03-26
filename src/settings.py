@@ -432,5 +432,3 @@ LOGIN_URL = config(
 # Security settings
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 USE_X_FORWARDED_HOST = True
-
-RQ_API_TOKEN = config("RQ_API_TOKEN", default="")

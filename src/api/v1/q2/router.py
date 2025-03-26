@@ -21,10 +21,10 @@ def test_q_job():
     return result
 
 
-@router.post("/test", auth=None, summary="Submit Test Job")
-def test_q(request):
-    task_id = async_task(test_q_job)
-    return {"message": "Job queued", "job_id": task_id}
+@router.post("/test", auth=None, summary="Submit Test Job(s)")
+def test_q(request, count: int = 1):
+    task_ids = [async_task(test_q_job) for _ in range(count)]
+    return {"message": "Jobs queued", "job_ids": task_ids if count > 1 else task_ids[0]}
 
 
 @router.get("/result", response=JobResult, summary="Get Job Result")

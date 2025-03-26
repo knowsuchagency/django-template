@@ -228,12 +228,11 @@ CACHES = {
 }
 
 Q_CLUSTER = {
-    "name": "DjangORM",
-    "orm": "default",
+    "name": "DJRedis",
+    "django_redis": "default",
     "timeout": 90,
     "retry": 120,
     "compress": True,
-    "bulk": 10,
 }
 
 SESSION_ENGINE = "django.contrib.sessions.backends.cache"

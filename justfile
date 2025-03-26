@@ -60,8 +60,14 @@ qcluster:
     uv run python manage.py qcluster
 
 # monitor q cluster
-qmonitor:
-    uv run python manage.py qmonitor
+qmonitor redis_url='':
+    #!/bin/bash
+    echo "redis_url: {{redis_url}}"
+    if [ -z "{{redis_url}}" ]; then
+        uv run python manage.py qmonitor
+    else
+        REDIS_URL={{redis_url}} uv run python manage.py qmonitor
+    fi
 
 # view q stats
 qstats:

@@ -55,10 +55,14 @@ test:
     export LOG_REQUESTS=false
     uv run python manage.py test src.core.tests
 
-# run rq worker
-worker:
-    uv run python manage.py rqworker default --with-scheduler
+# run q cluster
+qcluster:
+    uv run python manage.py qcluster
 
-# view rq stats
-@rqstats:
-    LOG_SETTINGS=false uv run python manage.py rqstats --interval 1
+# monitor q cluster
+qmonitor:
+    uv run python manage.py qmonitor
+
+# view q stats
+qstats:
+    uv run python manage.py qinfo

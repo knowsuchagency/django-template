@@ -28,7 +28,6 @@ urlpatterns = [
     path("accounts/", include("allauth.urls")),
     path("_allauth/", include("allauth.headless.urls")),
     path("__reload__/", include("django_browser_reload.urls")),
-    path("django-rq/", include("django_rq.urls")),
 ]
 
 urlpatterns += views.route.patterns

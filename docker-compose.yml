@@ -14,7 +14,8 @@ services:
       AWS_REGION: ${AWS_REGION:-us-east-2}
       DEBUG: ${DEBUG:-true}
       LOG_REQUESTS: ${LOG_REQUESTS:-true}
-      REDIS_URL: ${REDIS_URL:-redis://redis:6379}
+      REDIS_URL: redis://redis:6379
+      SECRET_KEY: ${SECRET_KEY:-django-insecure-your-secret-key-here}
     depends_on:
       - postgres
       - redis
@@ -25,7 +26,8 @@ services:
       target: worker
     environment:
       DATABASE_URL: ${DATABASE_URL:-postgresql://postgres:postgres@postgres:5432/postgres}
-      REDIS_URL: ${REDIS_URL:-redis://redis:6379}
+      REDIS_URL: redis://redis:6379
+      SECRET_KEY: ${SECRET_KEY:-django-insecure-your-secret-key-here}
     depends_on:
       - postgres
       - redis

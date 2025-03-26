@@ -21,7 +21,7 @@ COPY manage.py ./
 
 # Worker stage
 FROM base AS worker
-CMD ["uv", "run", "python", "manage.py", "rqworker", "default", "--with-scheduler"]
+CMD ["uv", "run", "python", "manage.py", "qcluster"]
 
 # Web stage
 FROM base AS web

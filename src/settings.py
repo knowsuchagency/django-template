@@ -172,7 +172,7 @@ INSTALLED_APPS = [
     "django_browser_reload",
     "widget_tweaks",
     "debug_toolbar",
-    "django_rq",
+    "django_q",
     "src.core",
 ]
 
@@ -227,10 +227,12 @@ CACHES = {
     }
 }
 
-RQ_QUEUES = {
-    "default": {
-        "USE_REDIS_CACHE": "default",
-    }
+Q_CLUSTER = {
+    "name": "DJRedis",
+    "django_redis": "default",
+    "timeout": 90,
+    "retry": 120,
+    "compress": True,
 }
 
 SESSION_ENGINE = "django.contrib.sessions.backends.cache"
@@ -242,8 +244,6 @@ DJANGO_REDIS_IGNORE_EXCEPTIONS = config(
 DJANGO_REDIS_LOG_IGNORED_EXCEPTIONS = config(
     "DJANGO_REDIS_LOG_IGNORED_EXCEPTIONS", default=True, cast=bool
 )
-
-RQ_SHOW_ADMIN_LINK = True
 
 ROOT_URLCONF = "src.urls"
 

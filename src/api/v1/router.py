@@ -4,11 +4,11 @@ from ninja import Router
 from ninja.responses import Response
 
 from .example.router import router as example_router
-from .rq.router import router as rq_router
+from .q2.router import router as q2_router
 
 
 router = Router()
-router.add_router("/rq", rq_router, tags=["rq"])
+router.add_router("/q2", q2_router, tags=["q2"])
 router.add_router("/example", example_router, tags=["example"])
 
 @router.get("/csrf-token", auth=None)

@@ -25,6 +25,7 @@ dependencies = [
     "django-q2>=1.7.6",
     "psutil>=7.0.0",
     "croniter>=6.0.0",
+    "django-unfold>=0.53.0",
 ]
 
 [dependency-groups]

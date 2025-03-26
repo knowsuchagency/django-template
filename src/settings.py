@@ -23,7 +23,6 @@ from django.core.management.utils import get_random_secret_key
 from loguru import logger
 from sentry_sdk.integrations.django import DjangoIntegration
 from sentry_sdk.integrations.redis import RedisIntegration
-from sentry_sdk.integrations.rq import RqIntegration
 
 
 def parse_comma_separated_list(string, sep=","):
@@ -112,7 +111,6 @@ if SENTRY_DSN and not RUNNING_ON_MAC:
         integrations=[
             DjangoIntegration(),
             RedisIntegration(),
-            RqIntegration(),
         ],
         auto_session_tracking=False,
         traces_sample_rate=0.01,
@@ -162,6 +160,8 @@ AUTHENTICATION_BACKENDS = [
 # Application definition
 
 INSTALLED_APPS = [
+    "unfold",
+    "unfold.contrib.inlines",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",

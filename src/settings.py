@@ -233,6 +233,7 @@ Q_CLUSTER = {
     "timeout": 90,
     "retry": 120,
     "compress": True,
+    "save_limit": 500,
 }
 
 SESSION_ENGINE = "django.contrib.sessions.backends.cache"

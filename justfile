@@ -70,5 +70,11 @@ qmonitor redis_url='':
     fi
 
 # view q stats
-qstats:
-    uv run python manage.py qinfo
+qstats redis_url='':
+    #!/bin/bash
+    echo "redis_url: {{redis_url}}"
+    if [ -z "{{redis_url}}" ]; then
+        uv run python manage.py qinfo
+    else
+        REDIS_URL={{redis_url}} uv run python manage.py qinfo
+    fi

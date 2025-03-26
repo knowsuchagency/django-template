@@ -61,4 +61,4 @@ worker:
 
 # view rq stats
 @rqstats:
-    LOG_SETTINGS=false uv run python manage.py rqstats
+    LOG_SETTINGS=false uv run python manage.py rqstats --interval 1

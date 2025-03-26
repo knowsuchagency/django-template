@@ -15,6 +15,7 @@ services:
       DEBUG: ${DEBUG:-true}
       LOG_REQUESTS: ${LOG_REQUESTS:-true}
       REDIS_URL: redis://redis:6379
+      SECRET_KEY: ${SECRET_KEY:-django-insecure-your-secret-key-here}
     depends_on:
       - postgres
       - redis
@@ -26,6 +27,7 @@ services:
     environment:
       DATABASE_URL: ${DATABASE_URL:-postgresql://postgres:postgres@postgres:5432/postgres}
       REDIS_URL: redis://redis:6379
+      SECRET_KEY: ${SECRET_KEY:-django-insecure-your-secret-key-here}
     depends_on:
       - postgres
       - redis

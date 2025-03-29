@@ -57,7 +57,7 @@ test:
 
 # run celery worker
 worker:
-    uv run celery -A src.celery_config worker --loglevel=info
+    uv run celery -A src.celery_config worker --autoscale=10,2 --loglevel=info
 
 # run celery beat
 beat:

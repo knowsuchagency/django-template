@@ -55,26 +55,14 @@ test:
     export LOG_REQUESTS=false
     uv run python manage.py test src.core.tests
 
-# run q cluster
-qcluster:
-    uv run python manage.py qcluster
+# run celery worker
+worker:
+    uv run celery -A src.celery_config worker --loglevel=info
 
-# monitor q cluster
-qmonitor redis_url='':
-    #!/bin/bash
-    echo "redis_url: {{redis_url}}"
-    if [ -z "{{redis_url}}" ]; then
-        uv run python manage.py qmonitor
-    else
-        REDIS_URL={{redis_url}} uv run python manage.py qmonitor
-    fi
+# run celery beat
+beat:
+    uv run celery -A src.celery_config beat --loglevel=info
 
-# view q stats
-qstats redis_url='':
-    #!/bin/bash
-    echo "redis_url: {{redis_url}}"
-    if [ -z "{{redis_url}}" ]; then
-        uv run python manage.py qinfo
-    else
-        REDIS_URL={{redis_url}} uv run python manage.py qinfo
-    fi
+# celery worker and beat
+celery:
+    npx concurrently --names "WORKER,BEAT" --prefix-colors "blue,green" "just worker" "just beat"

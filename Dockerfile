@@ -32,6 +32,11 @@ COPY justfile ./
 
 CMD ["just", "celery"]
 
+# Flower stage
+FROM worker AS flower
+
+CMD ["just", "flower"]
+
 # Web stage
 FROM base AS web
 RUN uv run python manage.py collectstatic --noinput

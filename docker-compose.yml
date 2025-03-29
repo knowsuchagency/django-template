@@ -23,8 +23,7 @@ services:
   flower:
     build:
       context: .
-      target: worker
-    command: just flower
+      target: flower
     environment:
       REDIS_URL: redis://redis:6379
       DATABASE_URL: ${DATABASE_URL:-postgresql://postgres:postgres@postgres:5432/postgres}

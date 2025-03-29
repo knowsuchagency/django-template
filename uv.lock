@@ -61,7 +61,6 @@ dependencies = [
     { name = "django-debug-toolbar" },
     { name = "django-ninja" },
     { name = "django-redis" },
-    { name = "django-unfold" },
     { name = "django-widget-tweaks" },
     { name = "djecorator" },
     { name = "granian" },
@@ -93,7 +92,6 @@ requires-dist = [
     { name = "django-debug-toolbar", specifier = ">=5.0.1" },
     { name = "django-ninja", specifier = ">=1.3.0" },
     { name = "django-redis", specifier = ">=5.4.0" },
-    { name = "django-unfold", specifier = ">=0.53.0" },
     { name = "django-widget-tweaks", specifier = ">=1.5.0" },
     { name = "djecorator", specifier = ">=1.2.0" },
     { name = "granian", specifier = ">=1.6.0" },
@@ -442,18 +440,6 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/ba/5b/0dbe271fef3c2274b83dbcb1b19fa3dacf1f7e542382819294644e78ea8b/django_timezone_field-7.1.tar.gz", hash = "sha256:b3ef409d88a2718b566fabe10ea996f2838bc72b22d3a2900c0aa905c761380c", size = 13727 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/ec/09/7a808392a751a24ffa62bec00e3085a9c1a151d728c323a5bab229ea0e58/django_timezone_field-7.1-py3-none-any.whl", hash = "sha256:93914713ed882f5bccda080eda388f7006349f25930b6122e9b07bf8db49c4b4", size = 13177 },
-]
-
-[[package]]
-name = "django-unfold"
-version = "0.53.0"
-source = { registry = "https://pypi.org/simple" }
-dependencies = [
-    { name = "django" },
-]
-sdist = { url = "https://files.pythonhosted.org/packages/4e/b4/aa562b7283c423ba2f597ced03dbf5e0dedae8f754669c021afc2bec6316/django_unfold-0.53.0.tar.gz", hash = "sha256:26c1db660104fb993a4223f9ef341adbc199b320ebbb5708abd7ec57e237d8b8", size = 1022501 }
-wheels = [
-    { url = "https://files.pythonhosted.org/packages/0f/e4/43a3c618f5664ac0203757efdc753d147476bc43c608878a3bb985b1a472/django_unfold-0.53.0-py3-none-any.whl", hash = "sha256:419a6901c45c0bee8eedb2d7e9b10a5f3c12ea0450b9ca920856095f4ae9390c", size = 1111147 },
 ]
 
 [[package]]

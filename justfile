@@ -66,3 +66,7 @@ beat:
 # celery worker and beat
 celery:
     npx concurrently --names "WORKER,BEAT" --prefix-colors "blue,green" "just worker" "just beat"
+
+# celery flower
+flower:
+    uv run celery -A src.celery_config flower

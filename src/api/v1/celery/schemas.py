@@ -11,7 +11,6 @@ class Status(str, Enum):
     SUCCESS = "SUCCESS"
     FAILURE = "FAILURE"
     RETRY = "RETRY"
-    REVOKED = "REVOKED"
 
 
 class JobResult(Schema):

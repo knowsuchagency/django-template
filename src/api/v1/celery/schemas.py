@@ -5,14 +5,15 @@ from datetime import datetime
 from ninja import Schema
 
 
-class JobStatus(str, Enum):
-    SUCCESS = "success"
-    FAILED = "failed"
+class Status(str, Enum):
+    PENDING = "PENDING"
+    STARTED = "STARTED"
+    SUCCESS = "SUCCESS"
+    FAILURE = "FAILURE"
+    RETRY = "RETRY"
 
 
 class JobResult(Schema):
     job_id: str
-    started: Optional[datetime]
-    stopped: Optional[datetime]
-    success: Optional[bool]
+    status: Status
     result: Optional[Any] = None

@@ -21,7 +21,16 @@ COPY manage.py ./
 
 # Worker stage
 FROM base AS worker
-CMD ["uv", "run", "python", "manage.py", "qcluster"]
+
+RUN apt-get update && apt-get install -y \
+    curl \
+    npm \
+    && rm -rf /var/lib/apt/lists/* \
+    && curl --proto '=https' --tlsv1.2 -sSf https://just.systems/install.sh | bash -s -- --to /usr/local/bin
+
+COPY justfile ./
+
+CMD ["just", "celery"]
 
 # Web stage
 FROM base AS web

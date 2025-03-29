@@ -160,8 +160,6 @@ AUTHENTICATION_BACKENDS = [
 # Application definition
 
 INSTALLED_APPS = [
-    "unfold",
-    "unfold.contrib.inlines",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -172,7 +170,8 @@ INSTALLED_APPS = [
     "django_browser_reload",
     "widget_tweaks",
     "debug_toolbar",
-    "django_q",
+    "django_celery_results",
+    "django_celery_beat",
     "src.core",
 ]
 
@@ -214,7 +213,7 @@ CACHE_PREFIX = config("CACHE_PREFIX", default="django_cache")
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": f"{REDIS_URL}/0",
+        "LOCATION": REDIS_URL,
         "OPTIONS": {
             "CLIENT_CLASS": "django_redis.client.DefaultClient",
             "COMPRESSOR": "django_redis.compressors.zlib.ZlibCompressor",
@@ -227,14 +226,6 @@ CACHES = {
     }
 }
 
-Q_CLUSTER = {
-    "name": "DJRedis",
-    "django_redis": "default",
-    "timeout": 90,
-    "retry": 120,
-    "compress": True,
-    "save_limit": 500,
-}
 
 SESSION_ENGINE = "django.contrib.sessions.backends.cache"
 SESSION_CACHE_ALIAS = "default"
@@ -432,3 +423,8 @@ LOGIN_URL = config(
 # Security settings
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 USE_X_FORWARDED_HOST = True
+
+CELERY_CACHE_BACKEND = "default"
+CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
+CELERY_RESULT_BACKEND = "django-db"
+CELERY_BROKER_URL = REDIS_URL

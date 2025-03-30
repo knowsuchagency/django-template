@@ -477,5 +477,40 @@
             </tbody>
         </table>
     </div>
+
+    <!-- Add Legend for Queue Metrics -->
+    <div class="module">
+        <div class="queue-header">Queue Metrics Legend</div>
+        <div style="padding: 15px; background-color: #ffffff; border-radius: 0 0 4px 4px;">
+            <div style="margin-bottom: 15px;">
+                <h3 style="margin: 0 0 8px 0; color: #495057;">Pending</h3>
+                <p>Shows the total number of tasks waiting to be processed in the broker's queue. These are tasks that
+                    have been submitted but haven't yet been picked up by a worker process. This is the most direct
+                    measure of your current queue backlog.</p>
+            </div>
+
+            <div style="margin-bottom: 15px;">
+                <h3 style="margin: 0 0 8px 0; color: #495057;">Task Queue</h3>
+                <p>Counts the number of tasks in the queue. If this keeps rising, it means you are taking on more tasks
+                    than your cluster can handle. You can limit this by setting the <code>queue_limit</code> in your
+                    cluster configuration. If your task queue is always hitting its limit and you're running out of
+                    resources, it may be time to add another cluster.</p>
+            </div>
+
+            <div style="margin-bottom: 15px;">
+                <h3 style="margin: 0 0 8px 0; color: #495057;">Result Queue</h3>
+                <p>Shows the number of results in the queue. Since results are only saved by a single process which has
+                    to access the database, it's normal for the result queue to take slightly longer to clear than the
+                    task queue.</p>
+            </div>
+
+            <div>
+                <h3 style="margin: 0 0 8px 0; color: #495057;">Reincarnations</h3>
+                <p>Shows the amount of processes that have been reincarnated after a recycle, sudden death, or timeout.
+                    If this number is unusually high, you are either suffering from repeated task errors or severe
+                    timeouts and you should check your logs for details.</p>
+            </div>
+        </div>
+    </div>
 </div>
 {% endblock %}

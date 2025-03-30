@@ -55,8 +55,12 @@ test:
     export LOG_REQUESTS=false
     uv run python manage.py test src.core.tests
 
+# set up periodic tasks
+setup_periodic_tasks: migrate
+    uv run python manage.py setup_periodic_tasks
+
 # run q cluster
-qcluster:
+qcluster: setup_periodic_tasks
     uv run python manage.py qcluster
 
 # monitor q cluster
@@ -79,17 +83,7 @@ qstats redis_url='':
         REDIS_URL={{redis_url}} uv run python manage.py qinfo
     fi
 
-# alternate q stats
-q2:
-    #!/usr/bin/env uv run python
-    import os
-    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'settings')
-    import django
-    django.setup()
-    from django_q.status import Stat
 
-    for stat in Stat.get_all():
-        print(stat.cluster_id, stat.status)
 
 # django shell
 shell:

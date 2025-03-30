@@ -58,6 +58,7 @@ dependencies = [
     { name = "django-cors-headers" },
     { name = "django-debug-toolbar" },
     { name = "django-ninja" },
+    { name = "django-q-registry" },
     { name = "django-q2" },
     { name = "django-redis" },
     { name = "django-widget-tweaks" },
@@ -90,6 +91,7 @@ requires-dist = [
     { name = "django-cors-headers", specifier = ">=4.4.0" },
     { name = "django-debug-toolbar", specifier = ">=5.0.1" },
     { name = "django-ninja", specifier = ">=1.3.0" },
+    { name = "django-q-registry", specifier = ">=0.5.0" },
     { name = "django-q2", specifier = ">=1.7.6" },
     { name = "django-redis", specifier = ">=5.4.0" },
     { name = "django-widget-tweaks", specifier = ">=1.5.0" },
@@ -403,6 +405,19 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/a6/70/11411d4f528e4fad57a17dae81c85da039feba90c001b64e677fc0925a97/django-picklefield-3.3.tar.gz", hash = "sha256:4e76dd20f2e95ffdaf18d641226ccecc169ff0473b0d6bec746f3ab97c26b8cb", size = 9559 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/34/e1/988fa6ded7275bb11e373ccd4b708af477f12027d3ee86b7cb5fc5779412/django_picklefield-3.3-py3-none-any.whl", hash = "sha256:d6f6fd94a17177fe0d16b0b452a9860b8a1da97b6e70633ab53ade4975f1ce9a", size = 9565 },
+]
+
+[[package]]
+name = "django-q-registry"
+version = "0.5.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "django" },
+    { name = "django-q2" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/16/f4/60cd0727a4a6aea543e449fe4bf39ea4b0cb8feab6c28a38370fc37c8275/django_q_registry-0.5.0.tar.gz", hash = "sha256:97b07499087dceadd8ef66f102b8a9dbd4ba7be4aa7484a87ceda4f893e814da", size = 21437 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/b7/4d/cb290e86d2cf6675f13f403bb599b1dee93d7a5a9a8607f3b79473456a1e/django_q_registry-0.5.0-py3-none-any.whl", hash = "sha256:6a034db99abdc4d5d9ccb765a96b6e2e457ed2dc3626ee290ea8bc10e2ea823f", size = 12510 },
 ]
 
 [[package]]

@@ -171,6 +171,7 @@ INSTALLED_APPS = [
     "widget_tweaks",
     "debug_toolbar",
     "django_q",
+    "django_q_registry",
     "core",
 ]
 

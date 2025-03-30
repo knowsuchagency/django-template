@@ -5,7 +5,7 @@ from pprint import pprint
 
 from django_q.tasks import async_task
 from django_q.models import Task
-from django.conf import settings
+from django.contrib.admin.views.decorators import staff_member_required
 from ninja import Router
 
 from .schemas import JobResult, QueueStatusResponse, QueueInfo
@@ -45,6 +45,7 @@ def result(request, job_id: str):
 
 
 @router.get("/queues", response=QueueStatusResponse, summary="Get Queue Status")
+@staff_member_required
 def queue_status(request):
     """
     Get a snapshot of all queues and their backpressure.

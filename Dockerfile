@@ -21,6 +21,7 @@ COPY manage.py ./
 
 # Worker stage
 FROM base AS worker
+
 CMD ["uv", "run", "python", "manage.py", "qcluster"]
 
 # Web stage

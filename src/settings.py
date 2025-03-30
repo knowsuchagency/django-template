@@ -211,6 +211,11 @@ CACHE_PREFIX = config("CACHE_PREFIX", default="django_cache")
 
 CACHES = {
     "default": {
+        "BACKEND": "django.core.cache.backends.db.DatabaseCache",
+        "LOCATION": "django_cache",
+        "TIMEOUT": 60 * 60 * 24 * 30,
+    },
+    "redis": {
         "BACKEND": "django_redis.cache.RedisCache",
         "LOCATION": REDIS_URL,
         "OPTIONS": {

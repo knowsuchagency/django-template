@@ -155,7 +155,7 @@
                             fill: false
                         },
                         {
-                            label: 'Queue Size',
+                            label: 'Pending',
                             data: queueSizeHistory,
                             borderColor: 'rgb(255, 99, 132)',
                             backgroundColor: 'rgba(255, 99, 132, 0.5)',
@@ -277,7 +277,7 @@
                 const queueName = dataset.label;
                 if (queueName === 'Task Queue') {
                     dataset.data = taskQueueHistory;
-                } else if (queueName === 'Queue Size') {
+                } else if (queueName === 'Pending') {
                     dataset.data = queueSizeHistory;
                 } else if (queueName === 'Result Queue') {
                     dataset.data = resultQueueHistory;
@@ -436,7 +436,7 @@
                 <div class="stat-value" id="queue-count">-</div>
             </div>
             <div class="stat-item">
-                <div class="stat-label">Queue Size</div>
+                <div class="stat-label">Pending</div>
                 <div class="stat-value" id="queue-size">-</div>
             </div>
             <div class="stat-item">

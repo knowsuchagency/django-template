@@ -211,6 +211,11 @@ CACHE_PREFIX = config("CACHE_PREFIX", default="django_cache")
 
 CACHES = {
     "default": {
+        "BACKEND": "django.core.cache.backends.db.DatabaseCache",
+        "LOCATION": "django_cache",
+        "TIMEOUT": 60 * 60 * 24 * 30,
+    },
+    "redis": {
         "BACKEND": "django_redis.cache.RedisCache",
         "LOCATION": REDIS_URL,
         "OPTIONS": {
@@ -424,9 +429,10 @@ SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 USE_X_FORWARDED_HOST = True
 
 Q_CLUSTER = {
-    "name": "DJRedis",
-    "django_redis": "default",
+    "name": "DjangORM",
     "timeout": 90,
     "retry": 120,
     "compress": True,
+    "bulk": 10,
+    "orm": "default",
 }

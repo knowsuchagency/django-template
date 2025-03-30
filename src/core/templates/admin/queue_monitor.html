@@ -127,10 +127,10 @@
         // Data storage for historical data
         const maxDataPoints = 60; // Store 1 minute of data
         let queueHistoryData = {};
-        let totalTasksHistory = [];
-        let queueSizeHistory = []; // Add queue size history array
-        let resultCountHistory = []; // Add result count history array
-        let reincarnationsHistory = []; // Add reincarnations history array
+        let taskQueueHistory = []; // Renamed from totalTasksHistory
+        let queueSizeHistory = [];
+        let resultCountHistory = [];
+        let reincarnationsHistory = [];
         let labels = [];
 
         // Polling controls
@@ -147,8 +147,8 @@
                     labels: labels,
                     datasets: [
                         {
-                            label: 'Total Tasks',
-                            data: totalTasksHistory,
+                            label: 'Task Queue',
+                            data: taskQueueHistory,
                             borderColor: 'rgb(53, 162, 235)',
                             backgroundColor: 'rgba(53, 162, 235, 0.5)',
                             borderWidth: 3,
@@ -246,10 +246,10 @@
             // Add a new time label
             addTimeLabel();
 
-            // Update total tasks history
-            totalTasksHistory.push(data.task_count);
-            if (totalTasksHistory.length > maxDataPoints) {
-                totalTasksHistory.shift();
+            // Update task queue history
+            taskQueueHistory.push(data.task_queue);
+            if (taskQueueHistory.length > maxDataPoints) {
+                taskQueueHistory.shift();
             }
 
             // Update queue size history
@@ -320,8 +320,8 @@
             // Update datasets data
             combinedChart.data.datasets.forEach(dataset => {
                 const queueName = dataset.label;
-                if (queueName === 'Total Tasks') {
-                    dataset.data = totalTasksHistory;
+                if (queueName === 'Task Queue') {
+                    dataset.data = taskQueueHistory;
                 } else if (queueName === 'Queue Size') {
                     dataset.data = queueSizeHistory;
                 } else if (queueName === 'Result Count') {
@@ -348,7 +348,7 @@
                 .then(data => {
                     // Update queue count and timestamp
                     document.getElementById('queue-count').textContent = data.queue_count;
-                    document.getElementById('task-count').textContent = data.task_count;
+                    document.getElementById('task-queue').textContent = data.task_queue;
                     document.getElementById('queue-size').textContent = data.queue_size;
                     document.getElementById('result-count').textContent = data.result_count;
                     document.getElementById('reincarnations').textContent = data.reincarnations;
@@ -487,8 +487,8 @@
                 <div class="stat-value" id="queue-size">-</div>
             </div>
             <div class="stat-item">
-                <div class="stat-label">Total Tasks</div>
-                <div class="stat-value" id="task-count">-</div>
+                <div class="stat-label">Task Queue</div>
+                <div class="stat-value" id="task-queue">-</div>
             </div>
             <div class="stat-item">
                 <div class="stat-label">Result Count</div>

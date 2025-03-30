@@ -57,14 +57,14 @@ def queue_status(request):
 
     stats = Stat.get_all(broker)
     active_queues = []
-    total_tasks = 0
+    task_queue = 0
     result_count = 0
     reincarnations = 0
 
     for stat in stats:
         # Calculate tasks in this queue
         queue_tasks = stat.task_q_size + stat.done_q_size
-        total_tasks += queue_tasks
+        task_queue += queue_tasks
         result_count += stat.done_q_size
         reincarnations += stat.reincarnations
         # Create queue info
@@ -82,7 +82,7 @@ def queue_status(request):
     response = QueueStatusResponse(
         queue_size=broker.queue_size(),
         queue_count=len(active_queues),
-        task_count=total_tasks,
+        task_queue=task_queue,
         result_count=result_count,
         reincarnations=reincarnations,
         timestamp=datetime.now().strftime("%H:%M:%S"),

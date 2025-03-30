@@ -31,7 +31,7 @@ class QueueInfo(Schema):
 class QueueStatusResponse(Schema):
     queue_size: int
     queue_count: int
-    task_count: int
+    task_queue: int
     timestamp: str
     result_count: int
     reincarnations: int

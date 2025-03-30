@@ -126,7 +126,6 @@
     document.addEventListener('DOMContentLoaded', function () {
         // Data storage for historical data
         const maxDataPoints = 60; // Store 1 minute of data
-        let queueHistoryData = {};
         let taskQueueHistory = []; // Renamed from totalTasksHistory
         let queueSizeHistory = [];
         let resultQueueHistory = [];
@@ -270,50 +269,6 @@
                 reincarnationsHistory.shift();
             }
 
-            // Update per-queue data
-            data.active_queues.forEach(queue => {
-                if (!queueHistoryData[queue.name]) {
-                    // Initialize for new queue
-                    queueHistoryData[queue.name] = {
-                        data: Array(labels.length - 1).fill(0),
-                        color: getRandomColor()
-                    };
-
-                    // Add dataset to chart
-                    combinedChart.data.datasets.push({
-                        label: queue.name,
-                        data: queueHistoryData[queue.name].data,
-                        borderColor: queueHistoryData[queue.name].color,
-                        backgroundColor: queueHistoryData[queue.name].color.replace(')', ', 0.1)').replace('rgb', 'rgba'),
-                        borderWidth: 2,
-                        tension: 0.1,
-                        fill: false
-                    });
-                }
-
-                // Add the new data point
-                queueHistoryData[queue.name].data.push(queue.tasks);
-
-                // Keep only the last maxDataPoints
-                if (queueHistoryData[queue.name].data.length > maxDataPoints) {
-                    queueHistoryData[queue.name].data.shift();
-                }
-            });
-
-            // Remove queues that are no longer active
-            const activeQueueNames = data.active_queues.map(q => q.name);
-            Object.keys(queueHistoryData).forEach(queueName => {
-                if (!activeQueueNames.includes(queueName)) {
-                    delete queueHistoryData[queueName];
-
-                    // Remove dataset from chart
-                    const index = combinedChart.data.datasets.findIndex(ds => ds.label === queueName);
-                    if (index !== -1) {
-                        combinedChart.data.datasets.splice(index, 1);
-                    }
-                }
-            });
-
             // Update the chart
             combinedChart.data.labels = labels;
 
@@ -328,8 +283,6 @@
                     dataset.data = resultQueueHistory;
                 } else if (queueName === 'Reincarnations') {
                     dataset.data = reincarnationsHistory;
-                } else if (queueHistoryData[queueName]) {
-                    dataset.data = queueHistoryData[queueName].data;
                 }
             });
 

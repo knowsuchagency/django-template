@@ -11,5 +11,5 @@ Schedule.objects.get_or_create(
     func="core.tasks.hello_world",
     name="Hello world",
     schedule_type=Schedule.CRON,
-    cron="*/5 * * * * *",
+    cron="*/1 * * * *",
 )

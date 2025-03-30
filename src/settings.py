@@ -170,9 +170,8 @@ INSTALLED_APPS = [
     "django_browser_reload",
     "widget_tweaks",
     "debug_toolbar",
-    "django_celery_results",
-    "django_celery_beat",
-    "src.core",
+    "django_q",
+    "core",
 ]
 
 ALLAUTH_APPS = [
@@ -424,7 +423,10 @@ LOGIN_URL = config(
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 USE_X_FORWARDED_HOST = True
 
-CELERY_CACHE_BACKEND = "default"
-CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
-CELERY_RESULT_BACKEND = "django-db"
-CELERY_BROKER_URL = REDIS_URL
+Q_CLUSTER = {
+    "name": "DJRedis",
+    "django_redis": "default",
+    "timeout": 90,
+    "retry": 120,
+    "compress": True,
+}

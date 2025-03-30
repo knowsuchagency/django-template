@@ -20,18 +20,6 @@ services:
       - postgres
       - redis
 
-  flower:
-    build:
-      context: .
-      target: flower
-    environment:
-      REDIS_URL: redis://redis:6379
-      DATABASE_URL: ${DATABASE_URL:-postgresql://postgres:postgres@postgres:5432/postgres}
-    ports:
-      - "5555:5555"
-    depends_on:
-      - redis
-
   worker:
     build:
       context: .

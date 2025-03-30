@@ -312,7 +312,7 @@
         }
 
         function fetchQueueData() {
-            fetch('/api/v1/celery/queues')
+            fetch('/api/v1/q2/queues')
                 .then(response => response.json())
                 .then(data => {
                     // Update queue count and timestamp
@@ -330,6 +330,10 @@
                           <td>${queue.name}</td>
                           <td>${queue.type}</td>
                           <td>${queue.tasks}</td>
+                          <td>${queue.cluster_id}</td>
+                          <td>${queue.workers}</td>
+                          <td>${queue.status}</td>
+                          <td>${queue.uptime ? queue.uptime.toFixed(2) : '-'}</td>
                         `;
                         tableBody.appendChild(row);
                     });
@@ -392,6 +396,7 @@
         // Setup event listeners for controls
         document.getElementById('toggle-polling').addEventListener('click', togglePolling);
         document.getElementById('polling-interval').addEventListener('change', changeInterval);
+        document.getElementById('refresh-now').addEventListener('click', fetchQueueData);
 
         // Fetch initial data
         fetchQueueData();
@@ -422,6 +427,8 @@
                 <option value="30000">30 seconds</option>
                 <option value="60000">1 minute</option>
             </select>
+            <!-- Add a manual refresh button -->
+            <button id="refresh-now" style="background-color: #5a8dee;">Refresh Now</button>
         </div>
     </div>
 
@@ -469,6 +476,10 @@
                     <th>Queue Name</th>
                     <th>Type</th>
                     <th>Pending Tasks</th>
+                    <th>Cluster ID</th>
+                    <th>Workers</th>
+                    <th>Status</th>
+                    <th>Uptime (sec)</th>
                 </tr>
             </thead>
             <tbody id="queue-table-body">

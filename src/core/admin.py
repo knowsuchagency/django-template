@@ -1,9 +1,36 @@
 from django.contrib import admin
 from django.urls import path
-from django.utils.html import format_html
 
 from .models import User, StockTicker
 from .views import queue_monitor
+
+
+# Register our models with the default admin site
+@admin.register(User)
+class UserAdmin(admin.ModelAdmin):
+    fields = list_display = [
+        "username",
+        "email",
+        "first_name",
+        "last_name",
+        "is_staff",
+        "is_active",
+    ]
+
+
+@admin.register(StockTicker)
+class StockTickerAdmin(admin.ModelAdmin):
+    list_display = [
+        "symbol",
+        "company_name",
+        "price",
+        "change",
+        "percent_change",
+        "volume",
+        "date",
+    ]
+    list_filter = ["date", "symbol"]
+    search_fields = ["symbol", "company_name"]
 
 
 # We need to patch the admin site to add our own custom urls and app list without
@@ -53,31 +80,3 @@ def custom_get_app_list(request, app_label=None):
 # Patch the existing admin site instead of replacing it
 admin.site.get_urls = custom_get_urls
 admin.site.get_app_list = custom_get_app_list
-
-
-# Register our models with the default admin site
-@admin.register(User)
-class UserAdmin(admin.ModelAdmin):
-    fields = list_display = [
-        "username",
-        "email",
-        "first_name",
-        "last_name",
-        "is_staff",
-        "is_active",
-    ]
-
-
-@admin.register(StockTicker)
-class StockTickerAdmin(admin.ModelAdmin):
-    list_display = [
-        "symbol",
-        "company_name",
-        "price",
-        "change",
-        "percent_change",
-        "volume",
-        "date",
-    ]
-    list_filter = ["date", "symbol"]
-    search_fields = ["symbol", "company_name"]

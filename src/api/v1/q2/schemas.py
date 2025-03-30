@@ -29,6 +29,7 @@ class QueueInfo(Schema):
 
 
 class QueueStatusResponse(Schema):
+    queue_size: int
     queue_count: int
     task_count: int
     timestamp: str

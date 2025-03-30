@@ -128,6 +128,7 @@
         const maxDataPoints = 60; // Store 1 minute of data
         let queueHistoryData = {};
         let totalTasksHistory = [];
+        let queueSizeHistory = []; // Add queue size history array
         let labels = [];
 
         // Polling controls
@@ -142,15 +143,26 @@
                 type: 'line',
                 data: {
                     labels: labels,
-                    datasets: [{
-                        label: 'Total Tasks',
-                        data: totalTasksHistory,
-                        borderColor: 'rgb(53, 162, 235)',
-                        backgroundColor: 'rgba(53, 162, 235, 0.5)',
-                        borderWidth: 3,
-                        tension: 0.1,
-                        fill: false
-                    }]
+                    datasets: [
+                        {
+                            label: 'Total Tasks',
+                            data: totalTasksHistory,
+                            borderColor: 'rgb(53, 162, 235)',
+                            backgroundColor: 'rgba(53, 162, 235, 0.5)',
+                            borderWidth: 3,
+                            tension: 0.1,
+                            fill: false
+                        },
+                        {
+                            label: 'Queue Size',
+                            data: queueSizeHistory,
+                            borderColor: 'rgb(255, 99, 132)',
+                            backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                            borderWidth: 3,
+                            tension: 0.1,
+                            fill: false
+                        }
+                    ]
                 },
                 options: {
                     responsive: true,
@@ -220,6 +232,12 @@
                 totalTasksHistory.shift();
             }
 
+            // Update queue size history
+            queueSizeHistory.push(data.queue_size);
+            if (queueSizeHistory.length > maxDataPoints) {
+                queueSizeHistory.shift();
+            }
+
             // Update per-queue data
             data.active_queues.forEach(queue => {
                 if (!queueHistoryData[queue.name]) {
@@ -272,6 +290,8 @@
                 const queueName = dataset.label;
                 if (queueName === 'Total Tasks') {
                     dataset.data = totalTasksHistory;
+                } else if (queueName === 'Queue Size') {
+                    dataset.data = queueSizeHistory;
                 } else if (queueHistoryData[queueName]) {
                     dataset.data = queueHistoryData[queueName].data;
                 }
@@ -293,6 +313,7 @@
                     // Update queue count and timestamp
                     document.getElementById('queue-count').textContent = data.queue_count;
                     document.getElementById('task-count').textContent = data.task_count;
+                    document.getElementById('queue-size').textContent = data.queue_size;
                     document.getElementById('timestamp').textContent = data.timestamp;
 
                     // Update queue table
@@ -422,6 +443,10 @@
             <div class="stat-item">
                 <div class="stat-label">Active Queues</div>
                 <div class="stat-value" id="queue-count">-</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">Queue Size</div>
+                <div class="stat-value" id="queue-size">-</div>
             </div>
             <div class="stat-item">
                 <div class="stat-label">Total Tasks</div>

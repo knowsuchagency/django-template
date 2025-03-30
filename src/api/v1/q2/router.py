@@ -6,6 +6,7 @@ from django_q.tasks import async_task
 from django_q.models import Task
 from django.contrib.admin.views.decorators import staff_member_required
 from ninja import Router
+from django_q.brokers import get_broker
 
 from .schemas import JobResult, QueueStatusResponse, QueueInfo
 
@@ -52,7 +53,9 @@ def queue_status(request):
     from django_q.status import Stat
     from datetime import datetime
 
-    stats = Stat.get_all()
+    broker = get_broker()
+
+    stats = Stat.get_all(broker)
     active_queues = []
     total_tasks = 0
 
@@ -74,6 +77,7 @@ def queue_status(request):
 
     # Create response
     response = QueueStatusResponse(
+        queue_size=broker.queue_size(),
         queue_count=len(active_queues),
         task_count=total_tasks,
         timestamp=datetime.now().strftime("%H:%M:%S"),

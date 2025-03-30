@@ -2,6 +2,7 @@ from django.http import HttpResponse
 from djecorator import Route
 from django.shortcuts import render
 from django.contrib.admin.views.decorators import staff_member_required
+
 route = Route()
 
 
@@ -17,4 +18,8 @@ def dashboard(request):
 
 @staff_member_required
 def queue_monitor(request):
-    return HttpResponse("Hello from the queue monitor!")  
+    """Queue monitoring view for the admin interface"""
+    context = {
+        "title": "Queue Monitor",  # This will be shown in the admin title
+    }
+    return render(request, "admin/queue_monitor.html", context)

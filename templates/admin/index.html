@@ -1,0 +1,12 @@
+{% extends "admin/index.html" %}
+{% load i18n %}
+
+{% block sidebar %}
+{{ block.super }}
+<div class="module" id="custom-admin-links">
+    <h2>{% trans 'Queue Management' %}</h2>
+    <ul>
+        <li><a href="{% url 'admin_queue_monitor' %}">{% trans 'Queue Monitor' %}</a></li>
+    </ul>
+</div>
+{% endblock %}

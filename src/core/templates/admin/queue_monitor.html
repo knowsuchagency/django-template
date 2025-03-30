@@ -10,8 +10,153 @@
 
 {% block extrahead %}
 {{ block.super }}
+<!-- Add Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function () {
+        // Data storage for historical data
+        const maxDataPoints = 60; // Store 1 minute of data
+        let queueHistoryData = {};
+        let totalTasksHistory = [];
+        let labels = [];
+
+        // Create charts
+        const taskCountChart = new Chart(
+            document.getElementById('task-count-chart'),
+            {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Total Tasks',
+                        data: totalTasksHistory,
+                        borderColor: 'rgb(75, 192, 192)',
+                        tension: 0.1,
+                        fill: false
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    },
+                    animation: {
+                        duration: 0 // Disable animation for better performance with 1s updates
+                    }
+                }
+            }
+        );
+
+        const queueTasksChart = new Chart(
+            document.getElementById('queue-tasks-chart'),
+            {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: []
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    },
+                    animation: {
+                        duration: 0 // Disable animation for better performance
+                    }
+                }
+            }
+        );
+
+        function addTimeLabel() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString();
+            labels.push(timeString);
+
+            // Keep only the last maxDataPoints labels
+            if (labels.length > maxDataPoints) {
+                labels.shift();
+            }
+        }
+
+        function updateCharts(data) {
+            // Add a new time label
+            addTimeLabel();
+
+            // Update total tasks history
+            totalTasksHistory.push(data.task_count);
+            if (totalTasksHistory.length > maxDataPoints) {
+                totalTasksHistory.shift();
+            }
+
+            // Update per-queue data
+            data.active_queues.forEach(queue => {
+                if (!queueHistoryData[queue.name]) {
+                    // Initialize for new queue
+                    queueHistoryData[queue.name] = {
+                        data: Array(labels.length - 1).fill(0),
+                        color: getRandomColor()
+                    };
+
+                    // Add dataset to chart
+                    queueTasksChart.data.datasets.push({
+                        label: queue.name,
+                        data: queueHistoryData[queue.name].data,
+                        borderColor: queueHistoryData[queue.name].color,
+                        tension: 0.1,
+                        fill: false
+                    });
+                }
+
+                // Add the new data point
+                queueHistoryData[queue.name].data.push(queue.tasks);
+
+                // Keep only the last maxDataPoints
+                if (queueHistoryData[queue.name].data.length > maxDataPoints) {
+                    queueHistoryData[queue.name].data.shift();
+                }
+            });
+
+            // Remove queues that are no longer active
+            const activeQueueNames = data.active_queues.map(q => q.name);
+            Object.keys(queueHistoryData).forEach(queueName => {
+                if (!activeQueueNames.includes(queueName)) {
+                    delete queueHistoryData[queueName];
+
+                    // Remove dataset from chart
+                    const index = queueTasksChart.data.datasets.findIndex(ds => ds.label === queueName);
+                    if (index !== -1) {
+                        queueTasksChart.data.datasets.splice(index, 1);
+                    }
+                }
+            });
+
+            // Update the charts
+            taskCountChart.data.labels = labels;
+            queueTasksChart.data.labels = labels;
+
+            // Update datasets data
+            queueTasksChart.data.datasets.forEach(dataset => {
+                const queueName = dataset.label;
+                if (queueHistoryData[queueName]) {
+                    dataset.data = queueHistoryData[queueName].data;
+                }
+            });
+
+            taskCountChart.update();
+            queueTasksChart.update();
+        }
+
+        function getRandomColor() {
+            const letters = '0123456789ABCDEF';
+            let color = '#';
+            for (let i = 0; i < 6; i++) {
+                color += letters[Math.floor(Math.random() * 16)];
+            }
+            return color;
+        }
+
         function fetchQueueData() {
             fetch('/api/v1/celery/queues')
                 .then(response => response.json())
@@ -28,12 +173,15 @@
                     data.active_queues.forEach(queue => {
                         const row = document.createElement('tr');
                         row.innerHTML = `
-              <td>${queue.name}</td>
-              <td>${queue.type}</td>
-              <td>${queue.tasks}</td>
-            `;
+                          <td>${queue.name}</td>
+                          <td>${queue.type}</td>
+                          <td>${queue.tasks}</td>
+                        `;
                         tableBody.appendChild(row);
                     });
+
+                    // Update charts with new data
+                    updateCharts(data);
                 })
                 .catch(error => {
                     console.error('Error fetching queue data:', error);
@@ -43,8 +191,8 @@
         // Fetch initial data
         fetchQueueData();
 
-        // Refresh data every 10 seconds
-        setInterval(fetchQueueData, 10000);
+        // Refresh data every 1 second
+        setInterval(fetchQueueData, 1000);
     });
 </script>
 {% endblock %}
@@ -58,6 +206,20 @@
         <p>Active Queues: <span id="queue-count">-</span></p>
         <p>Total Tasks: <span id="task-count">-</span></p>
         <p>Last Updated: <span id="timestamp">-</span></p>
+    </div>
+
+    <div class="module">
+        <h2>Total Tasks Over Time</h2>
+        <div style="height: 300px;">
+            <canvas id="task-count-chart"></canvas>
+        </div>
+    </div>
+
+    <div class="module">
+        <h2>Tasks Per Queue</h2>
+        <div style="height: 300px;">
+            <canvas id="queue-tasks-chart"></canvas>
+        </div>
     </div>
 
     <div class="module">

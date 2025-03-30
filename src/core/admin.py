@@ -6,8 +6,8 @@ from .models import User, StockTicker
 from .views import queue_monitor
 
 
-# Instead of replacing the admin site, we'll extend the existing one
-# Store original methods to preserve existing functionality
+# We need to patch the admin site to add our own custom urls and app list without
+# replacing the existing admin site and third party apps registered with it.
 original_get_urls = admin.site.get_urls
 original_get_app_list = admin.site.get_app_list
 

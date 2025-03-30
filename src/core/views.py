@@ -19,7 +19,4 @@ def dashboard(request):
 @staff_member_required
 def queue_monitor(request):
     """Queue monitoring view for the admin interface"""
-    context = {
-        "title": "Queue Monitor",  # This will be shown in the admin title
-    }
-    return render(request, "admin/queue_monitor.html", context)
+    return render(request, "admin/queue_monitor.html")

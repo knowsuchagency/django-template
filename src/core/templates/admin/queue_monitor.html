@@ -1,0 +1,79 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+    <a href="{% url 'admin:index' %}">{% trans 'Home' %}</a>
+    &rsaquo; {% trans 'Queue Monitor' %}
+</div>
+{% endblock %}
+
+{% block extrahead %}
+{{ block.super }}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        function fetchQueueData() {
+            fetch('/api/v1/celery/queues')
+                .then(response => response.json())
+                .then(data => {
+                    // Update queue count and timestamp
+                    document.getElementById('queue-count').textContent = data.queue_count;
+                    document.getElementById('task-count').textContent = data.task_count;
+                    document.getElementById('timestamp').textContent = data.timestamp;
+
+                    // Update queue table
+                    const tableBody = document.getElementById('queue-table-body');
+                    tableBody.innerHTML = '';
+
+                    data.active_queues.forEach(queue => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+              <td>${queue.name}</td>
+              <td>${queue.type}</td>
+              <td>${queue.tasks}</td>
+            `;
+                        tableBody.appendChild(row);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching queue data:', error);
+                });
+        }
+
+        // Fetch initial data
+        fetchQueueData();
+
+        // Refresh data every 10 seconds
+        setInterval(fetchQueueData, 10000);
+    });
+</script>
+{% endblock %}
+
+{% block content %}
+<div id="content-main">
+    <h1>Queue Monitor</h1>
+
+    <div class="module">
+        <h2>Queue Status Summary</h2>
+        <p>Active Queues: <span id="queue-count">-</span></p>
+        <p>Total Tasks: <span id="task-count">-</span></p>
+        <p>Last Updated: <span id="timestamp">-</span></p>
+    </div>
+
+    <div class="module">
+        <table>
+            <caption>Active Queues</caption>
+            <thead>
+                <tr>
+                    <th>Queue Name</th>
+                    <th>Type</th>
+                    <th>Pending Tasks</th>
+                </tr>
+            </thead>
+            <tbody id="queue-table-body">
+                <!-- Queue data will be inserted here by JavaScript -->
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

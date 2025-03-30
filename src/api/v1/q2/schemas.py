@@ -33,4 +33,6 @@ class QueueStatusResponse(Schema):
     queue_count: int
     task_count: int
     timestamp: str
+    result_count: int
+    reincarnations: int
     active_queues: List[QueueInfo]

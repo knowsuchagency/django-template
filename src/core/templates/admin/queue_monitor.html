@@ -129,6 +129,8 @@
         let queueHistoryData = {};
         let totalTasksHistory = [];
         let queueSizeHistory = []; // Add queue size history array
+        let resultCountHistory = []; // Add result count history array
+        let reincarnationsHistory = []; // Add reincarnations history array
         let labels = [];
 
         // Polling controls
@@ -158,6 +160,24 @@
                             data: queueSizeHistory,
                             borderColor: 'rgb(255, 99, 132)',
                             backgroundColor: 'rgba(255, 99, 132, 0.5)',
+                            borderWidth: 3,
+                            tension: 0.1,
+                            fill: false
+                        },
+                        {
+                            label: 'Result Count',
+                            data: resultCountHistory,
+                            borderColor: 'rgb(75, 192, 192)',
+                            backgroundColor: 'rgba(75, 192, 192, 0.5)',
+                            borderWidth: 3,
+                            tension: 0.1,
+                            fill: false
+                        },
+                        {
+                            label: 'Reincarnations',
+                            data: reincarnationsHistory,
+                            borderColor: 'rgb(153, 102, 255)',
+                            backgroundColor: 'rgba(153, 102, 255, 0.5)',
                             borderWidth: 3,
                             tension: 0.1,
                             fill: false
@@ -238,6 +258,18 @@
                 queueSizeHistory.shift();
             }
 
+            // Update result count history
+            resultCountHistory.push(data.result_count);
+            if (resultCountHistory.length > maxDataPoints) {
+                resultCountHistory.shift();
+            }
+
+            // Update reincarnations history
+            reincarnationsHistory.push(data.reincarnations);
+            if (reincarnationsHistory.length > maxDataPoints) {
+                reincarnationsHistory.shift();
+            }
+
             // Update per-queue data
             data.active_queues.forEach(queue => {
                 if (!queueHistoryData[queue.name]) {
@@ -292,6 +324,10 @@
                     dataset.data = totalTasksHistory;
                 } else if (queueName === 'Queue Size') {
                     dataset.data = queueSizeHistory;
+                } else if (queueName === 'Result Count') {
+                    dataset.data = resultCountHistory;
+                } else if (queueName === 'Reincarnations') {
+                    dataset.data = reincarnationsHistory;
                 } else if (queueHistoryData[queueName]) {
                     dataset.data = queueHistoryData[queueName].data;
                 }
@@ -314,6 +350,8 @@
                     document.getElementById('queue-count').textContent = data.queue_count;
                     document.getElementById('task-count').textContent = data.task_count;
                     document.getElementById('queue-size').textContent = data.queue_size;
+                    document.getElementById('result-count').textContent = data.result_count;
+                    document.getElementById('reincarnations').textContent = data.reincarnations;
                     document.getElementById('timestamp').textContent = data.timestamp;
 
                     // Update queue table
@@ -451,6 +489,14 @@
             <div class="stat-item">
                 <div class="stat-label">Total Tasks</div>
                 <div class="stat-value" id="task-count">-</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">Result Count</div>
+                <div class="stat-value" id="result-count">-</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">Reincarnations</div>
+                <div class="stat-value" id="reincarnations">-</div>
             </div>
             <div class="stat-item">
                 <div class="stat-label">Last Updated</div>

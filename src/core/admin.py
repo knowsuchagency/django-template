@@ -6,35 +6,26 @@ from .models import User, StockTicker
 from .views import queue_monitor
 
 
-# Store reference to the original method
-original_get_urls = admin.AdminSite.get_urls
+# Instead of replacing the admin site, we'll extend the existing one
+# Store original methods to preserve existing functionality
+original_get_urls = admin.site.get_urls
+original_get_app_list = admin.site.get_app_list
 
 
-# Fix the get_urls implementation
-def get_urls(self):
-    # Call the original method, not our own implementation
-    urls = original_get_urls(self)
+# Customize the get_urls method
+def custom_get_urls():
+    urls = original_get_urls()
     custom_urls = [
-        path("queue-monitor/", self.admin_view(queue_monitor), name="queue_monitor"),
+        path(
+            "queue-monitor/", admin.site.admin_view(queue_monitor), name="queue_monitor"
+        ),
     ]
     return custom_urls + urls
 
 
-# Monkey patch the AdminSite.get_urls with our custom method
-admin.AdminSite.get_urls = get_urls
-
-
-# Store reference to the original app list method
-original_get_app_list = admin.AdminSite.get_app_list
-
-
-# Add a custom method to the admin site to get our custom app list
-def get_app_list(self, request, app_label=None):
-    """
-    Return a sorted list of all the installed apps that have been
-    registered in this site.
-    """
-    app_list = original_get_app_list(self, request, app_label)
+# Customize the get_app_list method
+def custom_get_app_list(request, app_label=None):
+    app_list = original_get_app_list(request, app_label)
 
     # Add our Queue Monitor to the app list
     app_dict = {
@@ -59,11 +50,12 @@ def get_app_list(self, request, app_label=None):
     return app_list
 
 
-# Monkey patch the AdminSite.get_app_list with our custom method
-admin.AdminSite.get_app_list = get_app_list
+# Patch the existing admin site instead of replacing it
+admin.site.get_urls = custom_get_urls
+admin.site.get_app_list = custom_get_app_list
 
 
-# Register our models
+# Register our models with the default admin site
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
     fields = list_display = [

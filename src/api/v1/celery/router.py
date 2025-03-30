@@ -1,12 +1,14 @@
 import random
 import time
+import redis
 from pprint import pprint
 
 from celery import shared_task
 from celery.result import AsyncResult
+from django.conf import settings
 from ninja import Router
 
-from .schemas import JobResult
+from .schemas import JobResult, QueueInfo, QueueStatusResponse
 
 
 router = Router()
@@ -43,4 +45,54 @@ def result(request, job_id: str):
         job_id=task_result.id,
         status=task_result.status,
         result=result_data,
+    )
+
+
+@router.get("/queues", response=QueueStatusResponse, summary="Get Queue Status")
+def queue_status(request):
+    """
+    Get a snapshot of all Celery queues and their current backlog.
+    Shows queue names, types, and number of pending tasks.
+    """
+    # Connect to Redis
+    redis_client = redis.from_url(settings.REDIS_URL)
+
+    # Get all keys
+    all_keys = redis_client.keys("*")
+
+    # Filter for actual queue keys (not task metadata)
+    active_queues = []
+    total_tasks = 0
+
+    for key in all_keys:
+        key_name = key.decode("utf-8")
+        key_type = redis_client.type(key).decode("utf-8")
+
+        # Filter out task metadata and only look for actual queues (lists)
+        if (
+            key_type == "list"
+            and not key_name.startswith("celery-task-meta-")
+            and not key_name.startswith("_")
+        ):
+            queue_length = redis_client.llen(key_name) if key_type == "list" else 0
+            total_tasks += queue_length
+            active_queues.append(
+                QueueInfo(name=key_name, type=key_type, tasks=queue_length)
+            )
+
+    # Count task metadata entries
+    task_meta_keys = [
+        k for k in all_keys if k.decode("utf-8").startswith("celery-task-meta-")
+    ]
+    task_meta_count = len(task_meta_keys)
+
+    # Sort queues by name for consistent output
+    active_queues.sort(key=lambda q: q.name)
+
+    return QueueStatusResponse(
+        active_queues=active_queues,
+        queue_count=len(active_queues),
+        task_count=total_tasks,
+        task_metadata_count=task_meta_count,
+        timestamp=time.strftime("%Y-%m-%d %H:%M:%S"),
     )

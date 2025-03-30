@@ -64,26 +64,12 @@ qcluster: setup_periodic_tasks
     uv run python manage.py qcluster
 
 # monitor q cluster
-qmonitor redis_url='':
-    #!/bin/bash
-    echo "redis_url: {{redis_url}}"
-    if [ -z "{{redis_url}}" ]; then
-        uv run python manage.py qmonitor
-    else
-        REDIS_URL={{redis_url}} uv run python manage.py qmonitor
-    fi
+qmonitor:
+    uv run python manage.py qmonitor
 
-# view q stats
-qstats redis_url='':
-    #!/bin/bash
-    echo "redis_url: {{redis_url}}"
-    if [ -z "{{redis_url}}" ]; then
-        uv run python manage.py qinfo
-    else
-        REDIS_URL={{redis_url}} uv run python manage.py qinfo
-    fi
-
-
+# view q info
+qinfo:
+    uv run python manage.py qinfo
 
 # django shell
 shell:

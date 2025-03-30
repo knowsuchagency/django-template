@@ -29,26 +29,28 @@
         display: flex;
         flex-wrap: wrap;
         gap: 20px;
-        background-color: rgba(73, 80, 87, 0.7);
+        background-color: #f8f9fa;
         padding: 15px;
         border-radius: 4px;
         margin-bottom: 20px;
-        color: #e9ecef;
+        color: #212529;
+        border: 1px solid #dee2e6;
     }
 
     .stat-item {
         flex: 1;
         min-width: 200px;
         text-align: center;
-        padding: 10px;
+        padding: 15px;
         border-radius: 4px;
-        background-color: rgba(52, 58, 64, 0.8);
+        background-color: #ffffff;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     }
 
     .stat-value {
         font-size: 1.8em;
         font-weight: bold;
-        color: #79aec8;
+        color: #0d6efd;
         margin-top: 5px;
     }
 
@@ -56,6 +58,7 @@
         font-size: 0.9em;
         text-transform: uppercase;
         letter-spacing: 0.5px;
+        color: #6c757d;
     }
 
     @media (max-width: 992px) {
@@ -65,8 +68,8 @@
     }
 
     .queue-header {
-        background-color: #2c3034;
-        color: #e9ecef;
+        background-color: #343a40;
+        color: #ffffff;
         padding: 10px 15px;
         border-radius: 4px 4px 0 0;
         font-weight: 500;
@@ -133,8 +136,8 @@
         let isPolling = true;
 
         // Create charts
-        const taskCountChart = new Chart(
-            document.getElementById('task-count-chart'),
+        const combinedChart = new Chart(
+            document.getElementById('combined-chart'),
             {
                 type: 'line',
                 data: {
@@ -142,82 +145,55 @@
                     datasets: [{
                         label: 'Total Tasks',
                         data: totalTasksHistory,
-                        borderColor: 'rgb(75, 192, 192)',
+                        borderColor: 'rgb(53, 162, 235)',
+                        backgroundColor: 'rgba(53, 162, 235, 0.5)',
+                        borderWidth: 3,
                         tension: 0.1,
                         fill: false
                     }]
                 },
                 options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
                     scales: {
                         y: {
                             beginAtZero: true,
                             grid: {
-                                color: 'rgba(255, 255, 255, 0.1)'
+                                color: 'rgba(0, 0, 0, 0.1)'
                             },
                             ticks: {
-                                color: '#e9ecef'
+                                color: '#495057'
                             }
                         },
                         x: {
                             grid: {
-                                color: 'rgba(255, 255, 255, 0.1)'
+                                color: 'rgba(0, 0, 0, 0.1)'
                             },
                             ticks: {
-                                color: '#e9ecef'
+                                color: '#495057'
                             }
                         }
                     },
                     plugins: {
                         legend: {
+                            position: 'top',
                             labels: {
-                                color: '#e9ecef'
+                                color: '#495057',
+                                usePointStyle: true,
+                                padding: 20
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Queue Tasks Monitor',
+                            color: '#495057',
+                            font: {
+                                size: 16
                             }
                         }
                     },
                     animation: {
                         duration: 0 // Disable animation for better performance with 1s updates
-                    }
-                }
-            }
-        );
-
-        const queueTasksChart = new Chart(
-            document.getElementById('queue-tasks-chart'),
-            {
-                type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: []
-                },
-                options: {
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            grid: {
-                                color: 'rgba(255, 255, 255, 0.1)'
-                            },
-                            ticks: {
-                                color: '#e9ecef'
-                            }
-                        },
-                        x: {
-                            grid: {
-                                color: 'rgba(255, 255, 255, 0.1)'
-                            },
-                            ticks: {
-                                color: '#e9ecef'
-                            }
-                        }
-                    },
-                    plugins: {
-                        legend: {
-                            labels: {
-                                color: '#e9ecef'
-                            }
-                        }
-                    },
-                    animation: {
-                        duration: 0 // Disable animation for better performance
                     }
                 }
             }
@@ -254,10 +230,12 @@
                     };
 
                     // Add dataset to chart
-                    queueTasksChart.data.datasets.push({
+                    combinedChart.data.datasets.push({
                         label: queue.name,
                         data: queueHistoryData[queue.name].data,
                         borderColor: queueHistoryData[queue.name].color,
+                        backgroundColor: queueHistoryData[queue.name].color.replace(')', ', 0.1)').replace('rgb', 'rgba'),
+                        borderWidth: 2,
                         tension: 0.1,
                         fill: false
                     });
@@ -279,36 +257,33 @@
                     delete queueHistoryData[queueName];
 
                     // Remove dataset from chart
-                    const index = queueTasksChart.data.datasets.findIndex(ds => ds.label === queueName);
+                    const index = combinedChart.data.datasets.findIndex(ds => ds.label === queueName);
                     if (index !== -1) {
-                        queueTasksChart.data.datasets.splice(index, 1);
+                        combinedChart.data.datasets.splice(index, 1);
                     }
                 }
             });
 
-            // Update the charts
-            taskCountChart.data.labels = labels;
-            queueTasksChart.data.labels = labels;
+            // Update the chart
+            combinedChart.data.labels = labels;
 
             // Update datasets data
-            queueTasksChart.data.datasets.forEach(dataset => {
+            combinedChart.data.datasets.forEach(dataset => {
                 const queueName = dataset.label;
-                if (queueHistoryData[queueName]) {
+                if (queueName === 'Total Tasks') {
+                    dataset.data = totalTasksHistory;
+                } else if (queueHistoryData[queueName]) {
                     dataset.data = queueHistoryData[queueName].data;
                 }
             });
 
-            taskCountChart.update();
-            queueTasksChart.update();
+            combinedChart.update();
         }
 
         function getRandomColor() {
-            const letters = '0123456789ABCDEF';
-            let color = '#';
-            for (let i = 0; i < 6; i++) {
-                color += letters[Math.floor(Math.random() * 16)];
-            }
-            return color;
+            // Use more saturated colors for better visibility in light mode
+            const hue = Math.floor(Math.random() * 360);
+            return `hsl(${hue}, 70%, 45%)`;
         }
 
         function fetchQueueData() {
@@ -432,24 +407,15 @@
         </div>
     </div>
 
-    <!-- Charts side by side -->
-    <div class="charts-container">
-        <div class="module chart-module">
-            <div class="queue-header">Total Tasks Over Time</div>
-            <div style="height: 300px;">
-                <canvas id="task-count-chart"></canvas>
-            </div>
-        </div>
-
-        <div class="module chart-module">
-            <div class="queue-header">Tasks Per Queue</div>
-            <div style="height: 300px;">
-                <canvas id="queue-tasks-chart"></canvas>
-            </div>
+    <!-- Charts section - now with a single chart -->
+    <div class="module">
+        <div class="queue-header">Queue Tasks Monitor</div>
+        <div style="height: 400px; padding: 15px; background-color: #ffffff; border-radius: 0 0 4px 4px;">
+            <canvas id="combined-chart"></canvas>
         </div>
     </div>
 
-    <!-- Stats below the charts -->
+    <!-- Stats below the chart -->
     <div class="module">
         <div class="queue-header">Queue Status Summary</div>
         <div class="stats-container">

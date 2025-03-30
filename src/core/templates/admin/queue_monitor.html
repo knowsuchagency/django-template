@@ -71,7 +71,54 @@
         border-radius: 4px 4px 0 0;
         font-weight: 500;
     }
+
+    /* New styles for the control panel */
+    .control-panel {
+        display: flex;
+        gap: 15px;
+        align-items: center;
+        margin-bottom: 20px;
+        padding: 15px;
+        background-color: rgba(52, 58, 64, 0.8);
+        border-radius: 4px;
+    }
+
+    .control-panel button {
+        padding: 8px 16px;
+        border-radius: 4px;
+        background-color: #79aec8;
+        color: white;
+        border: none;
+        cursor: pointer;
+        font-weight: 500;
+    }
+
+    .control-panel button:hover {
+        background-color: #6b9cb8;
+    }
+
+    .control-panel button.stopped {
+        background-color: #28a745;
+    }
+
+    .control-panel button.stopped:hover {
+        background-color: #218838;
+    }
+
+    .control-panel select {
+        padding: 8px;
+        border-radius: 4px;
+        border: 1px solid #ced4da;
+        background-color: #343a40;
+        color: #e9ecef;
+    }
+
+    .control-panel label {
+        color: #e9ecef;
+        font-weight: 500;
+    }
 </style>
+
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         // Data storage for historical data
@@ -79,6 +126,11 @@
         let queueHistoryData = {};
         let totalTasksHistory = [];
         let labels = [];
+
+        // Polling controls
+        let pollingInterval = 1000; // Default to 1 second
+        let pollingIntervalId = null;
+        let isPolling = true;
 
         // Create charts
         const taskCountChart = new Chart(
@@ -290,11 +342,63 @@
                 });
         }
 
+        // New functions to control polling
+        function startPolling() {
+            if (!isPolling) {
+                pollingIntervalId = setInterval(fetchQueueData, pollingInterval);
+                isPolling = true;
+                updateToggleButton();
+            }
+        }
+
+        function stopPolling() {
+            if (isPolling) {
+                clearInterval(pollingIntervalId);
+                isPolling = false;
+                updateToggleButton();
+            }
+        }
+
+        function togglePolling() {
+            if (isPolling) {
+                stopPolling();
+            } else {
+                startPolling();
+            }
+        }
+
+        function updateToggleButton() {
+            const toggleButton = document.getElementById('toggle-polling');
+            if (isPolling) {
+                toggleButton.textContent = 'Stop Polling';
+                toggleButton.classList.remove('stopped');
+            } else {
+                toggleButton.textContent = 'Start Polling';
+                toggleButton.classList.add('stopped');
+            }
+        }
+
+        function changeInterval() {
+            const intervalSelect = document.getElementById('polling-interval');
+            pollingInterval = parseInt(intervalSelect.value);
+
+            // Restart polling with new interval if currently polling
+            if (isPolling) {
+                stopPolling();
+                startPolling();
+            }
+        }
+
+        // Setup event listeners for controls
+        document.getElementById('toggle-polling').addEventListener('click', togglePolling);
+        document.getElementById('polling-interval').addEventListener('change', changeInterval);
+
         // Fetch initial data
         fetchQueueData();
 
-        // Refresh data every 1 second
-        setInterval(fetchQueueData, 1000);
+        // Start initial polling
+        pollingIntervalId = setInterval(fetchQueueData, pollingInterval);
+        updateToggleButton();
     });
 </script>
 {% endblock %}
@@ -302,6 +406,24 @@
 {% block content %}
 <div id="content-main">
     <h1>Queue Monitor</h1>
+
+    <!-- Control Panel -->
+    <div class="module">
+        <div class="queue-header">Control Panel</div>
+        <div class="control-panel">
+            <button id="toggle-polling">Stop Polling</button>
+            <label for="polling-interval">Polling Interval:</label>
+            <select id="polling-interval" style="min-height: 36px;">
+                <option value="500">0.5 seconds</option>
+                <option value="1000" selected>1 second</option>
+                <option value="2000">2 seconds</option>
+                <option value="5000">5 seconds</option>
+                <option value="10000">10 seconds</option>
+                <option value="30000">30 seconds</option>
+                <option value="60000">1 minute</option>
+            </select>
+        </div>
+    </div>
 
     <!-- Charts side by side -->
     <div class="charts-container">

@@ -1,6 +1,5 @@
 import random
 import time
-import redis
 from pprint import pprint
 
 from django_q.tasks import async_task
@@ -23,7 +22,7 @@ def test_q_job():
     return result
 
 
-@router.post("/test", auth=None, summary="Submit Test Job(s)")
+@router.post("/test", summary="Submit Test Job(s)")
 def test_q(request, count: int = 1):
     task_ids = [async_task(test_q_job) for _ in range(count)]
     return {"message": "Jobs queued", "job_ids": task_ids if count > 1 else task_ids[0]}

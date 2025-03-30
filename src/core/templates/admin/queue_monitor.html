@@ -129,7 +129,7 @@
         let queueHistoryData = {};
         let taskQueueHistory = []; // Renamed from totalTasksHistory
         let queueSizeHistory = [];
-        let resultCountHistory = [];
+        let resultQueueHistory = [];
         let reincarnationsHistory = [];
         let labels = [];
 
@@ -165,8 +165,8 @@
                             fill: false
                         },
                         {
-                            label: 'Result Count',
-                            data: resultCountHistory,
+                            label: 'Result Queue',
+                            data: resultQueueHistory,
                             borderColor: 'rgb(75, 192, 192)',
                             backgroundColor: 'rgba(75, 192, 192, 0.5)',
                             borderWidth: 3,
@@ -258,10 +258,10 @@
                 queueSizeHistory.shift();
             }
 
-            // Update result count history
-            resultCountHistory.push(data.result_count);
-            if (resultCountHistory.length > maxDataPoints) {
-                resultCountHistory.shift();
+            // Update result queue history
+            resultQueueHistory.push(data.result_queue);
+            if (resultQueueHistory.length > maxDataPoints) {
+                resultQueueHistory.shift();
             }
 
             // Update reincarnations history
@@ -324,8 +324,8 @@
                     dataset.data = taskQueueHistory;
                 } else if (queueName === 'Queue Size') {
                     dataset.data = queueSizeHistory;
-                } else if (queueName === 'Result Count') {
-                    dataset.data = resultCountHistory;
+                } else if (queueName === 'Result Queue') {
+                    dataset.data = resultQueueHistory;
                 } else if (queueName === 'Reincarnations') {
                     dataset.data = reincarnationsHistory;
                 } else if (queueHistoryData[queueName]) {
@@ -350,7 +350,7 @@
                     document.getElementById('queue-count').textContent = data.queue_count;
                     document.getElementById('task-queue').textContent = data.task_queue;
                     document.getElementById('queue-size').textContent = data.queue_size;
-                    document.getElementById('result-count').textContent = data.result_count;
+                    document.getElementById('result-queue').textContent = data.result_queue;
                     document.getElementById('reincarnations').textContent = data.reincarnations;
                     document.getElementById('timestamp').textContent = data.timestamp;
 
@@ -491,8 +491,8 @@
                 <div class="stat-value" id="task-queue">-</div>
             </div>
             <div class="stat-item">
-                <div class="stat-label">Result Count</div>
-                <div class="stat-value" id="result-count">-</div>
+                <div class="stat-label">Result Queue</div>
+                <div class="stat-value" id="result-queue">-</div>
             </div>
             <div class="stat-item">
                 <div class="stat-label">Reincarnations</div>

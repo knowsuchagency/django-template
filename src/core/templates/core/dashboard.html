@@ -16,23 +16,20 @@
         </div>
     </div>
 
-    <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+    <div class="grid grid-cols-1 gap-6">
         <div class="card bg-base-200 shadow-xl">
             <div class="card-body">
-                <h2 class="card-title">Stock Prices</h2>
+                <h2 class="card-title">Stock Data</h2>
                 <div class="form-control mb-4">
                     <select id="stockSelector" class="select select-bordered w-full max-w-xs">
                         <option value="">All Stocks</option>
                         <!-- Options will be populated dynamically -->
                     </select>
                 </div>
-                <div id="stockChartContainer" class="w-full h-64"></div>
-            </div>
-        </div>
+                <h3 class="text-lg font-semibold mt-4 mb-2">Stock Prices</h3>
+                <div id="stockChartContainer" class="w-full h-64 mb-6"></div>
 
-        <div class="card bg-base-200 shadow-xl">
-            <div class="card-body">
-                <h2 class="card-title">Trading Volume</h2>
+                <h3 class="text-lg font-semibold mt-4 mb-2">Trading Volume</h3>
                 <div id="volumeChartContainer" class="w-full h-64"></div>
             </div>
         </div>

@@ -54,6 +54,11 @@
             volumeChart = echarts.init(volumeChartContainer, 'dark');
         }
 
+        // Connect the charts for synchronized dataZoom and tooltip
+        if (stockChart && volumeChart) {
+            echarts.connect([stockChart, volumeChart]);
+        }
+
         // Stock selector
         const stockSelector = document.getElementById('stockSelector');
 

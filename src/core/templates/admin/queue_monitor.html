@@ -75,21 +75,24 @@
         font-weight: 500;
     }
 
-    /* New styles for the control panel */
+    /* Styles for control panel */
     .control-panel {
         display: flex;
         gap: 15px;
         align-items: center;
         margin-bottom: 20px;
         padding: 15px;
-        background-color: rgba(52, 58, 64, 0.8);
+        background-color: #f8f9fa;
+        /* Light background for light mode */
         border-radius: 4px;
+        border: 1px solid #dee2e6;
     }
 
     .control-panel button {
         padding: 8px 16px;
         border-radius: 4px;
         background-color: #79aec8;
+        /* Keep consistent with admin theme */
         color: white;
         border: none;
         cursor: pointer;
@@ -112,13 +115,119 @@
         padding: 8px;
         border-radius: 4px;
         border: 1px solid #ced4da;
-        background-color: #343a40;
-        color: #e9ecef;
+        background-color: #ffffff;
+        /* Light background for light mode */
+        color: #495057;
     }
 
     .control-panel label {
-        color: #e9ecef;
+        color: #495057;
+        /* Dark text for light mode */
         font-weight: 500;
+    }
+
+    /* Dark mode specific styles */
+    @media (prefers-color-scheme: dark) {
+        .stats-container {
+            background-color: #2c2c2c;
+            /* Darker background */
+            border-color: #444;
+            color: #e0e0e0;
+            /* Lighter text */
+        }
+
+        .stat-item {
+            background-color: #333;
+            /* Darker item background */
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+            border: 1px solid #484848;
+        }
+
+        .stat-value {
+            color: #87cefa;
+            /* Lighter blue */
+        }
+
+        .stat-label {
+            color: #a0a0a0;
+            /* Lighter grey */
+        }
+
+        .queue-header {
+            background-color: #444;
+            /* Darker header background */
+            color: #f0f0f0;
+        }
+
+        .control-panel {
+            background-color: #2c2c2c;
+            /* Darker background */
+            border-color: #444;
+        }
+
+        .control-panel select {
+            background-color: #3a3a3a;
+            /* Darker select background */
+            color: #e0e0e0;
+            /* Lighter text */
+            border-color: #555;
+        }
+
+        .control-panel label {
+            color: #e0e0e0;
+            /* Lighter text */
+        }
+
+        /* Adjust table colors for dark mode */
+        .module table {
+            border-color: #444;
+        }
+
+        .module table caption {
+            color: #e0e0e0;
+            background-color: #444;
+        }
+
+        .module table thead th {
+            background-color: #3a3a3a;
+            color: #e0e0e0;
+            border-bottom-color: #555;
+        }
+
+        .module table tbody td {
+            color: #c0c0c0;
+            border-bottom-color: #444;
+            border-left-color: #444;
+        }
+
+        .module table tbody tr:nth-child(odd) td {
+            background-color: #333;
+        }
+
+        .module table tbody tr:hover td {
+            background-color: #4a4a4a;
+        }
+
+        /* Adjust legend text colors */
+        .module>div[style*="padding: 15px;"] {
+            background-color: #2c2c2c !important;
+            /* Darker background */
+            color: #e0e0e0;
+        }
+
+        .module>div[style*="padding: 15px;"] h3 {
+            color: #e8e8e8 !important;
+        }
+
+        .module>div[style*="padding: 15px;"] p {
+            color: #c0c0c0 !important;
+        }
+
+        .module>div[style*="padding: 15px;"] code {
+            background-color: #444;
+            color: #f0f0f0;
+            border-color: #555;
+        }
     }
 </style>
 
@@ -142,13 +251,46 @@
         const combinedChart = echarts.init(chartDom);
         let option;
 
+        // Determine theme based on system preference
+        const isDarkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+        // Define colors based on theme
+        const colors = {
+            light: {
+                title: '#495057',
+                legend: '#495057',
+                axisLine: '#ced4da',
+                axisLabel: '#495057',
+                splitLine: 'rgba(0, 0, 0, 0.1)',
+                taskQueue: 'rgb(53, 162, 235)',
+                pending: 'rgb(255, 99, 132)',
+                resultQueue: 'rgb(75, 192, 192)',
+                reincarnations: 'rgb(153, 102, 255)',
+                background: '#ffffff'
+            },
+            dark: {
+                title: '#e0e0e0',
+                legend: '#a0a0a0',
+                axisLine: '#555',
+                axisLabel: '#a0a0a0',
+                splitLine: 'rgba(255, 255, 255, 0.1)',
+                taskQueue: 'rgb(87, 189, 255)', // Lighter blue
+                pending: 'rgb(255, 138, 166)', // Lighter red
+                resultQueue: 'rgb(118, 218, 218)', // Lighter teal
+                reincarnations: 'rgb(188, 155, 255)', // Lighter purple
+                background: '#2c2c2c' // Match container background
+            }
+        };
+        const currentColors = isDarkMode ? colors.dark : colors.light;
+
         // Initial chart configuration
         option = {
+            backgroundColor: currentColors.background, // Set background color
             title: {
                 text: 'Queue Tasks Monitor',
                 left: 'center',
                 textStyle: {
-                    color: '#495057',
+                    color: currentColors.title,
                     fontSize: 16
                 }
             },
@@ -159,7 +301,7 @@
                 data: ['Task Queue', 'Pending', 'Result Queue', 'Reincarnations'],
                 top: 'bottom',
                 textStyle: {
-                    color: '#495057'
+                    color: currentColors.legend
                 }
             },
             grid: {
@@ -174,27 +316,28 @@
                 data: labels,
                 axisLine: {
                     lineStyle: {
-                        color: '#ced4da'
+                        color: currentColors.axisLine
                     }
                 },
                 axisLabel: {
-                    color: '#495057'
+                    color: currentColors.axisLabel
                 }
             },
             yAxis: {
                 type: 'value',
                 axisLine: {
+                    show: true, // Show Y axis line
                     lineStyle: {
-                        color: '#ced4da'
+                        color: currentColors.axisLine
                     }
                 },
                 splitLine: {
                     lineStyle: {
-                        color: 'rgba(0, 0, 0, 0.1)'
+                        color: currentColors.splitLine
                     }
                 },
                 axisLabel: {
-                    color: '#495057'
+                    color: currentColors.axisLabel
                 }
             },
             series: [
@@ -204,7 +347,7 @@
                     smooth: true,
                     data: taskQueueHistory,
                     lineStyle: { width: 3 },
-                    itemStyle: { color: 'rgb(53, 162, 235)' }
+                    itemStyle: { color: currentColors.taskQueue }
                 },
                 {
                     name: 'Pending',
@@ -212,7 +355,7 @@
                     smooth: true,
                     data: queueSizeHistory,
                     lineStyle: { width: 3 },
-                    itemStyle: { color: 'rgb(255, 99, 132)' }
+                    itemStyle: { color: currentColors.pending }
                 },
                 {
                     name: 'Result Queue',
@@ -220,7 +363,7 @@
                     smooth: true,
                     data: resultQueueHistory,
                     lineStyle: { width: 3 },
-                    itemStyle: { color: 'rgb(75, 192, 192)' }
+                    itemStyle: { color: currentColors.resultQueue }
                 },
                 {
                     name: 'Reincarnations',
@@ -228,7 +371,7 @@
                     smooth: true,
                     data: reincarnationsHistory,
                     lineStyle: { width: 3 },
-                    itemStyle: { color: 'rgb(153, 102, 255)' }
+                    itemStyle: { color: currentColors.reincarnations }
                 }
             ],
             animation: false // Disable animation for performance
@@ -391,6 +534,32 @@
         // Start initial polling
         pollingIntervalId = setInterval(fetchQueueData, pollingInterval);
         updateToggleButton();
+
+        // Listen for changes in color scheme preference
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+            const newColorScheme = event.matches ? "dark" : "light";
+            const newColors = colors[newColorScheme];
+            combinedChart.setOption({
+                backgroundColor: newColors.background,
+                title: { textStyle: { color: newColors.title } },
+                legend: { textStyle: { color: newColors.legend } },
+                xAxis: {
+                    axisLine: { lineStyle: { color: newColors.axisLine } },
+                    axisLabel: { color: newColors.axisLabel }
+                },
+                yAxis: {
+                    axisLine: { lineStyle: { color: newColors.axisLine } },
+                    splitLine: { lineStyle: { color: newColors.splitLine } },
+                    axisLabel: { color: newColors.axisLabel }
+                },
+                series: [
+                    { name: 'Task Queue', itemStyle: { color: newColors.taskQueue } },
+                    { name: 'Pending', itemStyle: { color: newColors.pending } },
+                    { name: 'Result Queue', itemStyle: { color: newColors.resultQueue } },
+                    { name: 'Reincarnations', itemStyle: { color: newColors.reincarnations } }
+                ]
+            });
+        });
     });
 </script>
 {% endblock %}
@@ -422,7 +591,8 @@
     <!-- Charts section - now using ECharts -->
     <div class="module">
         <div class="queue-header">Queue Tasks Monitor</div>
-        <div style="height: 400px; padding: 15px; background-color: #ffffff; border-radius: 0 0 4px 4px;">
+        <div
+            style="height: 400px; padding: 15px; background-color: #ffffff; border-radius: 0 0 4px 4px; border: 1px solid #dee2e6;">
             <div id="combined-chart" style="width: 100%; height: 100%;"></div>
         </div>
     </div>
@@ -481,7 +651,7 @@
     <!-- Add Legend for Queue Metrics -->
     <div class="module">
         <div class="queue-header">Queue Metrics Legend</div>
-        <div style="padding: 15px; background-color: #ffffff; border-radius: 0 0 4px 4px;">
+        <div style="padding: 15px; background-color: #ffffff; border-radius: 0 0 4px 4px; border: 1px solid #dee2e6;">
             <div style="margin-bottom: 15px;">
                 <h3 style="margin: 0 0 8px 0; color: #495057;">Pending</h3>
                 <p>Shows the total number of tasks waiting to be processed in the broker's queue. These are tasks that

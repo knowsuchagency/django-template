@@ -3,7 +3,7 @@
 {% block title %}Dashboard{% endblock %}
 
 {% block head_scripts %}
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
 {% endblock %}
 
 {% block content %}
@@ -16,28 +16,21 @@
         </div>
     </div>
 
-    <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+    <div class="grid grid-cols-1 gap-6">
         <div class="card bg-base-200 shadow-xl">
             <div class="card-body">
-                <h2 class="card-title">Stock Prices</h2>
+                <h2 class="card-title">Stock Data</h2>
                 <div class="form-control mb-4">
                     <select id="stockSelector" class="select select-bordered w-full max-w-xs">
                         <option value="">All Stocks</option>
                         <!-- Options will be populated dynamically -->
                     </select>
                 </div>
-                <div class="w-full h-64">
-                    <canvas id="stockChart"></canvas>
-                </div>
-            </div>
-        </div>
+                <h3 class="text-lg font-semibold mt-4 mb-2">Stock Prices</h3>
+                <div id="stockChartContainer" class="w-full h-64 mb-6"></div>
 
-        <div class="card bg-base-200 shadow-xl">
-            <div class="card-body">
-                <h2 class="card-title">Trading Volume</h2>
-                <div class="w-full h-64">
-                    <canvas id="volumeChart"></canvas>
-                </div>
+                <h3 class="text-lg font-semibold mt-4 mb-2">Trading Volume</h3>
+                <div id="volumeChartContainer" class="w-full h-64"></div>
             </div>
         </div>
     </div>
@@ -46,18 +39,30 @@
 
 {% block body_scripts %}
 <script>
-    // Stock data fetch and chart rendering
     document.addEventListener('DOMContentLoaded', function () {
-        // Chart configuration 
+        // ECharts instances
         let stockChart = null;
         let volumeChart = null;
-        const stockChartCtx = document.getElementById('stockChart').getContext('2d');
-        const volumeChartCtx = document.getElementById('volumeChart').getContext('2d');
+        const stockChartContainer = document.getElementById('stockChartContainer');
+        const volumeChartContainer = document.getElementById('volumeChartContainer');
+
+        // Initialize ECharts instances with the dark theme
+        if (stockChartContainer) {
+            stockChart = echarts.init(stockChartContainer, 'dark');
+        }
+        if (volumeChartContainer) {
+            volumeChart = echarts.init(volumeChartContainer, 'dark');
+        }
+
+        // Connect the charts for synchronized dataZoom and tooltip
+        if (stockChart && volumeChart) {
+            echarts.connect([stockChart, volumeChart]);
+        }
 
         // Stock selector
         const stockSelector = document.getElementById('stockSelector');
 
-        // Fetch stock data
+        // Fetch stock data (remains the same)
         async function fetchStockData(symbol = null) {
             let url = '/api/v1/example/stocks';
             if (symbol) {
@@ -76,9 +81,8 @@
             }
         }
 
-        // Process data for charts
+        // Process data for charts (remains mostly the same, structure adjusted slightly for ECharts)
         function processStockData(data) {
-            // Group by date and symbol
             const groupedByDate = {};
             const symbols = new Set();
 
@@ -90,176 +94,188 @@
                 symbols.add(stock.symbol);
             });
 
-            // Sort dates
             const sortedDates = Object.keys(groupedByDate).sort();
 
-            // Populate stock selector
-            stockSelector.innerHTML = '<option value="">All Stocks</option>';
-            [...symbols].sort().forEach(symbol => {
-                stockSelector.innerHTML += `<option value="${symbol}">${symbol}</option>`;
-            });
+            // Populate stock selector (only if it hasn't been populated before)
+            if (stockSelector.options.length <= 1) {
+                stockSelector.innerHTML = '<option value="">All Stocks</option>';
+                [...symbols].sort().forEach(symbol => {
+                    stockSelector.innerHTML += `<option value="${symbol}">${symbol}</option>`;
+                });
+            }
+
 
             return {
                 dates: sortedDates,
-                symbols: [...symbols],
+                symbols: [...symbols].sort(), // Ensure symbols are sorted for consistent colors
                 groupedByDate
             };
         }
 
-        // Create stock price chart
+        // Create stock price chart using ECharts
         function createStockChart(processedData, selectedSymbol = null) {
+            if (!stockChart) return; // Exit if chart instance not initialized
+
             const { dates, symbols, groupedByDate } = processedData;
-
-            // If a chart already exists, destroy it
-            if (stockChart) {
-                stockChart.destroy();
-            }
-
-            // Prepare datasets
-            const datasets = [];
-            const colorPalette = [
-                'rgba(255, 99, 132, 0.7)',
-                'rgba(54, 162, 235, 0.7)',
-                'rgba(255, 206, 86, 0.7)',
-                'rgba(75, 192, 192, 0.7)',
-                'rgba(153, 102, 255, 0.7)',
-                'rgba(255, 159, 64, 0.7)',
-                'rgba(199, 199, 199, 0.7)'
-            ];
-
-            // Filter symbols based on selection
             const symbolsToDisplay = selectedSymbol ? [selectedSymbol] : symbols;
 
-            symbolsToDisplay.forEach((symbol, index) => {
+            const series = symbolsToDisplay.map(symbol => {
                 const data = dates.map(date =>
-                    groupedByDate[date][symbol] ? groupedByDate[date][symbol].price : null
+                    groupedByDate[date] && groupedByDate[date][symbol] ? groupedByDate[date][symbol].price : null
                 );
-
-                datasets.push({
-                    label: symbol,
-                    data,
-                    borderColor: colorPalette[index % colorPalette.length],
-                    backgroundColor: colorPalette[index % colorPalette.length].replace('0.7', '0.2'),
-                    borderWidth: 2,
-                    tension: 0.1
-                });
-            });
-
-            // Create the chart
-            stockChart = new Chart(stockChartCtx, {
-                type: 'line',
-                data: {
-                    labels: dates,
-                    datasets
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            beginAtZero: false
-                        }
-                    },
-                    plugins: {
-                        title: {
-                            display: true,
-                            text: 'Stock Prices Over Time'
-                        }
+                return {
+                    name: symbol,
+                    type: 'line',
+                    data: data,
+                    smooth: true,
+                    emphasis: {
+                        focus: 'series'
                     }
-                }
+                };
             });
+
+            const option = {
+                title: {
+                    text: 'Stock Prices Over Time',
+                    left: 'center'
+                },
+                tooltip: {
+                    trigger: 'axis'
+                },
+                legend: {
+                    data: symbolsToDisplay,
+                    bottom: 10
+                },
+                grid: {
+                    left: '3%',
+                    right: '4%',
+                    bottom: '25%',
+                    containLabel: true
+                },
+                xAxis: {
+                    type: 'category',
+                    boundaryGap: false,
+                    data: dates
+                },
+                yAxis: {
+                    type: 'value',
+                    scale: true
+                },
+                series: series,
+                dataZoom: [
+                    {
+                        type: 'inside',
+                        start: 0,
+                        end: 100
+                    },
+                    {
+                        start: 0,
+                        end: 100
+                    }
+                ]
+            };
+
+            stockChart.setOption(option, true);
         }
 
-        // Create volume chart
+        // Create volume chart using ECharts
         function createVolumeChart(processedData, selectedSymbol = null) {
+            if (!volumeChart) return; // Exit if chart instance not initialized
+
             const { dates, symbols, groupedByDate } = processedData;
-
-            // If a chart already exists, destroy it
-            if (volumeChart) {
-                volumeChart.destroy();
-            }
-
-            // Prepare datasets
-            const datasets = [];
-            const colorPalette = [
-                'rgba(255, 99, 132, 0.7)',
-                'rgba(54, 162, 235, 0.7)',
-                'rgba(255, 206, 86, 0.7)',
-                'rgba(75, 192, 192, 0.7)',
-                'rgba(153, 102, 255, 0.7)',
-                'rgba(255, 159, 64, 0.7)',
-                'rgba(199, 199, 199, 0.7)'
-            ];
-
-            // Filter symbols based on selection
             const symbolsToDisplay = selectedSymbol ? [selectedSymbol] : symbols;
 
-            symbolsToDisplay.forEach((symbol, index) => {
+            const series = symbolsToDisplay.map(symbol => {
                 const data = dates.map(date =>
-                    groupedByDate[date][symbol] ? groupedByDate[date][symbol].volume : null
+                    groupedByDate[date] && groupedByDate[date][symbol] ? groupedByDate[date][symbol].volume : null
                 );
-
-                datasets.push({
-                    label: symbol,
-                    data,
-                    backgroundColor: colorPalette[index % colorPalette.length],
-                    borderWidth: 1
-                });
-            });
-
-            // Create the chart
-            volumeChart = new Chart(volumeChartCtx, {
-                type: 'bar',
-                data: {
-                    labels: dates,
-                    datasets
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            beginAtZero: true
-                        }
-                    },
-                    plugins: {
-                        title: {
-                            display: true,
-                            text: 'Trading Volume Over Time'
-                        }
+                return {
+                    name: symbol,
+                    type: 'bar',
+                    data: data,
+                    emphasis: {
+                        focus: 'series'
                     }
-                }
+                };
             });
+
+            const option = {
+                title: {
+                    text: 'Trading Volume Over Time',
+                    left: 'center'
+                },
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: {
+                        type: 'shadow'
+                    }
+                },
+                legend: {
+                    data: symbolsToDisplay,
+                    bottom: 10
+                },
+                grid: {
+                    left: '3%',
+                    right: '4%',
+                    bottom: '25%',
+                    containLabel: true
+                },
+                xAxis: {
+                    type: 'category',
+                    data: dates
+                },
+                yAxis: {
+                    type: 'value'
+                },
+                series: series,
+                dataZoom: [
+                    {
+                        type: 'inside',
+                        start: 0,
+                        end: 100
+                    },
+                    {
+                        start: 0,
+                        end: 100
+                    }
+                ]
+            };
+
+            volumeChart.setOption(option, true);
         }
 
-        // Initialize charts
-        async function initCharts() {
-            const stockData = await fetchStockData();
-            if (stockData.length === 0) return;
+        // Initialize charts and handle updates
+        async function updateCharts(symbol = null) {
+            const stockData = await fetchStockData(symbol);
+            if (stockData.length === 0) {
+                // Optionally clear charts or show a message
+                stockChart?.clear();
+                volumeChart?.clear();
+                console.log("No data received for the selected symbol or initial load.");
+                return; // Exit if no data
+            }
 
             const processedData = processStockData(stockData);
-            createStockChart(processedData);
-            createVolumeChart(processedData);
-
-            // Handle stock selection change
-            stockSelector.addEventListener('change', async function () {
-                const selectedSymbol = this.value;
-                if (selectedSymbol) {
-                    const stockData = await fetchStockData(selectedSymbol);
-                    const processedData = processStockData(stockData);
-                    createStockChart(processedData, selectedSymbol);
-                    createVolumeChart(processedData, selectedSymbol);
-                } else {
-                    const stockData = await fetchStockData();
-                    const processedData = processStockData(stockData);
-                    createStockChart(processedData);
-                    createVolumeChart(processedData);
-                }
-            });
+            createStockChart(processedData, symbol);
+            createVolumeChart(processedData, symbol);
         }
 
-        // Start application
-        initCharts();
+
+        // Initial Load
+        updateCharts();
+
+
+        // Handle stock selection change
+        stockSelector.addEventListener('change', function () {
+            const selectedSymbol = this.value || null; // Use null if "All Stocks" is selected
+            updateCharts(selectedSymbol);
+        });
+
+        // Optional: Resize charts on window resize
+        window.addEventListener('resize', function () {
+            stockChart?.resize();
+            volumeChart?.resize();
+        });
     });
 </script>
 {% endblock %}

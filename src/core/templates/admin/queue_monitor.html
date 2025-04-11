@@ -10,8 +10,8 @@
 
 {% block extrahead %}
 {{ block.super }}
-<!-- Add Chart.js -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- Add Apache ECharts -->
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.1/dist/echarts.min.js"></script>
 <style>
     .charts-container {
         display: flex;
@@ -126,7 +126,7 @@
     document.addEventListener('DOMContentLoaded', function () {
         // Data storage for historical data
         const maxDataPoints = 60; // Store 1 minute of data
-        let taskQueueHistory = []; // Renamed from totalTasksHistory
+        let taskQueueHistory = [];
         let queueSizeHistory = [];
         let resultQueueHistory = [];
         let reincarnationsHistory = [];
@@ -137,102 +137,108 @@
         let pollingIntervalId = null;
         let isPolling = true;
 
-        // Create charts
-        const combinedChart = new Chart(
-            document.getElementById('combined-chart'),
-            {
-                type: 'line',
-                data: {
-                    labels: labels,
-                    datasets: [
-                        {
-                            label: 'Task Queue',
-                            data: taskQueueHistory,
-                            borderColor: 'rgb(53, 162, 235)',
-                            backgroundColor: 'rgba(53, 162, 235, 0.5)',
-                            borderWidth: 3,
-                            tension: 0.1,
-                            fill: false
-                        },
-                        {
-                            label: 'Pending',
-                            data: queueSizeHistory,
-                            borderColor: 'rgb(255, 99, 132)',
-                            backgroundColor: 'rgba(255, 99, 132, 0.5)',
-                            borderWidth: 3,
-                            tension: 0.1,
-                            fill: false
-                        },
-                        {
-                            label: 'Result Queue',
-                            data: resultQueueHistory,
-                            borderColor: 'rgb(75, 192, 192)',
-                            backgroundColor: 'rgba(75, 192, 192, 0.5)',
-                            borderWidth: 3,
-                            tension: 0.1,
-                            fill: false
-                        },
-                        {
-                            label: 'Reincarnations',
-                            data: reincarnationsHistory,
-                            borderColor: 'rgb(153, 102, 255)',
-                            backgroundColor: 'rgba(153, 102, 255, 0.5)',
-                            borderWidth: 3,
-                            tension: 0.1,
-                            fill: false
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            grid: {
-                                color: 'rgba(0, 0, 0, 0.1)'
-                            },
-                            ticks: {
-                                color: '#495057'
-                            }
-                        },
-                        x: {
-                            grid: {
-                                color: 'rgba(0, 0, 0, 0.1)'
-                            },
-                            ticks: {
-                                color: '#495057'
-                            }
-                        }
-                    },
-                    plugins: {
-                        legend: {
-                            position: 'top',
-                            labels: {
-                                color: '#495057',
-                                usePointStyle: true,
-                                padding: 20
-                            }
-                        },
-                        title: {
-                            display: true,
-                            text: 'Queue Tasks Monitor',
-                            color: '#495057',
-                            font: {
-                                size: 16
-                            }
-                        }
-                    },
-                    animation: {
-                        duration: 0 // Disable animation for better performance with 1s updates
-                    }
+        // Initialize ECharts instance
+        const chartDom = document.getElementById('combined-chart');
+        const combinedChart = echarts.init(chartDom);
+        let option;
+
+        // Initial chart configuration
+        option = {
+            title: {
+                text: 'Queue Tasks Monitor',
+                left: 'center',
+                textStyle: {
+                    color: '#495057',
+                    fontSize: 16
                 }
-            }
-        );
+            },
+            tooltip: {
+                trigger: 'axis'
+            },
+            legend: {
+                data: ['Task Queue', 'Pending', 'Result Queue', 'Reincarnations'],
+                top: 'bottom',
+                textStyle: {
+                    color: '#495057'
+                }
+            },
+            grid: {
+                left: '3%',
+                right: '4%',
+                bottom: '10%', // Adjust bottom to make space for legend
+                containLabel: true
+            },
+            xAxis: {
+                type: 'category',
+                boundaryGap: false,
+                data: labels,
+                axisLine: {
+                    lineStyle: {
+                        color: '#ced4da'
+                    }
+                },
+                axisLabel: {
+                    color: '#495057'
+                }
+            },
+            yAxis: {
+                type: 'value',
+                axisLine: {
+                    lineStyle: {
+                        color: '#ced4da'
+                    }
+                },
+                splitLine: {
+                    lineStyle: {
+                        color: 'rgba(0, 0, 0, 0.1)'
+                    }
+                },
+                axisLabel: {
+                    color: '#495057'
+                }
+            },
+            series: [
+                {
+                    name: 'Task Queue',
+                    type: 'line',
+                    smooth: true,
+                    data: taskQueueHistory,
+                    lineStyle: { width: 3 },
+                    itemStyle: { color: 'rgb(53, 162, 235)' }
+                },
+                {
+                    name: 'Pending',
+                    type: 'line',
+                    smooth: true,
+                    data: queueSizeHistory,
+                    lineStyle: { width: 3 },
+                    itemStyle: { color: 'rgb(255, 99, 132)' }
+                },
+                {
+                    name: 'Result Queue',
+                    type: 'line',
+                    smooth: true,
+                    data: resultQueueHistory,
+                    lineStyle: { width: 3 },
+                    itemStyle: { color: 'rgb(75, 192, 192)' }
+                },
+                {
+                    name: 'Reincarnations',
+                    type: 'line',
+                    smooth: true,
+                    data: reincarnationsHistory,
+                    lineStyle: { width: 3 },
+                    itemStyle: { color: 'rgb(153, 102, 255)' }
+                }
+            ],
+            animation: false // Disable animation for performance
+        };
+
+        combinedChart.setOption(option);
 
         function addTimeLabel() {
             const now = new Date();
-            const timeString = now.toLocaleTimeString();
+            const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
             labels.push(timeString);
 
             // Keep only the last maxDataPoints labels
@@ -269,24 +275,18 @@
                 reincarnationsHistory.shift();
             }
 
-            // Update the chart
-            combinedChart.data.labels = labels;
-
-            // Update datasets data
-            combinedChart.data.datasets.forEach(dataset => {
-                const queueName = dataset.label;
-                if (queueName === 'Task Queue') {
-                    dataset.data = taskQueueHistory;
-                } else if (queueName === 'Pending') {
-                    dataset.data = queueSizeHistory;
-                } else if (queueName === 'Result Queue') {
-                    dataset.data = resultQueueHistory;
-                } else if (queueName === 'Reincarnations') {
-                    dataset.data = reincarnationsHistory;
-                }
+            // Update the ECharts chart
+            combinedChart.setOption({
+                xAxis: {
+                    data: labels
+                },
+                series: [
+                    { name: 'Task Queue', data: taskQueueHistory },
+                    { name: 'Pending', data: queueSizeHistory },
+                    { name: 'Result Queue', data: resultQueueHistory },
+                    { name: 'Reincarnations', data: reincarnationsHistory }
+                ]
             });
-
-            combinedChart.update();
         }
 
         function getRandomColor() {
@@ -419,11 +419,11 @@
         </div>
     </div>
 
-    <!-- Charts section - now with a single chart -->
+    <!-- Charts section - now using ECharts -->
     <div class="module">
         <div class="queue-header">Queue Tasks Monitor</div>
         <div style="height: 400px; padding: 15px; background-color: #ffffff; border-radius: 0 0 4px 4px;">
-            <canvas id="combined-chart"></canvas>
+            <div id="combined-chart" style="width: 100%; height: 100%;"></div>
         </div>
     </div>
 

@@ -1,12 +1,25 @@
-Use `uv` as the package manager. Any terminal command using python should start with `uv run` as that will ensure it runs within the appropriate virtual environment.
+# Django Template Cursor Rules
 
-`just` is the command runner.
+## Environment & Tools
+- Always prefix Python commands with `uv run` to ensure virtual environment usage
+- Use `just` as the command runner for all tasks (see justfile)
+- Format code with `ruff` via `just format`
 
-We use daisyui version 5 for the UI, which is based on tailwind version 4.
+## Django Project Structure
+- Django 5.1.1 with Django Ninja for API development
+- Main app is `core` with custom User model (requires email field)
+- API endpoints in `src/api/v1/` using Django Ninja routers
+- Static files served with WhiteNoise
+- Django-Q2 for async task processing with Redis broker
 
-django-widget-tweaks is used to customize django form widgets.
+## Frontend Development
+- Server-side templates with Django template engine
+- DaisyUI version 5 for UI (based on Tailwind CSS v4)
+- Use django-widget-tweaks for form customization
+- Templates located in `src/core/templates/`
 
-We use djecorator to define routes using decorators i.e.:
+## Routing Patterns
+We use djecorator for clean view routing:
 
 ```python
 from djecorator import Route
@@ -14,23 +27,77 @@ from django.shortcuts import render
 
 route = Route()
 
-
 @route("/")
 def landing(request):
     return render(request, "core/landing.html")
 
-
 @route("/dashboard/", login_required=True)
 def dashboard(request):
     return render(request, "core/dashboard.html")
+
+# In urls.py:
+from core import views
+urlpatterns += views.route.patterns
 ```
 
-...
+## API Development
+Use Django Ninja for API endpoints:
 
 ```python
-from core import views
+from ninja import Router
+from ninja.responses import Response
 
-...
+router = Router()
 
-urlpatterns += views.route.patterns
+@router.get("/example")
+def example_endpoint(request):
+    return {"status": "success"}
+
+# In api/v1/router.py:
+api.add_router("/example/", example.router)
+```
+
+## Database & Models
+- PostgreSQL with schema support via DATABASE_URL
+- Custom User model in `core.models` with UUID field
+- Always run `just makemigrations` and `just migrate` after model changes
+- Use `just flush` to reset database (requires confirmation)
+
+## Testing
+- Run tests with `just test` (uses in-memory SQLite)
+- Tests in `src/core/tests.py`
+- Always flush Redis in tearDown to prevent test pollution:
+  ```python
+  def tearDown(self):
+      get_redis_connection("default").flushall()
+  ```
+
+## Task Queue (Django-Q2)
+- Define async tasks in `core/tasks.py`
+- Run worker with `just qcluster`
+- Monitor with `just qmonitor`
+- Schedule periodic tasks with cron expressions
+
+## Security & Authentication
+- Django-allauth for authentication
+- Custom CSRF middleware for wildcard domain support
+- Staff-only views use `@staff_member_required` decorator
+- Debug auth bypass for Lovable preview (check HTTP_X_LOVABLE_PREVIEW header)
+
+## Environment Variables
+- Use `.env` file (created from `.env.template` via 1Password)
+- Key variables: DATABASE_URL, REDIS_URL, SECRET_KEY, DEBUG
+- CSRF_TRUSTED_ORIGINS for cross-origin requests
+- See `src/settings.py` for all configuration options
+
+## Common Commands
+```bash
+just init <schema>        # Initialize project with database schema
+just runserver           # Start development server
+just makemigrations      # Create migrations
+just migrate             # Apply migrations
+just test                # Run test suite
+just format              # Format code with ruff
+just qcluster            # Start task queue worker
+just shell               # Django shell
 ```

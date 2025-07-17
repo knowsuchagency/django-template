@@ -1,0 +1,82 @@
+[tools]
+python = "3.12"
+
+
+[tasks.format]
+description = "format/fix code"
+run = [
+    "uvx ruff check --fix",
+    "uvx ruff format"
+]
+
+[tasks.init]
+description = "initialize development"
+run = '''
+#!/bin/zsh
+echo "creating virtual environment"
+uv venv -p 3.12
+echo "installing dependencies"
+uv sync
+echo "creating .env file from template"
+op inject -i .env.template -o .env
+# replace $schema with the schema name
+sed -i '' "s/\$schema/${1}/g" .env
+# replace shared\ with shared in .env
+sed -i '' "s/shared\\\\/shared/g" .env
+cat .env
+direnv allow
+'''
+
+[tasks.runserver]
+description = "run development server"
+run = "DEBUG=true .venv/bin/python manage.py runserver"
+
+[tasks.makemigrations]
+description = "make migrations"
+run = ".venv/bin/python manage.py makemigrations"
+
+[tasks.migrate]
+description = "migrate"
+run = [
+    ".venv/bin/python manage.py migrate",
+    ".venv/bin/python manage.py createcachetable"
+]
+
+[tasks.flush]
+description = "flush database"
+run = ".venv/bin/python manage.py flush"
+
+[tasks.createsuperuser]
+description = "create superuser"
+run = ".venv/bin/python manage.py createsuperuser"
+
+[tasks.collectstatic]
+description = "build theme and collect static files"
+run = ".venv/bin/python manage.py collectstatic --noinput"
+
+[tasks.test]
+description = "run tests"
+env = { DATABASE_URL = "sqlite:///:memory:", LOG_REQUESTS = "false" }
+run = "uv run python manage.py test src.core.tests"
+
+[tasks.setup_periodic_tasks]
+description = "set up periodic tasks"
+depends = ["migrate"]
+run = "uv run python manage.py setup_periodic_tasks"
+
+[tasks.qcluster]
+description = "run q cluster"
+depends = ["setup_periodic_tasks"]
+run = "uv run python manage.py qcluster"
+
+[tasks.qmonitor]
+description = "monitor q cluster"
+run = "uv run python manage.py qmonitor"
+
+[tasks.qinfo]
+description = "view q info"
+run = "uv run python manage.py qinfo"
+
+[tasks.shell]
+description = "django shell"
+run = "uv run python manage.py shell"

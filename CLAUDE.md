@@ -8,31 +8,31 @@ All Python commands must be prefixed with `uv run` to use the virtual environmen
 
 ### Development Setup
 ```bash
-just init <schema>        # Initialize dev environment with database schema
-just runserver           # Run dev server on port 8000
-just migrate             # Apply migrations and create cache table
-just makemigrations      # Create new migrations
-just createsuperuser     # Create admin user
-just collectstatic       # Collect static files
+mise run init <schema>    # Initialize dev environment with database schema
+mise run runserver       # Run dev server on port 8000
+mise run migrate         # Apply migrations and create cache table
+mise run makemigrations  # Create new migrations
+mise run createsuperuser # Create admin user
+mise run collectstatic   # Collect static files
 ```
 
 ### Testing & Code Quality
 ```bash
-just test                # Run tests (uses in-memory SQLite)
-just format              # Format code with ruff
+mise run test            # Run tests (uses in-memory SQLite)
+mise run format          # Format code with ruff
 ```
 
 ### Django-Q Task Queue
 ```bash
-just qcluster            # Run task queue cluster
-just qmonitor            # Monitor queue status
-just setup_periodic_tasks # Initialize periodic tasks
+mise run qcluster        # Run task queue cluster
+mise run qmonitor        # Monitor queue status
+mise run setup_periodic_tasks # Initialize periodic tasks
 ```
 
 ### Database Operations
 ```bash
-just flush               # Flush database (requires confirmation)
-just shell               # Django shell
+mise run flush           # Flush database (requires confirmation)
+mise run shell           # Django shell
 ```
 
 ## Architecture Overview
@@ -44,6 +44,10 @@ This is a Django 5.1.1 project using Django Ninja for API development and Django
 - **Task Queue**: Django-Q2 with Redis broker
 - **Authentication**: Django-allauth with custom User model
 - **Frontend**: Server-side templates with djecorator routing
+  - **UI Framework**: DaisyUI v5 (based on Tailwind CSS v4)
+  - **JavaScript**: Alpine.js v3 with alpine-ajax for reactivity
+  - **Charts**: ECharts v5 for data visualization
+  - **Form Styling**: django-widget-tweaks for form customization
 - **Caching**: Redis primary, database cache fallback
 - **Static Files**: WhiteNoise for production serving
 
@@ -95,6 +99,41 @@ def my_task():
 async_task(my_task)
 ```
 
+4. **Frontend Reactivity**: Use Alpine.js with alpine-ajax:
+```html
+<!-- Alpine.js component with state management -->
+<div x-data="{ selectedItem: '', items: [] }">
+    <!-- Use alpine-ajax for server-rendered HTML updates -->
+    <button @click="$ajax('/api/endpoint', { target: 'result' })">Load</button>
+    
+    <!-- Or use fetch for JSON APIs with Alpine.js reactivity -->
+    <button @click="fetch('/api/data').then(r => r.json()).then(d => items = d)">Refresh</button>
+    
+    <div id="result">
+        <!-- Content updated by alpine-ajax -->
+    </div>
+</div>
+```
+
+5. **Chart Integration**: Use ECharts with Alpine.js:
+```javascript
+function chartComponent() {
+    return {
+        chart: null,
+        initChart() {
+            this.chart = echarts.init(document.getElementById('chartContainer'), 'dark');
+            this.updateChart();
+        },
+        async updateChart() {
+            const data = await fetch('/api/chart-data').then(r => r.json());
+            this.chart.setOption({
+                // ECharts configuration
+            });
+        }
+    }
+}
+```
+
 ### Environment Configuration
 
 The project uses `.env` files with 1Password integration. Key variables:
@@ -103,11 +142,35 @@ The project uses `.env` files with 1Password integration. Key variables:
 - `CSRF_TRUSTED_ORIGINS`: Required for cross-origin requests
 - `DEBUG`: Development mode flag
 
+### Frontend Development Guidelines
+
+- **Alpine.js**: Preferred for all interactive components
+  - Use `x-data` for component state
+  - Use `x-model` for two-way data binding
+  - Use `@event` syntax for event handlers
+  - Initialize components with `x-init`
+
+- **alpine-ajax**: Use for server-side HTML updates
+  - Use `x-target` attribute to specify update targets
+  - Use `$ajax()` magic helper for programmatic requests
+  - Supports events: `ajax:before`, `ajax:success`, `ajax:error`
+  - Use `x-merge` for advanced DOM updates (append, prepend, morph)
+
+- **Data Fetching**:
+  - Use alpine-ajax for HTML responses
+  - Use fetch API with Alpine.js for JSON APIs
+  - Always handle loading and error states
+
+- **Form Handling**:
+  - Use Django forms with widget-tweaks for styling
+  - Enhance with Alpine.js for client-side validation
+  - Use alpine-ajax for inline form submissions
+
 ### Testing Guidelines
 
 - Tests use in-memory SQLite to avoid database dependencies
 - Redis is flushed in tearDown to prevent test pollution
-- Run with `just test` (sets DATABASE_URL and LOG_REQUESTS=false)
+- Run with `mise run test` (sets DATABASE_URL and LOG_REQUESTS=false)
 - Test files: `src/core/tests.py`
 
 ### Security Considerations

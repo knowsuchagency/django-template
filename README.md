@@ -8,6 +8,7 @@ A simple Django template.
 - [Installation](#installation)
 - [Development](#development)
 - [Available Commands](#available-commands)
+- [Notes](#notes)
 
 ## Prerequisites
 
@@ -15,8 +16,7 @@ Before you begin, ensure you have the following installed:
 
 - Python 3.12
 - [uv](https://github.com/astral-sh/uv) (Python package manager)
-- [just](https://github.com/casey/just) (command runner)
-- [onepassword cli](https://developer.1password.com/docs/cli/get-started/) (onepassword cli)
+- [mise](https://mise.jdx.dev/) (development environment manager)
 
 ## Installation
 
@@ -27,12 +27,53 @@ Before you begin, ensure you have the following installed:
    cd django-template
    ```
 
-2. Initialize the development environment:
+2. Install dependencies:
    ```
-   just init
+   uv sync
    ```
-   This will create a virtual environment, install dependencies, and set up the .env file.
 
+3. Run database migrations:
+   ```
+   mise run migrate
+   ```
+
+4. Create a superuser (optional):
+   ```
+   mise run createsuperuser
+   ```
+
+5. Start the development server:
+   ```
+   mise run runserver
+   ```
+
+## Development
+
+The project uses `mise` for task management. All Python commands are automatically prefixed with `uv run` to use the virtual environment.
+
+## Available Commands
+
+### Development
+- `mise run runserver` - Start the development server on port 8000
+- `mise run migrate` - Apply database migrations and create cache table
+- `mise run makemigrations` - Create new migrations
+- `mise run createsuperuser` - Create a superuser account
+- `mise run shell` - Open Django shell
+
+### Code Quality
+- `mise run format` - Format code using ruff
+- `mise run test` - Run tests with in-memory SQLite
+
+### Static Files
+- `mise run collectstatic` - Collect static files
+
+### Django-Q Task Queue
+- `mise run qcluster` - Run the task queue cluster
+- `mise run qmonitor` - Monitor queue status
+- `mise run setup_periodic_tasks` - Initialize periodic tasks
+
+### Database
+- `mise run flush` - Flush the database (requires confirmation)
 
 ## Notes
 

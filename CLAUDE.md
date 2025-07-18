@@ -8,7 +8,6 @@ All Python commands must be prefixed with `uv run` to use the virtual environmen
 
 ### Development Setup
 ```bash
-mise run init <schema>    # Initialize dev environment with database schema
 mise run runserver       # Run dev server on port 8000
 mise run migrate         # Apply migrations and create cache table
 mise run makemigrations  # Create new migrations
@@ -136,11 +135,13 @@ function chartComponent() {
 
 ### Environment Configuration
 
-The project uses `.env` files with 1Password integration. Key variables:
-- `DATABASE_URL`: PostgreSQL with schema support
-- `REDIS_URL`: Redis connection for cache/queue
+The project uses `mise.toml` for environment configuration. Key variables:
+- `DATABASE_URL`: SQLite database (default: `sqlite:///data.db`)
+- `REDIS_URL`: Redis connection for cache/queue (optional)
 - `CSRF_TRUSTED_ORIGINS`: Required for cross-origin requests
 - `DEBUG`: Development mode flag
+- `SECRET_KEY`: Django secret key
+- `ALLOWED_HOSTS`: Comma-separated list of allowed hosts
 
 ### Frontend Development Guidelines
 

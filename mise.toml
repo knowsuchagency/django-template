@@ -1,6 +1,9 @@
 [tools]
 python = "3.12"
 
+[env]
+_.file = '.env'
+
 
 [tasks.format]
 description = "format/fix code"
@@ -12,7 +15,6 @@ run = [
 [tasks.init]
 description = "initialize development"
 run = '''
-#!/bin/zsh
 echo "creating virtual environment"
 uv venv -p 3.12
 echo "installing dependencies"

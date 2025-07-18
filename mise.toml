@@ -1,6 +1,25 @@
 [tools]
 python = "3.12"
 
+[settings]
+experimental = true
+python.venv_auto_create = true
+python.venv_stdlib = false
+
+[env]
+PYTHONPATH = "src"
+SECRET_KEY = "thisisthesupersecretkey"
+DATABASE_URL = "sqlite:///data.db"
+# REDIS_URL = "redis://localhost:6379"
+CACHE_PREFIX = "django_cache"
+ALLOWED_HOSTS = "localhost,127.0.0.1"
+CSRF_TRUSTED_ORIGINS = "http://localhost:8000,http://localhost:8080"
+LOG_REQUESTS = "true"
+DEBUG = "true"
+# AWS_ACCESS_KEY_ID = "op://dev/ses/access_key_id"
+# AWS_SECRET_ACCESS_KEY = "op://dev/ses/secret_access_key"
+# AWS_DEFAULT_REGION = "op://dev/ses/region"
+# SENTRY_DSN = "op://dev/sentry/sandbox_dsn"
 
 [tasks.format]
 description = "format/fix code"
@@ -9,50 +28,32 @@ run = [
     "uvx ruff format"
 ]
 
-[tasks.init]
-description = "initialize development"
-run = '''
-#!/bin/zsh
-echo "creating virtual environment"
-uv venv -p 3.12
-echo "installing dependencies"
-uv sync
-echo "creating .env file from template"
-op inject -i .env.template -o .env
-# replace $schema with the schema name
-sed -i '' "s/\$schema/${1}/g" .env
-# replace shared\ with shared in .env
-sed -i '' "s/shared\\\\/shared/g" .env
-cat .env
-direnv allow
-'''
-
 [tasks.runserver]
 description = "run development server"
-run = "DEBUG=true .venv/bin/python manage.py runserver"
+run = "DEBUG=true uv run python manage.py runserver"
 
 [tasks.makemigrations]
 description = "make migrations"
-run = ".venv/bin/python manage.py makemigrations"
+run = "uv run python manage.py makemigrations"
 
 [tasks.migrate]
 description = "migrate"
 run = [
-    ".venv/bin/python manage.py migrate",
-    ".venv/bin/python manage.py createcachetable"
+    "uv run python manage.py migrate",
+    "uv run python manage.py createcachetable"
 ]
 
 [tasks.flush]
 description = "flush database"
-run = ".venv/bin/python manage.py flush"
+run = "uv run python manage.py flush"
 
 [tasks.createsuperuser]
 description = "create superuser"
-run = ".venv/bin/python manage.py createsuperuser"
+run = "uv run python manage.py createsuperuser"
 
 [tasks.collectstatic]
 description = "build theme and collect static files"
-run = ".venv/bin/python manage.py collectstatic --noinput"
+run = "uv run python manage.py collectstatic --noinput"
 
 [tasks.test]
 description = "run tests"

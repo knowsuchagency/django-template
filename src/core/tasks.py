@@ -3,9 +3,11 @@ from django_q.models import Schedule
 from django.db.utils import OperationalError
 from loguru import logger
 
+
 def hello_world():
     print("Hello, world!")
     return "Hello, world!"
+
 
 try:
     Schedule.objects.get_or_create(

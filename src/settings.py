@@ -228,7 +228,7 @@ CACHES = {
         # set the cache timeout to 30 days
         "TIMEOUT": 60 * 60 * 24 * 30,
         "KEY_PREFIX": CACHE_PREFIX,
-    }
+    },
 }
 
 

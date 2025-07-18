@@ -10,6 +10,7 @@ router = Router()
 router.add_router("/example", example_router, tags=["example"])
 router.add_router("/q2", q2_router, tags=["q2"])
 
+
 @router.get("/csrf-token", auth=None)
 @ensure_csrf_cookie
 def get_csrf_token(request):
@@ -18,6 +19,7 @@ def get_csrf_token(request):
     """
     token = get_token(request)
     return Response({"token": token})
+
 
 @router.get("/sentry-debug")
 def sentry_debug(request):

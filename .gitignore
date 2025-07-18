@@ -143,3 +143,4 @@ dist
 .ruff_cache/
 
 db.sqlite3
+data.db

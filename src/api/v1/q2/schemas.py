@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Any, Optional, List, Union
+from typing import Any, Optional, List
 from datetime import datetime
 
 from ninja import Schema

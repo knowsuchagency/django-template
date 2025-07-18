@@ -29,7 +29,7 @@ Before you begin, ensure you have the following installed:
 
 2. Install dependencies:
    ```
-   uv sync
+   mise install
    ```
 
 3. Run database migrations:

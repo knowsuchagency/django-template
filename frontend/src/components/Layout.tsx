@@ -1,8 +1,8 @@
 import { Outlet, Link } from "react-router"
-import { useAuth } from "@/contexts/AuthContext"
+import { useAllauth } from "@knowsuchagency/allauth-react"
 
 export default function Layout() {
-  const { user, logout } = useAuth()
+  const { user, logout } = useAllauth()
   
   return (
     <div className="min-h-screen">

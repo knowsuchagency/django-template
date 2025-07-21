@@ -2,8 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
 import { RefreshCw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { useAuth } from '@/contexts/AuthContext'
-import { allauthFetch } from '@/lib/auth'
+import { useAllauth } from '@knowsuchagency/allauth-react'
 
 interface StockData {
   id: number
@@ -14,7 +13,7 @@ interface StockData {
 }
 
 export const Dashboard: React.FC = () => {
-  const { user } = useAuth()
+  const { user } = useAllauth()
   const [stockData, setStockData] = useState<StockData[]>([])
   const [selectedSymbol, setSelectedSymbol] = useState<string>('')
   const [availableSymbols, setAvailableSymbols] = useState<string[]>([])
@@ -28,7 +27,14 @@ export const Dashboard: React.FC = () => {
         url += `?symbol=${selectedSymbol}`
       }
       
-      const response = await allauthFetch(url)
+      // Use fetch with credentials for custom API endpoints
+      // The AllauthClient handles auth for allauth endpoints only
+      const response = await fetch(url, {
+        credentials: 'include',
+        headers: {
+          'Accept': 'application/json',
+        }
+      })
       if (!response.ok) {
         throw new Error('Failed to fetch stock data')
       }

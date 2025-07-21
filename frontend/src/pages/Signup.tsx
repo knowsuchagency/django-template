@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { useNavigate, Link } from 'react-router'
-import { useAuth } from '@/contexts/AuthContext'
+import { useAllauth } from '@knowsuchagency/allauth-react'
 import { Button } from '@/components/ui/button'
 
 export const Signup: React.FC = () => {
@@ -9,7 +9,7 @@ export const Signup: React.FC = () => {
   const [confirmPassword, setConfirmPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
-  const { signup } = useAuth()
+  const { signup } = useAllauth()
   const navigate = useNavigate()
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -24,7 +24,7 @@ export const Signup: React.FC = () => {
     setLoading(true)
     
     try {
-      await signup(email, password)
+      await signup({ email, password })
       navigate('/dashboard')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Signup failed')

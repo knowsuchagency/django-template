@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { useNavigate, Link } from 'react-router'
-import { useAuth } from '@/contexts/AuthContext'
+import { useAllauth } from '@knowsuchagency/allauth-react'
 import { Button } from '@/components/ui/button'
 
 export const Login: React.FC = () => {
@@ -8,7 +8,7 @@ export const Login: React.FC = () => {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
-  const { login } = useAuth()
+  const { login } = useAllauth()
   const navigate = useNavigate()
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -17,7 +17,7 @@ export const Login: React.FC = () => {
     setLoading(true)
     
     try {
-      await login(email, password)
+      await login({ email, password })
       navigate('/dashboard')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login failed')

@@ -29,8 +29,13 @@ run = [
     "uvx ruff format"
 ]
 
+[tasks.install-frontend]
+description = "install frontend dependencies"
+run = "cd frontend && bun install"
+
 [tasks.build]
 description = "build frontend"
+depends = ["install-frontend"]
 run = "cd frontend && bun run build"
 
 [tasks.runserver]
@@ -64,6 +69,7 @@ run = "uv run python manage.py collectstatic --noinput"
 
 [tasks.test]
 description = "run tests"
+depends = ["install-frontend"]
 env = { DATABASE_URL = "sqlite:///:memory:", LOG_REQUESTS = "false" }
 run = [
     "uv run python manage.py test src.core.tests",

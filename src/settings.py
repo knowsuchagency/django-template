@@ -172,7 +172,7 @@ INSTALLED_APPS = [
     "corsheaders",
     "django_browser_reload",
     "widget_tweaks",
-    # "debug_toolbar",
+    "debug_toolbar",
     "django_q",
     "django_q_registry",
     "django_vite",
@@ -197,7 +197,7 @@ INSTALLED_APPS += ALLAUTH_APPS
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
-    # "debug_toolbar.middleware.DebugToolbarMiddleware",
+    "debug_toolbar.middleware.DebugToolbarMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",

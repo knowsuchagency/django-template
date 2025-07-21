@@ -56,9 +56,10 @@ This is a Django 5.1.1 project using Django Ninja for API development and Django
   - **UI Framework**: Tailwind CSS v4 with shadcn/ui components
   - **Routing**: React Router v7 with protected routes
   - **State Management**: React Context API
-  - **Authentication**: @knowsuchagency/allauth-react for Django integration
-  - **Charts**: Recharts for data visualization
-  - **HTTP Client**: Built-in AllauthClient for API calls
+  - **Authentication**: @knowsuchagency/allauth-react with AllauthProvider
+  - **Theme Support**: Dark/light mode with system preference detection
+  - **Charts**: Recharts with theme-aware styling
+  - **HTTP Client**: Native fetch with credentials for API calls
 - **Server-side Templates**: DaisyUI v5 + Alpine.js v3 (legacy views)
 - **Caching**: Redis primary, database cache fallback
 - **Static Files**: WhiteNoise for production serving
@@ -86,14 +87,14 @@ frontend/              # React frontend application
 │   ├── main.tsx       # Application entry point
 │   ├── components/    # Reusable React components
 │   │   ├── Layout.tsx # App layout with navigation
-│   │   └── ui/        # shadcn/ui components
+│   │   ├── ThemeToggle.tsx # Dark/light mode toggle
+│   │   └── ui/        # shadcn/ui components (button, dropdown-menu)
 │   ├── contexts/      # React contexts
-│   │   └── AuthContext.tsx # Authentication state management
+│   │   └── ThemeContext.tsx # Theme state management
 │   ├── lib/           # Utility functions
-│   │   ├── auth.ts    # AllauthClient configuration
 │   │   └── utils.ts   # Helper functions
 │   └── pages/         # Page components
-│       ├── Dashboard.tsx # Protected dashboard page
+│       ├── Dashboard.tsx # Protected dashboard with charts
 │       ├── Login.tsx     # Login page
 │       └── Signup.tsx    # Signup page
 ├── vite.config.ts     # Vite configuration
@@ -148,36 +149,42 @@ async_task(my_task)
 
 ### React Development Patterns
 
-1. **Authentication Flow**: Use AllauthClient for API calls:
+1. **Authentication Setup**: Use AllauthProvider and hooks:
 ```typescript
-import { AllauthClient } from '@knowsuchagency/allauth-fetch'
+import { AllauthProvider, useAllauth } from '@knowsuchagency/allauth-react'
 
-export const authClient = new AllauthClient({
-  apiBaseUrl: import.meta.env.DEV 
-    ? 'http://localhost:8000' 
-    : window.location.origin
-})
+// In App.tsx
+function App() {
+  return (
+    <AllauthProvider
+      baseUrl={import.meta.env.DEV ? 'http://localhost:8000' : window.location.origin}
+      csrfTokenEndpoint="/api/v1/csrf-token"
+    >
+      <AppRoutes />
+    </AllauthProvider>
+  )
+}
+
+// In components
+const { user, login, logout, signup, isAuthenticated } = useAllauth()
 
 // Login
-await authClient.login({ username, password })
+await login({ email, password })
 
-// Get user
-const user = await authClient.getUser()
-
-// Logout
-await authClient.logout()
+// Signup
+await signup({ email, password })
 ```
 
-2. **Protected Routes**: Use authentication context:
+2. **Protected Routes**: Use allauth hooks:
 ```typescript
 const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { user, loading } = useAuth()
+  const { isAuthenticated, isLoading } = useAllauth()
   
-  if (loading) {
+  if (isLoading) {
     return <div>Loading...</div>
   }
   
-  if (!user) {
+  if (!isAuthenticated) {
     return <Navigate to="/login" replace />
   }
   
@@ -185,45 +192,89 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
 }
 ```
 
-3. **API Integration**: AllauthClient handles CSRF automatically:
+3. **API Integration**: Use standard fetch with credentials:
 ```typescript
-// API calls with automatic CSRF token handling
-const response = await authClient.request('/api/v1/data')
+// For custom API endpoints (not allauth endpoints)
+const response = await fetch('/api/v1/example/stocks', {
+  credentials: 'include',
+  headers: {
+    'Accept': 'application/json',
+  }
+})
 const data = await response.json()
 ```
 
-4. **Component Development**: Use TypeScript with shadcn/ui:
+4. **Component Development**: Theme-aware components with shadcn/ui:
 ```typescript
 import { Button } from "@/components/ui/button"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 export function MyComponent() {
   return (
-    <div className="p-4">
-      <Button onClick={() => console.log('clicked')}>
-        Click me
-      </Button>
+    <div className="p-4 bg-background text-foreground">
+      <Button variant="default">Primary Action</Button>
+      
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" size="icon">
+            <Sun className="h-4 w-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem>Light</DropdownMenuItem>
+          <DropdownMenuItem>Dark</DropdownMenuItem>
+          <DropdownMenuItem>System</DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
     </div>
   )
 }
 ```
 
-5. **Chart Integration**: Use Recharts for data visualization:
+5. **Dark Mode Support**: Theme management with system preference detection:
+```typescript
+import { ThemeProvider, useTheme } from '@/contexts/ThemeContext'
+
+// Wrap app with ThemeProvider
+<ThemeProvider>
+  <AllauthProvider>
+    <App />
+  </AllauthProvider>
+</ThemeProvider>
+
+// Use theme in components
+const { theme, setTheme, effectiveTheme } = useTheme()
+
+// Theme toggle component
+import { ThemeToggle } from '@/components/ThemeToggle'
+```
+
+6. **Chart Integration**: Theme-aware Recharts visualization:
 ```typescript
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts'
-
-const data = [
-  { name: 'Page A', uv: 4000, pv: 2400 },
-  { name: 'Page B', uv: 3000, pv: 1398 },
-]
+import { useTheme } from '@/contexts/ThemeContext'
 
 function MyChart() {
+  const { effectiveTheme } = useTheme()
+  
+  const chartTheme = {
+    grid: effectiveTheme === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)',
+    axis: effectiveTheme === 'dark' ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.1)',
+    tick: effectiveTheme === 'dark' ? 'rgba(255, 255, 255, 0.6)' : 'rgba(0, 0, 0, 0.6)',
+  }
+  
   return (
     <LineChart width={600} height={300} data={data}>
-      <CartesianGrid strokeDasharray="3 3" />
-      <XAxis dataKey="name" />
-      <YAxis />
+      <CartesianGrid strokeDasharray="3 3" stroke={chartTheme.grid} />
+      <XAxis stroke={chartTheme.axis} tick={{ fill: chartTheme.tick }} />
+      <YAxis stroke={chartTheme.axis} tick={{ fill: chartTheme.tick }} />
       <Tooltip />
-      <Line type="monotone" dataKey="pv" stroke="#8884d8" />
+      <Line type="monotone" dataKey="pv" stroke="#0070f3" />
     </LineChart>
   )
 }
@@ -264,8 +315,9 @@ The project uses `mise.toml` for environment configuration. Key variables:
 - **Routing**:
   - React Router v7 handles client-side routing
   - All React routes must be under `/app` prefix
-  - Use `<Navigate>` for redirects
-  - Implement route guards for protected pages
+  - Root route redirects to `/dashboard` (authenticated) or `/login` (unauthenticated)
+  - Protected routes use `useAllauth()` hook for authentication checks
+  - Removed static pages (Home, About, Contact) in favor of app-focused flow
 
 - **API Integration**:
   - Use AllauthClient for all API calls
@@ -274,10 +326,11 @@ The project uses `mise.toml` for environment configuration. Key variables:
   - Implement proper error handling
 
 - **Styling**:
-  - Use Tailwind CSS utility classes
+  - Use Tailwind CSS utility classes with theme-aware colors
+  - Theme variables: `bg-background`, `text-foreground`, `border-border`, etc.
   - Follow shadcn/ui component patterns
-  - Use CSS modules for component-specific styles
-  - Maintain consistent spacing with Tailwind's design system
+  - Dark mode support via `.dark` class on document root
+  - Vercel-style color palette for charts and UI elements
 
 - **Form Handling**:
   - Use controlled components with React state
@@ -309,8 +362,14 @@ The project uses `mise.toml` for environment configuration. Key variables:
 - `GET /csrf-token` - Get CSRF token for forms
 
 **Frontend-Backend Communication**:
-- AllauthClient automatically handles CSRF tokens
-- All API calls require authentication except login/signup
+- Use `useAllauth()` hook for authentication operations (login, logout, signup)
+- For custom API endpoints (e.g., `/api/v1/example/`), use standard fetch with credentials:
+  ```typescript
+  const response = await fetch('/api/v1/example/stocks', {
+    credentials: 'include',
+    headers: { 'Accept': 'application/json' }
+  })
+  ```
 - Session-based authentication with httpOnly cookies
 - CORS configured for development with Vite proxy
 

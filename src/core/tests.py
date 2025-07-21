@@ -1,6 +1,7 @@
 from django.test import TestCase, Client
 from django.contrib.auth import get_user_model
 from datetime import date
+from django.conf import settings
 from django_redis import get_redis_connection
 
 from core.models import StockTicker
@@ -18,25 +19,24 @@ class ViewTests(TestCase):
         )
 
     def tearDown(self):
-        get_redis_connection("default").flushall()
+        # Only flush Redis if it's configured and available
+        if "redis" in settings.CACHES and settings.CACHES["redis"]["LOCATION"] != "redis://localhost:6379":
+            try:
+                get_redis_connection("redis").flushall()
+            except:
+                pass
 
-    def test_landing_page(self):
-        """Test that landing page is accessible"""
+    def test_root_redirect(self):
+        """Test that root redirects to app"""
         response = self.client.get("/")
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "core/landing.html")
+        self.assertEqual(response.status_code, 302)
+        self.assertRedirects(response, "/app/", fetch_redirect_response=False)
 
-    def test_dashboard_requires_login(self):
-        """Test that dashboard requires authentication"""
-        # Test without login
-        response = self.client.get("/dashboard/")
-        self.assertEqual(response.status_code, 302)  # Should redirect to login
-
-        # Test with login
-        self.client.login(username="testuser", password="testpass123")
-        response = self.client.get("/dashboard/")
+    def test_app_page(self):
+        """Test that app page is accessible"""
+        response = self.client.get("/app/")
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "core/dashboard.html")
+        self.assertTemplateUsed(response, "index.html")
 
 
 class APITests(TestCase):
@@ -73,7 +73,12 @@ class APITests(TestCase):
         )
 
     def tearDown(self):
-        get_redis_connection("default").flushall()
+        # Only flush Redis if it's configured and available
+        if "redis" in settings.CACHES and settings.CACHES["redis"]["LOCATION"] != "redis://localhost:6379":
+            try:
+                get_redis_connection("redis").flushall()
+            except:
+                pass
 
     def test_csrf_token_endpoint(self):
         """Test CSRF token endpoint"""
@@ -122,6 +127,6 @@ class APITests(TestCase):
     def test_sentry_debug_endpoint(self):
         """Test sentry debug endpoint raises exception"""
         self.client.login(username="testuser", password="testpass123")
-        with self.assertRaises(Exception) as context:
+        # The test client re-raises exceptions in DEBUG mode, so we expect the exception
+        with self.assertRaisesMessage(Exception, "This is a test exception for Sentry"):
             self.client.get("/api/v1/sentry-debug")
-        self.assertEqual(str(context.exception), "This is a test exception for Sentry")

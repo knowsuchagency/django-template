@@ -144,3 +144,4 @@ dist
 
 db.sqlite3
 data.db
+staticfiles/

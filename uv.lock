@@ -61,6 +61,7 @@ dependencies = [
     { name = "django-q-registry" },
     { name = "django-q2" },
     { name = "django-redis" },
+    { name = "django-vite" },
     { name = "django-widget-tweaks" },
     { name = "djecorator" },
     { name = "granian" },
@@ -94,6 +95,7 @@ requires-dist = [
     { name = "django-q-registry", specifier = ">=0.5.0" },
     { name = "django-q2", specifier = ">=1.7.6" },
     { name = "django-redis", specifier = ">=5.4.0" },
+    { name = "django-vite", specifier = ">=3.0.2" },
     { name = "django-widget-tweaks", specifier = ">=1.5.0" },
     { name = "djecorator", specifier = ">=1.2.0" },
     { name = "granian", specifier = ">=1.6.0" },
@@ -444,6 +446,18 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/83/9d/2272742fdd9d0a9f0b28cd995b0539430c9467a2192e4de2cea9ea6ad38c/django-redis-5.4.0.tar.gz", hash = "sha256:6a02abaa34b0fea8bf9b707d2c363ab6adc7409950b2db93602e6cb292818c42", size = 52567 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/b7/f1/63caad7c9222c26a62082f4f777de26389233b7574629996098bf6d25a4d/django_redis-5.4.0-py3-none-any.whl", hash = "sha256:ebc88df7da810732e2af9987f7f426c96204bf89319df4c6da6ca9a2942edd5b", size = 31119 },
+]
+
+[[package]]
+name = "django-vite"
+version = "3.1.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "django" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/23/fe/4be07f538bbf9bf8bf73b045552ec2a1b4fba67e3176abb30490b643368e/django_vite-3.1.0.tar.gz", hash = "sha256:8b4ffe4a9fa81ff568bfb195e74dde8694aaf13fd4b656ae60bf59cce08b85e8", size = 25434 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/30/59/7df4b1077fa41b43b4e542696d75138dbb86a65f44248c607b3e0f1014ce/django_vite-3.1.0-py3-none-any.whl", hash = "sha256:4e46572bd6b1ce70784be129205dc2ffcbc7a3c19fea50bebfb72b327bbde5fc", size = 23579 },
 ]
 
 [[package]]

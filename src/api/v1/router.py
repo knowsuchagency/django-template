@@ -5,10 +5,12 @@ from ninja.responses import Response
 
 from .example.router import router as example_router
 from .q2.router import router as q2_router
+from .auth import router as auth_router
 
 router = Router()
 router.add_router("/example", example_router, tags=["example"])
 router.add_router("/q2", q2_router, tags=["q2"])
+router.add_router("/auth", auth_router, tags=["auth"])
 
 
 @router.get("/csrf-token", auth=None)

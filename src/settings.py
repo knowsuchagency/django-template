@@ -51,7 +51,7 @@ LOG_SETTINGS = config("LOG_SETTINGS", default=False, cast=bool)
 # ALLOWED_HOSTS defines which host/domain names the Django site can serve
 # Example values: ['knowsuchagency.com', 'www.knowsuchagency.com', 'localhost', '127.0.0.1']
 # Default '*' allows all hosts in development, but should be restricted in production
-ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="", cast=parse_comma_separated_list)
+ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="*" if DEBUG else "localhost,127.0.0.1", cast=parse_comma_separated_list)
 
 # CSRF_TRUSTED_ORIGINS defines the origins that are trusted for CSRF-protected requests
 # Example values: ['https://knowsuchagency.com', 'https://www.knowsuchagency.com']
@@ -131,6 +131,8 @@ CSRF_TRUSTED_ORIGINS += [
     "http://127.0.0.1:8080",
     "http://localhost:3000",
     "http://127.0.0.1:3000",
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
     "https://*.lovable.app",
     "https://*.ngrok-free.app",
 ]
@@ -165,6 +167,7 @@ INSTALLED_APPS = [
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
+    "whitenoise.runserver_nostatic",
     "django.contrib.staticfiles",
     "corsheaders",
     "django_browser_reload",
@@ -172,12 +175,14 @@ INSTALLED_APPS = [
     "debug_toolbar",
     "django_q",
     "django_q_registry",
+    "django_vite",
     "core",
 ]
 
 ALLAUTH_APPS = [
     "allauth",
     "allauth.account",
+    "allauth.headless",
     # "allauth.socialaccount",
     # "allauth.socialaccount.providers.apple",
     # "allauth.socialaccount.providers.google",
@@ -201,7 +206,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "allauth.account.middleware.AccountMiddleware",
-    "django_browser_reload.middleware.BrowserReloadMiddleware",
+    # "django_browser_reload.middleware.BrowserReloadMiddleware",
 ]
 
 if LOG_REQUESTS:
@@ -319,10 +324,26 @@ STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
+STATICFILES_DIRS = [
+    BASE_DIR / "static",
+    BASE_DIR / "frontend/dist",
+]
+
 # WhiteNoise configuration
 WHITENOISE_USE_FINDERS = True
 WHITENOISE_AUTOREFRESH = DEBUG
 WHITENOISE_MANIFEST_STRICT = False
+
+# Django Vite configuration
+DJANGO_VITE = {
+    "default": {
+        "dev_mode": DEBUG,
+        "dev_server_port": 5173,
+        # In dev mode, Vite serves from /static/, in prod mode we don't want double prefix
+        "static_url_prefix": "" if not DEBUG else "/static/",
+        "manifest_path": BASE_DIR / "frontend/dist/.vite/manifest.json",
+    }
+}
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
@@ -400,6 +421,15 @@ ACCOUNT_EMAIL_CONFIRMATION_ANONYMOUS_REDIRECT_URL = "/"
 ACCOUNT_CSRF_COOKIE_NAME = "csrftoken"  # Match Django's default CSRF cookie name
 ACCOUNT_PRESERVE_CSRF_TOKEN = True  # Preserve CSRF token across requests
 ACCOUNT_SESSION_REMEMBER = True  # Keep logged in users authenticated between sessions
+
+# Django Allauth Headless mode configuration
+HEADLESS_FRONTEND_URLS = {
+    "account_confirm_email": "/app/verify-email/{key}",
+    "account_reset_password": "/app/password-reset",
+    "account_reset_password_from_key": "/app/password-reset/{key}",
+    "account_signup": "/app/signup",
+    "socialaccount_login_error": "/app/login",
+}
 
 # Email settings
 

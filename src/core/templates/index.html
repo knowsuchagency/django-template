@@ -1,0 +1,19 @@
+{% load django_vite %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    {% vite_hmr_client %}
+    
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="{% static 'vite.svg' %}" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Django Template</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    {% vite_react_refresh %}
+    {% vite_asset 'src/main.tsx' %}
+  </body>
+</html>

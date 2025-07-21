@@ -145,3 +145,7 @@ dist
 db.sqlite3
 data.db
 staticfiles/
+
+# Playwright test results
+test-results/
+playwright-report/

@@ -9,12 +9,15 @@ def hello_world():
     return "Hello, world!"
 
 
-try:
-    Schedule.objects.get_or_create(
-        func="core.tasks.hello_world",
-        name="Hello world",
-        schedule_type=Schedule.CRON,
-        cron="*/1 * * * *",
-    )
-except OperationalError:
-    logger.warning("Database or migrations not ready, skipping task registration")
+def register_periodic_tasks():
+    """Register periodic tasks. Should be called after migrations."""
+    try:
+        Schedule.objects.get_or_create(
+            func="core.tasks.hello_world",
+            name="Hello world",
+            schedule_type=Schedule.CRON,
+            cron="*/1 * * * *",
+        )
+        logger.info("Periodic tasks registered successfully")
+    except OperationalError:
+        logger.warning("Database or migrations not ready, skipping task registration")

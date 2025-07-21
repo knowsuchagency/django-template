@@ -1,6 +1,6 @@
 x-environment: &default-environment
-  DATABASE_URL: ${DATABASE_URL:-postgresql://postgres:postgres@postgres:5432/postgres}
-  REDIS_URL: $redis://redis:6379
+  DATABASE_URL: postgresql://postgres:postgres@postgres:5432/postgres
+  REDIS_URL: redis://redis:6379
   SECRET_KEY: ${SECRET_KEY:-django-insecure-your-secret-key-here}
 
 services:
@@ -20,8 +20,14 @@ services:
       DEBUG: ${DEBUG:-true}
       LOG_REQUESTS: ${LOG_REQUESTS:-true}
     depends_on:
-      - postgres
-      - redis
+      postgres:
+        condition: service_started
+      redis:
+        condition: service_started
+      migrations:
+        condition: service_completed_successfully
+      create_cache_table:
+        condition: service_completed_successfully
 
   worker:
     build:
@@ -30,10 +36,16 @@ services:
     environment:
       <<: *default-environment
     depends_on:
-      - postgres
-      - redis
-      - migrations
-      - setup_periodic_tasks
+      postgres:
+        condition: service_started
+      redis:
+        condition: service_started
+      migrations:
+        condition: service_completed_successfully
+      create_cache_table:
+        condition: service_completed_successfully
+      setup_periodic_tasks:
+        condition: service_completed_successfully
 
   redis:
     image: redis:7-alpine
@@ -46,6 +58,11 @@ services:
       POSTGRES_DB: postgres
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
   migrations:
     build:
@@ -55,17 +72,30 @@ services:
     environment:
       <<: *default-environment
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
+
+  create_cache_table:
+    build:
+      context: .
+      target: web
+    command: uv run manage.py createcachetable
+    environment:
+      <<: *default-environment
+    depends_on:
+      migrations:
+        condition: service_completed_successfully
 
   setup_periodic_tasks:
     build:
       context: .
       target: web
-    command: uv run manage.py setup_periodic_tasks
+    command: uv run manage.py register_tasks
     environment:
       <<: *default-environment
     depends_on:
-      - postgres
+      migrations:
+        condition: service_completed_successfully
 
 volumes:
   postgres_data:

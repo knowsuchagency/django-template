@@ -51,7 +51,7 @@ LOG_SETTINGS = config("LOG_SETTINGS", default=False, cast=bool)
 # ALLOWED_HOSTS defines which host/domain names the Django site can serve
 # Example values: ['knowsuchagency.com', 'www.knowsuchagency.com', 'localhost', '127.0.0.1']
 # Default '*' allows all hosts in development, but should be restricted in production
-ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="", cast=parse_comma_separated_list)
+ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="*" if DEBUG else "localhost,127.0.0.1", cast=parse_comma_separated_list)
 
 # CSRF_TRUSTED_ORIGINS defines the origins that are trusted for CSRF-protected requests
 # Example values: ['https://knowsuchagency.com', 'https://www.knowsuchagency.com']
@@ -339,7 +339,8 @@ DJANGO_VITE = {
     "default": {
         "dev_mode": DEBUG,
         "dev_server_port": 5173,
-        "static_url_prefix": "/static/",
+        "static_url_prefix": "",
+        "manifest_path": BASE_DIR / "frontend/dist/.vite/manifest.json",
     }
 }
 

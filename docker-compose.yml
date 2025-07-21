@@ -12,12 +12,12 @@ services:
       - "${BACKEND_PORT:-8000}:8000"
     environment:
       <<: *default-environment
+      ALLOWED_HOSTS: ${ALLOWED_HOSTS:-localhost,127.0.0.1,0.0.0.0}
       CSRF_TRUSTED_ORIGINS: ${CSRF_TRUSTED_ORIGINS}
       SENTRY_DSN: ${SENTRY_DSN}
       AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
       AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
       AWS_REGION: ${AWS_REGION:-us-east-2}
-      DEBUG: ${DEBUG:-true}
       LOG_REQUESTS: ${LOG_REQUESTS:-true}
     depends_on:
       postgres:

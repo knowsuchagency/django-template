@@ -11,8 +11,16 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
-  // Always use /static/ for consistency
-  base: '/static/',
+  // Base path for assets - empty since Django handles /static/ prefix
+  base: '/',
+  build: {
+    manifest: true,
+    rollupOptions: {
+      input: {
+        main: path.resolve(__dirname, "src/main.tsx"),
+      },
+    },
+  },
   server: {
     proxy: {
       "/api": {

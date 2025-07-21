@@ -29,7 +29,7 @@ run = [
     "uvx ruff format"
 ]
 
-[tasks.frontend-build]
+[tasks.build]
 description = "build frontend"
 run = "cd frontend && bun run build"
 
@@ -59,7 +59,7 @@ run = "uv run python manage.py createsuperuser"
 
 [tasks.collectstatic]
 description = "build theme and collect static files"
-depends = ["frontend-build"]
+depends = ["build"]
 run = "uv run python manage.py collectstatic --noinput"
 
 [tasks.test]

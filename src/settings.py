@@ -182,6 +182,7 @@ INSTALLED_APPS = [
 ALLAUTH_APPS = [
     "allauth",
     "allauth.account",
+    "allauth.headless",
     # "allauth.socialaccount",
     # "allauth.socialaccount.providers.apple",
     # "allauth.socialaccount.providers.google",
@@ -418,6 +419,15 @@ ACCOUNT_EMAIL_CONFIRMATION_ANONYMOUS_REDIRECT_URL = "/"
 ACCOUNT_CSRF_COOKIE_NAME = "csrftoken"  # Match Django's default CSRF cookie name
 ACCOUNT_PRESERVE_CSRF_TOKEN = True  # Preserve CSRF token across requests
 ACCOUNT_SESSION_REMEMBER = True  # Keep logged in users authenticated between sessions
+
+# Django Allauth Headless mode configuration
+HEADLESS_FRONTEND_URLS = {
+    "account_confirm_email": "/app/verify-email/{key}",
+    "account_reset_password": "/app/password-reset",
+    "account_reset_password_from_key": "/app/password-reset/{key}",
+    "account_signup": "/app/signup",
+    "socialaccount_login_error": "/app/login",
+}
 
 # Email settings
 

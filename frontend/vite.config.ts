@@ -11,7 +11,8 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
-  base: "/static/",
+  // Always use /static/ for consistency
+  base: '/static/',
   server: {
     proxy: {
       "/api": {
@@ -22,10 +23,15 @@ export default defineConfig({
         target: "http://localhost:8000",
         changeOrigin: true,
       },
+      "/_allauth": {
+        target: "http://localhost:8000",
+        changeOrigin: true,
+      },
       "/admin": {
         target: "http://localhost:8000",
         changeOrigin: true,
       },
     },
   },
+  appType: 'spa',
 })

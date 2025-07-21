@@ -4,7 +4,7 @@ const isDevelopment = import.meta.env.DEV
 
 export const allauthClient = new AllauthClient(
   isDevelopment ? 'http://localhost:8000' : '',
-  '/api/v1/csrf-token',
+  isDevelopment ? '/api/v1/csrf-token' : '',
   'browser'
 )
 

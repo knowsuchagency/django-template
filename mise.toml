@@ -33,6 +33,7 @@ description = "build frontend"
 run = "cd frontend && bun run build"
 
 [tasks.runserver]
+depends = ["collectstatic"]
 description = "run development server"
 run = "npx concurrently --names 'Django,Vite' --prefix-colors 'green,blue' 'DEBUG=true uv run python manage.py runserver' 'cd frontend && bun run dev'"
 

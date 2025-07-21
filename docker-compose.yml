@@ -35,6 +35,8 @@ services:
       target: worker
     environment:
       <<: *default-environment
+    deploy:
+      replicas: ${WORKER_REPLICAS:-0}
     depends_on:
       postgres:
         condition: service_started
@@ -43,8 +45,6 @@ services:
       migrations:
         condition: service_completed_successfully
       create_cache_table:
-        condition: service_completed_successfully
-      setup_periodic_tasks:
         condition: service_completed_successfully
 
   redis:

@@ -27,19 +27,19 @@ export const Login: React.FC = () => {
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-50">
+    <div className="flex items-center justify-center min-h-screen bg-background">
       <div className="w-full max-w-md">
-        <form onSubmit={handleSubmit} className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
-          <h2 className="text-2xl font-bold mb-6 text-center">Login</h2>
+        <form onSubmit={handleSubmit} className="bg-card border border-border rounded-lg px-8 pt-6 pb-8 mb-4">
+          <h2 className="text-2xl font-bold mb-6 text-center text-foreground">Login</h2>
           
           {error && (
-            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+            <div className="bg-destructive/10 border border-destructive/30 text-destructive px-4 py-3 rounded-md mb-4">
               {error}
             </div>
           )}
           
           <div className="mb-4">
-            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="email">
+            <label className="block text-foreground text-sm font-medium mb-2" htmlFor="email">
               Email
             </label>
             <input
@@ -47,13 +47,13 @@ export const Login: React.FC = () => {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              className="appearance-none border border-input rounded-md w-full py-2 px-3 text-foreground bg-background leading-tight focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
               required
             />
           </div>
           
           <div className="mb-6">
-            <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="password">
+            <label className="block text-foreground text-sm font-medium mb-2" htmlFor="password">
               Password
             </label>
             <input
@@ -61,7 +61,7 @@ export const Login: React.FC = () => {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+              className="appearance-none border border-input rounded-md w-full py-2 px-3 text-foreground bg-background leading-tight focus:outline-none focus:ring-2 focus:ring-ring focus:border-transparent"
               required
             />
           </div>
@@ -72,9 +72,9 @@ export const Login: React.FC = () => {
             </Button>
           </div>
           
-          <p className="text-center mt-4 text-sm">
+          <p className="text-center mt-4 text-sm text-muted-foreground">
             Don't have an account?{' '}
-            <Link to="/signup" className="text-blue-500 hover:text-blue-700">
+            <Link to="/signup" className="text-primary hover:text-primary/80 transition-colors">
               Sign up
             </Link>
           </p>

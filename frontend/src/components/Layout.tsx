@@ -1,33 +1,35 @@
 import { Outlet, Link } from "react-router"
 import { useAllauth } from "@knowsuchagency/allauth-react"
+import { ThemeToggle } from "./ThemeToggle"
 
 export default function Layout() {
   const { user, logout } = useAllauth()
   
   return (
-    <div className="min-h-screen">
-      <nav className="bg-gray-800 text-white p-4">
-        <div className="container mx-auto flex justify-between items-center">
+    <div className="min-h-screen bg-background">
+      <nav className="border-b border-border bg-card">
+        <div className="container mx-auto flex justify-between items-center px-4 py-3">
           <div className="flex gap-6">
             {/* No navigation links needed when logged in */}
           </div>
           <div className="flex gap-4 items-center">
+            <ThemeToggle />
             {user ? (
               <>
-                <span>Welcome, {user.username}!</span>
+                <span className="text-foreground">Welcome, {user.username}!</span>
                 <button
                   onClick={logout}
-                  className="bg-red-600 hover:bg-red-700 px-3 py-1 rounded"
+                  className="bg-primary text-primary-foreground hover:bg-primary/90 px-3 py-1.5 rounded-md text-sm font-medium transition-colors"
                 >
                   Logout
                 </button>
               </>
             ) : (
               <>
-                <Link to="/login" className="hover:text-gray-300">
+                <Link to="/login" className="text-muted-foreground hover:text-foreground transition-colors">
                   Login
                 </Link>
-                <Link to="/signup" className="hover:text-gray-300">
+                <Link to="/signup" className="text-muted-foreground hover:text-foreground transition-colors">
                   Sign Up
                 </Link>
               </>

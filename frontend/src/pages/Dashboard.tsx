@@ -3,6 +3,7 @@ import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, L
 import { RefreshCw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useAllauth } from '@knowsuchagency/allauth-react'
+import { useTheme } from '@/contexts/ThemeContext'
 
 interface StockData {
   id: number
@@ -14,10 +15,27 @@ interface StockData {
 
 export const Dashboard: React.FC = () => {
   const { user } = useAllauth()
+  const { effectiveTheme } = useTheme()
   const [stockData, setStockData] = useState<StockData[]>([])
   const [selectedSymbol, setSelectedSymbol] = useState<string>('')
   const [availableSymbols, setAvailableSymbols] = useState<string[]>([])
   const [loading, setLoading] = useState(false)
+  
+  // Chart theme based on mode
+  const chartTheme = React.useMemo(() => ({
+    grid: effectiveTheme === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)',
+    axis: effectiveTheme === 'dark' ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.1)',
+    tick: effectiveTheme === 'dark' ? 'rgba(255, 255, 255, 0.6)' : 'rgba(0, 0, 0, 0.6)',
+    colors: [
+      '#0070f3',  // Vercel blue
+      '#7928ca',  // Purple
+      '#ff0080',  // Pink
+      '#ff4458',  // Red
+      '#f5a623',  // Orange
+      '#50e3c2',  // Teal
+      '#b8e986'   // Green
+    ]
+  }), [effectiveTheme])
 
   const fetchStockData = async () => {
     setLoading(true)
@@ -102,17 +120,17 @@ export const Dashboard: React.FC = () => {
   const symbolsToDisplay = selectedSymbol ? [selectedSymbol] : availableSymbols
 
   return (
-    <div className="w-full p-6">
-      <h2 className="text-3xl font-bold mb-4">Dashboard</h2>
+    <div className="w-full p-6 bg-background">
+      <h2 className="text-3xl font-bold mb-4 text-foreground">Dashboard</h2>
       
-      <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-        <h3 className="text-xl font-semibold mb-2">Welcome, {user?.username || 'User'}!</h3>
-        <p className="text-gray-600">This is your private dashboard. You can only see this page when logged in.</p>
+      <div className="bg-card rounded-lg border border-border p-6 mb-6">
+        <h3 className="text-xl font-semibold mb-2 text-foreground">Welcome, {user?.username || 'User'}!</h3>
+        <p className="text-muted-foreground">This is your private dashboard. You can only see this page when logged in.</p>
       </div>
 
-      <div className="bg-white rounded-lg shadow-md p-6">
+      <div className="bg-card rounded-lg border border-border p-6">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-2xl font-semibold">Stock Data</h2>
+          <h2 className="text-2xl font-semibold text-foreground">Stock Data</h2>
           <Button
             onClick={fetchStockData}
             disabled={loading}
@@ -127,7 +145,7 @@ export const Dashboard: React.FC = () => {
           <select
             value={selectedSymbol}
             onChange={(e) => setSelectedSymbol(e.target.value)}
-            className="w-full max-w-xs px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full max-w-xs px-3 py-2 bg-background border border-input rounded-md text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
           >
             <option value="">All Stocks</option>
             {availableSymbols.map(symbol => (
@@ -138,22 +156,44 @@ export const Dashboard: React.FC = () => {
 
         <div className="space-y-8">
           <div>
-            <h3 className="text-lg font-semibold mb-4">Stock Prices Over Time</h3>
+            <h3 className="text-lg font-semibold mb-4 text-foreground">Stock Prices Over Time</h3>
             <ResponsiveContainer width="100%" height={300}>
               <LineChart data={processedData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="date" />
-                <YAxis />
-                <Tooltip />
-                <Legend />
+                <CartesianGrid strokeDasharray="3 3" stroke={chartTheme.grid} vertical={false} />
+                <XAxis 
+                  dataKey="date" 
+                  stroke={chartTheme.axis}
+                  tick={{ fill: chartTheme.tick }}
+                  axisLine={{ stroke: chartTheme.axis }}
+                />
+                <YAxis 
+                  stroke={chartTheme.axis}
+                  tick={{ fill: chartTheme.tick }}
+                  axisLine={{ stroke: chartTheme.axis }}
+                />
+                <Tooltip 
+                  contentStyle={{ 
+                    backgroundColor: 'hsl(var(--background))', 
+                    border: '1px solid hsl(var(--border))',
+                    borderRadius: '6px',
+                    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)'
+                  }}
+                  labelStyle={{ color: 'hsl(var(--foreground))' }}
+                />
+                <Legend 
+                  wrapperStyle={{ paddingTop: '20px' }}
+                  iconType="line"
+                />
                 {symbolsToDisplay.map((symbol, index) => (
                   <Line
                     key={symbol}
                     type="monotone"
                     dataKey={`${symbol}_price`}
                     name={symbol}
-                    stroke={`hsl(${index * 360 / symbolsToDisplay.length}, 70%, 50%)`}
+                    stroke={chartTheme.colors[index % chartTheme.colors.length]}
                     strokeWidth={2}
+                    dot={false}
+                    activeDot={{ r: 4 }}
                   />
                 ))}
               </LineChart>
@@ -161,20 +201,40 @@ export const Dashboard: React.FC = () => {
           </div>
 
           <div>
-            <h3 className="text-lg font-semibold mb-4">Trading Volume Over Time</h3>
+            <h3 className="text-lg font-semibold mb-4 text-foreground">Trading Volume Over Time</h3>
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={processedData} margin={{ left: 20, right: 5, top: 5, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="date" />
-                <YAxis />
-                <Tooltip />
-                <Legend />
+                <CartesianGrid strokeDasharray="3 3" stroke={chartTheme.grid} vertical={false} />
+                <XAxis 
+                  dataKey="date" 
+                  stroke={chartTheme.axis}
+                  tick={{ fill: chartTheme.tick }}
+                  axisLine={{ stroke: chartTheme.axis }}
+                />
+                <YAxis 
+                  stroke={chartTheme.axis}
+                  tick={{ fill: chartTheme.tick }}
+                  axisLine={{ stroke: chartTheme.axis }}
+                />
+                <Tooltip 
+                  contentStyle={{ 
+                    backgroundColor: 'hsl(var(--background))', 
+                    border: '1px solid hsl(var(--border))',
+                    borderRadius: '6px',
+                    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)'
+                  }}
+                  labelStyle={{ color: 'hsl(var(--foreground))' }}
+                />
+                <Legend 
+                  wrapperStyle={{ paddingTop: '20px' }}
+                />
                 {symbolsToDisplay.map((symbol, index) => (
                   <Bar
                     key={symbol}
                     dataKey={`${symbol}_volume`}
                     name={symbol}
-                    fill={`hsl(${index * 360 / symbolsToDisplay.length}, 70%, 50%)`}
+                    fill={chartTheme.colors[index % chartTheme.colors.length]}
+                    opacity={0.8}
                   />
                 ))}
               </BarChart>

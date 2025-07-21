@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate } from "react-router"
 import { AllauthProvider, useAllauth } from "@knowsuchagency/allauth-react"
+import { ThemeProvider } from "@/contexts/ThemeContext"
 import Layout from "@/components/Layout"
 import { Dashboard } from "@/pages/Dashboard"
 import { Login } from "@/pages/Login"
@@ -42,11 +43,13 @@ function AppRoutes() {
 
 function App() {
   return (
-    <AllauthProvider
-      baseUrl={import.meta.env.DEV ? 'http://localhost:8000' : window.location.origin}
-      csrfTokenEndpoint="/api/v1/csrf-token"    >
-      <AppRoutes />
-    </AllauthProvider>
+    <ThemeProvider>
+      <AllauthProvider
+        baseUrl={import.meta.env.DEV ? 'http://localhost:8000' : window.location.origin}
+        csrfTokenEndpoint="/api/v1/csrf-token"    >
+        <AppRoutes />
+      </AllauthProvider>
+    </ThemeProvider>
   )
 }
 

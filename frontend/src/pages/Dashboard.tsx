@@ -163,7 +163,7 @@ export const Dashboard: React.FC = () => {
           <div>
             <h3 className="text-lg font-semibold mb-4">Trading Volume Over Time</h3>
             <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={processedData}>
+              <BarChart data={processedData} margin={{ left: 20, right: 5, top: 5, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="date" />
                 <YAxis />

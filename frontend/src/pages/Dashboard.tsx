@@ -42,15 +42,41 @@ export const Dashboard: React.FC = () => {
       const data = await response.json()
       setStockData(data)
       
-      // Extract unique symbols
-      const symbols = [...new Set(data.map((stock: StockData) => stock.symbol))].sort() as string[]
-      setAvailableSymbols(symbols)
+      // Only update available symbols if we're fetching all stocks
+      // This prevents the dropdown from losing options when filtering
+      if (!selectedSymbol) {
+        const symbols = [...new Set(data.map((stock: StockData) => stock.symbol))].sort() as string[]
+        setAvailableSymbols(symbols)
+      }
     } catch (error) {
       console.error('Error fetching stock data:', error)
     } finally {
       setLoading(false)
     }
   }
+
+  // Fetch all available symbols on mount
+  useEffect(() => {
+    const fetchAllSymbols = async () => {
+      try {
+        const response = await fetch('/api/v1/example/stocks', {
+          credentials: 'include',
+          headers: {
+            'Accept': 'application/json',
+          }
+        })
+        if (response.ok) {
+          const data = await response.json()
+          const symbols = [...new Set(data.map((stock: StockData) => stock.symbol))].sort() as string[]
+          setAvailableSymbols(symbols)
+        }
+      } catch (error) {
+        console.error('Error fetching all symbols:', error)
+      }
+    }
+    
+    fetchAllSymbols()
+  }, [])
 
   useEffect(() => {
     fetchStockData()

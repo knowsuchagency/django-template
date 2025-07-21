@@ -1,6 +1,6 @@
 import React from 'react'
 import { Sun, Moon, Monitor } from 'lucide-react'
-import { useTheme } from '@/contexts/ThemeContext'
+import { useThemeStore } from '@/stores/themeStore'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,7 +10,7 @@ import {
 import { Button } from "@/components/ui/button"
 
 export const ThemeToggle: React.FC = () => {
-  const { setTheme } = useTheme()
+  const setTheme = useThemeStore((state) => state.setTheme)
 
   return (
     <DropdownMenu>

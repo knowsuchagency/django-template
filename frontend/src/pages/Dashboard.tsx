@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react'
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
 import { RefreshCw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { useAllauth } from '@knowsuchagency/allauth-react'
-import { useTheme } from '@/contexts/ThemeContext'
+import { useAuthStore } from '@/stores/authStore'
+import { useThemeStore } from '@/stores/themeStore'
 
 interface StockData {
   id: number
@@ -14,8 +14,8 @@ interface StockData {
 }
 
 export const Dashboard: React.FC = () => {
-  const { user } = useAllauth()
-  const { effectiveTheme } = useTheme()
+  const user = useAuthStore((state) => state.user)
+  const effectiveTheme = useThemeStore((state) => state.effectiveTheme)
   const [stockData, setStockData] = useState<StockData[]>([])
   const [selectedSymbol, setSelectedSymbol] = useState<string>('')
   const [availableSymbols, setAvailableSymbols] = useState<string[]>([])

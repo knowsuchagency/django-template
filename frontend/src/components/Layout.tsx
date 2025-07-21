@@ -1,9 +1,11 @@
 import { Outlet, Link } from "react-router"
 import { useAllauth } from "@knowsuchagency/allauth-react"
+import { useAuthStore } from "@/stores/authStore"
 import { ThemeToggle } from "./ThemeToggle"
 
 export default function Layout() {
-  const { user, logout } = useAllauth()
+  const { logout } = useAllauth()
+  const user = useAuthStore((state) => state.user)
   
   return (
     <div className="min-h-screen bg-background">
@@ -16,7 +18,7 @@ export default function Layout() {
             <ThemeToggle />
             {user ? (
               <>
-                <span className="text-foreground">Welcome, {user.username}!</span>
+                <span className="text-foreground">Welcome, {user.username || user.email || 'User'}!</span>
                 <button
                   onClick={logout}
                   className="bg-primary text-primary-foreground hover:bg-primary/90 px-3 py-1.5 rounded-md text-sm font-medium transition-colors"

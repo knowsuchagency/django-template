@@ -30,6 +30,7 @@ Django 5.1.1 + Django Ninja API + React SPA with Vite
 ### Tech Stack
 - **Backend**: Django with Django Ninja (`/api/v1/`)
 - **Frontend**: React + TypeScript + Tailwind CSS + shadcn/ui
+- **State Management**: Zustand with persist middleware
 - **Auth**: Django-allauth + @knowsuchagency/allauth-react
 - **Task Queue**: Django-Q2 with Redis
 - **Database**: SQLite (dev) / PostgreSQL (prod)
@@ -48,7 +49,8 @@ frontend/
 ├── src/
 │   ├── components/    # React components
 │   ├── pages/         # Page components
-│   └── contexts/      # React contexts
+│   ├── stores/        # Zustand stores
+│   └── types/         # TypeScript types
 └── vite.config.ts
 ```
 
@@ -72,6 +74,17 @@ router = Router()
 @router.get("/example")
 def example(request):
     return {"message": "Hello"}
+```
+
+### State Management
+```typescript
+// Auth store with Zustand
+import { useAuthStore } from '@/stores/authStore'
+const user = useAuthStore((state) => state.user)
+
+// Theme store with persist
+import { useThemeStore } from '@/stores/themeStore'
+const { theme, setTheme } = useThemeStore()
 ```
 
 ### React Authentication

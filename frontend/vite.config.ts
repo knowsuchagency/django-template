@@ -11,8 +11,8 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
-  // Base path for assets - empty since Django handles /static/ prefix
-  base: '/',
+  // Always use /static/ for consistency
+  base: '/static/',
   build: {
     manifest: true,
     rollupOptions: {

@@ -339,7 +339,8 @@ DJANGO_VITE = {
     "default": {
         "dev_mode": DEBUG,
         "dev_server_port": 5173,
-        "static_url_prefix": "",
+        # In dev mode, Vite serves from /static/, in prod mode we don't want double prefix
+        "static_url_prefix": "" if not DEBUG else "/static/",
         "manifest_path": BASE_DIR / "frontend/dist/.vite/manifest.json",
     }
 }

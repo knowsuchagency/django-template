@@ -1,9 +1,6 @@
 import { Routes, Route, Navigate } from "react-router"
 import { AllauthProvider, useAllauth } from "@knowsuchagency/allauth-react"
 import Layout from "@/components/Layout"
-import Home from "@/pages/Home"
-import About from "@/pages/About"
-import Contact from "@/pages/Contact"
 import { Dashboard } from "@/pages/Dashboard"
 import { Login } from "@/pages/Login"
 import { Signup } from "@/pages/Signup"
@@ -23,12 +20,14 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
 }
 
 function AppRoutes() {
+  const { isAuthenticated } = useAllauth()
+  
   return (
     <Routes>
       <Route element={<Layout />}>
-        <Route index element={<Home />} />
-        <Route path="about" element={<About />} />
-        <Route path="contact" element={<Contact />} />
+        <Route index element={
+          <Navigate to={isAuthenticated ? "/dashboard" : "/login"} replace />
+        } />
         <Route path="login" element={<Login />} />
         <Route path="signup" element={<Signup />} />
         <Route path="dashboard" element={

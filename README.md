@@ -195,5 +195,13 @@ To use Lovable's built-in preview window, you'll need to note the request's actu
 ### Docker Support
 The project includes Docker configuration for production deployment:
 ```bash
-docker-compose up  # Full stack with PostgreSQL, Redis, and worker processes
+docker-compose up  # Full stack with PostgreSQL and Redis (no workers by default)
+
+# Run with workers enabled
+WORKER_REPLICAS=1 docker-compose up
+
+# Run with multiple workers
+WORKER_REPLICAS=3 docker-compose up
 ```
+
+Workers are disabled by default (`WORKER_REPLICAS=0`). Set the `WORKER_REPLICAS` environment variable to enable background task processing.

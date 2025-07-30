@@ -39,6 +39,7 @@ COPY manage.py ./
 
 # Copy built frontend files from frontend-builder stage
 COPY --from=frontend-builder /app/frontend/dist ./frontend/dist
+COPY --from=frontend-builder /app/frontend/public ./frontend/public
 
 # Worker stage
 FROM base AS worker

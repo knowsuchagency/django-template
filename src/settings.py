@@ -327,6 +327,7 @@ STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 STATICFILES_DIRS = [
     BASE_DIR / "static",
     BASE_DIR / "frontend/dist",
+    BASE_DIR / "frontend/public",
 ]
 
 # WhiteNoise configuration

@@ -19,7 +19,7 @@ A modern Django + React template with authentication, API, and task queue suppor
 - **Backend**: Django 5.1.1 with Django Ninja API (`/api/v1/`)
 - **Frontend**: React + TypeScript + Tailwind CSS + shadcn/ui
 - **State Management**: Zustand with persist middleware
-- **Authentication**: Django-allauth + @knowsuchagency/allauth-react
+- **Authentication**: Django-allauth + @knowsuchagency/django-allauth
 - **Task Queue**: Django-Q2 with Redis
 - **Database**: SQLite (development) / PostgreSQL (production)
 - **Build Tools**: Vite (frontend), uv (Python), mise (task runner)
@@ -161,10 +161,20 @@ const { theme, setTheme } = useThemeStore()
 
 ### React Authentication
 ```typescript
-import { AllauthProvider, useAllauth } from '@knowsuchagency/allauth-react'
+import { AllauthProvider, useAuth } from '@knowsuchagency/django-allauth'
 
 // In components
-const { user, login, logout, signup, isAuthenticated } = useAllauth()
+const { 
+  user, 
+  isAuthenticated,
+  login, 
+  logout, 
+  signup,
+  isLoggingIn,
+  isSigningUp,
+  loginError,
+  signupError 
+} = useAuth()
 ```
 
 ### API Calls

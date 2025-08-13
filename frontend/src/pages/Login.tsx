@@ -1,28 +1,22 @@
 import React, { useState } from 'react'
 import { useNavigate, Link } from 'react-router'
-import { useAllauth } from '@knowsuchagency/allauth-react'
+import { useAuth } from '@knowsuchagency/django-allauth'
 import { Button } from '@/components/ui/button'
 
 export const Login: React.FC = () => {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [error, setError] = useState('')
-  const [loading, setLoading] = useState(false)
-  const { login } = useAllauth()
+  const { login, isLoggingIn, loginError } = useAuth()
   const navigate = useNavigate()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setError('')
-    setLoading(true)
     
     try {
       await login({ email, password })
       navigate('/dashboard')
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Login failed')
-    } finally {
-      setLoading(false)
+    } catch {
+      // Error is handled via loginError from useAuth
     }
   }
 
@@ -32,9 +26,9 @@ export const Login: React.FC = () => {
         <form onSubmit={handleSubmit} className="bg-card border border-border rounded-lg px-8 pt-6 pb-8 mb-4">
           <h2 className="text-2xl font-bold mb-6 text-center text-foreground">Login</h2>
           
-          {error && (
+          {loginError && (
             <div className="bg-destructive/10 border border-destructive/30 text-destructive px-4 py-3 rounded-md mb-4">
-              {error}
+              {loginError instanceof Error ? loginError.message : 'Login failed'}
             </div>
           )}
           
@@ -67,8 +61,8 @@ export const Login: React.FC = () => {
           </div>
           
           <div className="flex items-center justify-between">
-            <Button type="submit" disabled={loading} className="w-full">
-              {loading ? 'Logging in...' : 'Login'}
+            <Button type="submit" disabled={isLoggingIn} className="w-full">
+              {isLoggingIn ? 'Logging in...' : 'Login'}
             </Button>
           </div>
           

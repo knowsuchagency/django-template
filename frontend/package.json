@@ -14,8 +14,7 @@
     "test:e2e:report": "playwright show-report"
   },
   "dependencies": {
-    "@knowsuchagency/allauth-fetch": "npm:@jsr/knowsuchagency__allauth-fetch",
-    "@knowsuchagency/allauth-react": "npm:@jsr/knowsuchagency__allauth-react",
+    "@knowsuchagency/django-allauth": "^0.14.0",
     "@radix-ui/react-dropdown-menu": "^2.1.15",
     "@radix-ui/react-slot": "^1.2.3",
     "@tailwindcss/vite": "^4.1.11",

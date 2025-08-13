@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { useNavigate, Link } from 'react-router'
-import { useAllauth } from '@knowsuchagency/allauth-react'
+import { useAuth } from '@knowsuchagency/django-allauth'
 import { Button } from '@/components/ui/button'
 
 export const Signup: React.FC = () => {
@@ -8,8 +8,7 @@ export const Signup: React.FC = () => {
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [error, setError] = useState('')
-  const [loading, setLoading] = useState(false)
-  const { signup } = useAllauth()
+  const { signup, isSigningUp, signupError } = useAuth()
   const navigate = useNavigate()
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -21,15 +20,11 @@ export const Signup: React.FC = () => {
       return
     }
     
-    setLoading(true)
-    
     try {
       await signup({ email, password })
       navigate('/dashboard')
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Signup failed')
-    } finally {
-      setLoading(false)
+    } catch {
+      // Error is handled via signupError from useAuth
     }
   }
 
@@ -39,9 +34,9 @@ export const Signup: React.FC = () => {
         <form onSubmit={handleSubmit} className="bg-card border border-border rounded-lg px-8 pt-6 pb-8 mb-4">
           <h2 className="text-2xl font-bold mb-6 text-center text-foreground">Sign Up</h2>
           
-          {error && (
+          {(error || signupError) && (
             <div className="bg-destructive/10 border border-destructive/30 text-destructive px-4 py-3 rounded-md mb-4">
-              {error}
+              {error || (signupError instanceof Error ? signupError.message : 'Signup failed')}
             </div>
           )}
           
@@ -88,8 +83,8 @@ export const Signup: React.FC = () => {
           </div>
           
           <div className="flex items-center justify-between">
-            <Button type="submit" disabled={loading} className="w-full">
-              {loading ? 'Creating account...' : 'Sign Up'}
+            <Button type="submit" disabled={isSigningUp} className="w-full">
+              {isSigningUp ? 'Creating account...' : 'Sign Up'}
             </Button>
           </div>
           

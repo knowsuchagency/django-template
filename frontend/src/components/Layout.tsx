@@ -1,10 +1,10 @@
 import { Outlet, Link } from "react-router"
-import { useAllauth } from "@knowsuchagency/allauth-react"
+import { useAuth } from "@knowsuchagency/django-allauth"
 import { useAuthStore } from "@/stores/authStore"
 import { ThemeToggle } from "./ThemeToggle"
 
 export default function Layout() {
-  const { logout } = useAllauth()
+  const { logout } = useAuth()
   const user = useAuthStore((state) => state.user)
   
   return (

@@ -4,7 +4,8 @@
       "Bash(find:*)",
       "Bash(ls:*)",
       "mcp__context7__resolve-library-id",
-      "mcp__context7__get-library-docs"
+      "mcp__context7__get-library-docs",
+      "WebFetch(domain:raw.githubusercontent.com)"
     ],
     "deny": []
   }

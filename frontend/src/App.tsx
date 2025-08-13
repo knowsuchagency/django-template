@@ -1,6 +1,6 @@
 import { useEffect } from "react"
 import { Routes, Route, Navigate } from "react-router"
-import { AllauthProvider, useAllauth } from "@knowsuchagency/allauth-react"
+import { AllauthProvider, useAuth } from "@knowsuchagency/django-allauth"
 import { useAuthStore } from "@/stores/authStore"
 import { useThemeStore } from "@/stores/themeStore"
 import Layout from "@/components/Layout"
@@ -9,7 +9,7 @@ import { Login } from "@/pages/Login"
 import { Signup } from "@/pages/Signup"
 
 const AuthSync = () => {
-  const { user, isAuthenticated, isLoading } = useAllauth()
+  const { user, isAuthenticated, isLoading } = useAuth()
   const { setUser, setIsAuthenticated, setIsLoading } = useAuthStore()
   
   useEffect(() => {

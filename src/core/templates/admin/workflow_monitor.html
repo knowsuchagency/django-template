@@ -4,7 +4,7 @@
 {% block breadcrumbs %}
 <div class="breadcrumbs">
     <a href="{% url 'admin:index' %}">{% trans 'Home' %}</a>
-    &rsaquo; {% trans 'Queue Monitor' %}
+    &rsaquo; {% trans 'Workflow Monitor' %}
 </div>
 {% endblock %}
 
@@ -29,164 +29,62 @@
 
 {% block content %}
 <div id="content-main" x-data="workflowMonitor()" x-init="init()">
-    <h1 class="text-2xl font-bold mb-6">Workflow Monitor (DBOS)</h1>
+    <h1 class="text-xl font-bold mb-4">Workflow Monitor (DBOS)</h1>
 
-    <!-- Control Panel -->
-    <div class="card bg-base-200 shadow-xl mb-6">
-        <div class="card-body">
-            <h2 class="card-title">Control Panel</h2>
-            <div class="flex flex-wrap gap-4 items-center">
+    <!-- Compact Control Panel with Inline Stats -->
+    <div class="bg-base-200 rounded-lg p-4 mb-4">
+        <div class="flex flex-wrap gap-4 items-center justify-between">
+            <div class="grid grid-cols-3 gap-2 items-center">
                 <button 
                     @click="togglePolling()" 
                     :class="isPolling ? 'btn-error' : 'btn-success'"
-                    class="btn"
+                    class="btn btn-sm"
                     x-text="isPolling ? 'Stop Polling' : 'Start Polling'">
                 </button>
                 
-                <div class="form-control">
-                    <label class="label">
-                        <span class="label-text">Polling Interval:</span>
-                    </label>
-                    <select 
-                        x-model="pollingInterval" 
-                        @change="changeInterval()"
-                        class="select select-bordered">
-                        <option value="500">0.5 seconds</option>
-                        <option value="1000">1 second</option>
-                        <option value="2000">2 seconds</option>
-                        <option value="5000">5 seconds</option>
-                        <option value="10000">10 seconds</option>
-                        <option value="30000">30 seconds</option>
-                        <option value="60000">1 minute</option>
-                    </select>
-                </div>
-                
-                <button @click="fetchData()" class="btn btn-primary">
+                <button @click="fetchData()" class="btn btn-primary btn-sm">
                     Refresh Now
                 </button>
+                
+                <select 
+                    x-model="pollingInterval" 
+                    @change="changeInterval()"
+                    class="select select-bordered select-sm w-full">
+                    <option value="500">0.5s</option>
+                    <option value="1000">1s</option>
+                    <option value="2000">2s</option>
+                    <option value="5000">5s</option>
+                    <option value="10000">10s</option>
+                    <option value="30000">30s</option>
+                    <option value="60000">1m</option>
+                </select>
+            </div>
+            
+            <!-- Inline Stats -->
+            <div class="flex gap-4 text-sm items-center">
+                <div><span class="font-semibold text-warning">Enqueued:</span> <span x-text="stats.enqueued">0</span></div>
+                <div><span class="font-semibold text-info">Pending:</span> <span x-text="stats.pending">0</span></div>
+                <div><span class="font-semibold text-success">Success:</span> <span x-text="stats.success">0</span></div>
+                <div><span class="font-semibold text-error">Error:</span> <span x-text="stats.error">0</span></div>
+                <div><span class="font-semibold text-secondary">Cancelled:</span> <span x-text="stats.cancelled">0</span></div>
+                <div><span class="font-semibold">Total:</span> <span x-text="stats.total">0</span></div>
+                <div><span class="font-semibold text-xs">Updated:</span> <span class="text-xs opacity-70" x-text="stats.timestamp">-</span></div>
             </div>
         </div>
     </div>
 
     <!-- Chart -->
-    <div class="card bg-base-200 shadow-xl mb-6">
-        <div class="card-body">
-            <h2 class="card-title">Workflow Activity Monitor</h2>
-            <div id="combined-chart" class="w-full h-96"></div>
-        </div>
+    <div class="bg-base-200 rounded-lg p-4 mb-4">
+        <div id="combined-chart" class="w-full h-64"></div>
     </div>
 
-    <!-- Stats -->
-    <div class="card bg-base-200 shadow-xl mb-6">
-        <div class="card-body">
-            <h2 class="card-title mb-4">Workflow Status Summary</h2>
-            <div class="stats stats-vertical lg:stats-horizontal shadow w-full">
-                <div class="stat">
-                    <div class="stat-title">Enqueued</div>
-                    <div class="stat-value text-warning" x-text="stats.enqueued">-</div>
-                </div>
-                <div class="stat">
-                    <div class="stat-title">Pending</div>
-                    <div class="stat-value text-info" x-text="stats.pending">-</div>
-                </div>
-                <div class="stat">
-                    <div class="stat-title">Total Workflows</div>
-                    <div class="stat-value text-primary" x-text="stats.total">-</div>
-                </div>
-                <div class="stat">
-                    <div class="stat-title">Success</div>
-                    <div class="stat-value text-success" x-text="stats.success">-</div>
-                </div>
-                <div class="stat">
-                    <div class="stat-title">Error</div>
-                    <div class="stat-value text-error" x-text="stats.error">-</div>
-                </div>
-                <div class="stat">
-                    <div class="stat-title">Cancelled</div>
-                    <div class="stat-value text-secondary" x-text="stats.cancelled">-</div>
-                </div>
-                <div class="stat">
-                    <div class="stat-title">Last Updated</div>
-                    <div class="stat-value text-sm" x-text="stats.timestamp">-</div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- System Status Table -->
-    <div class="card bg-base-200 shadow-xl mb-6">
-        <div class="card-body">
-            <h2 class="card-title">Workflow System Status</h2>
-            <div class="overflow-x-auto">
-                <table class="table table-zebra">
-                    <thead>
-                        <tr>
-                            <th>System</th>
-                            <th>Type</th>
-                            <th>Queued Workflows</th>
-                            <th>Instance ID</th>
-                            <th>Workers</th>
-                            <th>Status</th>
-                            <th>Uptime</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <template x-for="queue in queueData" :key="queue.name">
-                            <tr>
-                                <td x-text="queue.name"></td>
-                                <td x-text="queue.type"></td>
-                                <td x-text="queue.queued"></td>
-                                <td x-text="queue.instance"></td>
-                                <td x-text="queue.workers"></td>
-                                <td x-text="queue.status"></td>
-                                <td x-text="queue.uptime"></td>
-                            </tr>
-                        </template>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-
-    <!-- Legend -->
-    <div class="card bg-base-200 shadow-xl">
-        <div class="card-body">
-            <h2 class="card-title">Workflow Metrics Legend</h2>
-            <div class="space-y-4">
-                <div>
-                    <h3 class="font-bold text-warning">ENQUEUED</h3>
-                    <p class="text-sm opacity-70">Workflows waiting in the queue to be executed. These have been submitted but are waiting for resources.</p>
-                </div>
-                <div>
-                    <h3 class="font-bold text-info">PENDING</h3>
-                    <p class="text-sm opacity-70">Workflows that are currently being executed or are about to start execution.</p>
-                </div>
-                <div>
-                    <h3 class="font-bold text-success">SUCCESS</h3>
-                    <p class="text-sm opacity-70">Workflows that have successfully completed execution without errors.</p>
-                </div>
-                <div>
-                    <h3 class="font-bold text-error">ERROR</h3>
-                    <p class="text-sm opacity-70">Workflows that encountered errors during execution. DBOS may retry these based on your configuration.</p>
-                </div>
-                <div>
-                    <h3 class="font-bold text-error">MAX_RECOVERY_ATTEMPTS_EXCEEDED</h3>
-                    <p class="text-sm opacity-70">Workflows that failed after exhausting all retry attempts. These require manual intervention or debugging.</p>
-                </div>
-                <div>
-                    <h3 class="font-bold text-secondary">CANCELLED</h3>
-                    <p class="text-sm opacity-70">Workflows that were manually cancelled before completion.</p>
-                </div>
-            </div>
-        </div>
-    </div>
 </div>
 
 <script>
 function workflowMonitor() {
     return {
         // State
-        isPolling: true,
+        isPolling: false,
         pollingInterval: 1000,
         pollingIntervalId: null,
         chart: null,
@@ -218,7 +116,6 @@ function workflowMonitor() {
         init() {
             this.initChart();
             this.fetchData();
-            this.startPolling();
         },
         
         initChart() {

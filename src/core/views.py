@@ -25,6 +25,6 @@ def spa_fallback(request, path):
 
 
 @staff_member_required
-def queue_monitor(request):
-    """Queue monitoring view for the admin interface"""
-    return render(request, "admin/queue_monitor.html")
+def workflow_monitor(request):
+    """Workflow monitoring view for the admin interface"""
+    return render(request, "admin/workflow_monitor.html")

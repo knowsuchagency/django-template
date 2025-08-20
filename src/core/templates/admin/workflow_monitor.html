@@ -287,7 +287,7 @@
         option = {
             backgroundColor: currentColors.background, // Set background color
             title: {
-                text: 'Queue Tasks Monitor',
+                text: 'Workflow Activity Monitor',
                 left: 'center',
                 textStyle: {
                     color: currentColors.title,
@@ -298,7 +298,7 @@
                 trigger: 'axis'
             },
             legend: {
-                data: ['Task Queue', 'Pending', 'Result Queue', 'Reincarnations'],
+                data: ['Total Workflows', 'Queued', 'Completed', 'Failed'],
                 top: 'bottom',
                 textStyle: {
                     color: currentColors.legend
@@ -342,7 +342,7 @@
             },
             series: [
                 {
-                    name: 'Task Queue',
+                    name: 'Total Workflows',
                     type: 'line',
                     smooth: true,
                     data: taskQueueHistory,
@@ -350,7 +350,7 @@
                     itemStyle: { color: currentColors.taskQueue }
                 },
                 {
-                    name: 'Pending',
+                    name: 'Queued',
                     type: 'line',
                     smooth: true,
                     data: queueSizeHistory,
@@ -358,7 +358,7 @@
                     itemStyle: { color: currentColors.pending }
                 },
                 {
-                    name: 'Result Queue',
+                    name: 'Completed',
                     type: 'line',
                     smooth: true,
                     data: resultQueueHistory,
@@ -366,7 +366,7 @@
                     itemStyle: { color: currentColors.resultQueue }
                 },
                 {
-                    name: 'Reincarnations',
+                    name: 'Failed',
                     type: 'line',
                     smooth: true,
                     data: reincarnationsHistory,
@@ -424,10 +424,10 @@
                     data: labels
                 },
                 series: [
-                    { name: 'Task Queue', data: taskQueueHistory },
-                    { name: 'Pending', data: queueSizeHistory },
-                    { name: 'Result Queue', data: resultQueueHistory },
-                    { name: 'Reincarnations', data: reincarnationsHistory }
+                    { name: 'Total Workflows', data: taskQueueHistory },
+                    { name: 'Queued', data: queueSizeHistory },
+                    { name: 'Completed', data: resultQueueHistory },
+                    { name: 'Failed', data: reincarnationsHistory }
                 ]
             });
         }
@@ -439,40 +439,46 @@
         }
 
         function fetchQueueData() {
-            fetch('/api/v1/q2/queues')
+            fetch('/api/v1/tasks/status')
                 .then(response => response.json())
                 .then(data => {
                     // Update queue count and timestamp
-                    document.getElementById('queue-count').textContent = data.queue_count;
-                    document.getElementById('task-queue').textContent = data.task_queue;
-                    document.getElementById('queue-size').textContent = data.queue_size;
-                    document.getElementById('result-queue').textContent = data.result_queue;
-                    document.getElementById('reincarnations').textContent = data.reincarnations;
+                    document.getElementById('queue-count').textContent = data.queued_workflows || 0;
+                    document.getElementById('task-queue').textContent = data.total_workflows || 0;
+                    document.getElementById('queue-size').textContent = data.queued_workflows || 0;
+                    document.getElementById('result-queue').textContent = 0; // DBOS doesn't have separate result queue
+                    document.getElementById('reincarnations').textContent = 0; // DBOS handles this internally
                     document.getElementById('timestamp').textContent = data.timestamp;
 
-                    // Update queue table
+                    // Update queue table - DBOS doesn't have multiple queues
                     const tableBody = document.getElementById('queue-table-body');
                     tableBody.innerHTML = '';
+                    
+                    // Add single row for DBOS workflows
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                      <td>DBOS Workflows</td>
+                      <td>workflow</td>
+                      <td>${data.queued_workflows || 0}</td>
+                      <td>-</td>
+                      <td>-</td>
+                      <td>${data.message || 'Running'}</td>
+                      <td>-</td>
+                    `;
+                    tableBody.appendChild(row);
 
-                    data.active_queues.forEach(queue => {
-                        const row = document.createElement('tr');
-                        row.innerHTML = `
-                          <td>${queue.name}</td>
-                          <td>${queue.type}</td>
-                          <td>${queue.tasks}</td>
-                          <td>${queue.cluster_id}</td>
-                          <td>${queue.workers}</td>
-                          <td>${queue.status}</td>
-                          <td>${queue.uptime ? queue.uptime.toFixed(2) : '-'}</td>
-                        `;
-                        tableBody.appendChild(row);
+                    // Update charts with new data (adapted for DBOS)
+                    updateCharts({
+                        task_queue: data.total_workflows || 0,
+                        queue_size: data.queued_workflows || 0,
+                        result_queue: 0,
+                        reincarnations: 0
                     });
-
-                    // Update charts with new data
-                    updateCharts(data);
                 })
                 .catch(error => {
                     console.error('Error fetching queue data:', error);
+                    // Show error in UI
+                    document.getElementById('timestamp').textContent = 'Error';
                 });
         }
 
@@ -553,10 +559,10 @@
                     axisLabel: { color: newColors.axisLabel }
                 },
                 series: [
-                    { name: 'Task Queue', itemStyle: { color: newColors.taskQueue } },
-                    { name: 'Pending', itemStyle: { color: newColors.pending } },
-                    { name: 'Result Queue', itemStyle: { color: newColors.resultQueue } },
-                    { name: 'Reincarnations', itemStyle: { color: newColors.reincarnations } }
+                    { name: 'Total Workflows', itemStyle: { color: newColors.taskQueue } },
+                    { name: 'Queued', itemStyle: { color: newColors.pending } },
+                    { name: 'Completed', itemStyle: { color: newColors.resultQueue } },
+                    { name: 'Failed', itemStyle: { color: newColors.reincarnations } }
                 ]
             });
         });
@@ -566,7 +572,7 @@
 
 {% block content %}
 <div id="content-main">
-    <h1>Queue Monitor</h1>
+    <h1>Workflow Monitor (DBOS)</h1>
 
     <!-- Control Panel -->
     <div class="module">
@@ -590,7 +596,7 @@
 
     <!-- Charts section - now using ECharts -->
     <div class="module">
-        <div class="queue-header">Queue Tasks Monitor</div>
+        <div class="queue-header">Workflow Activity Monitor</div>
         <div
             style="height: 400px; padding: 15px; background-color: #ffffff; border-radius: 0 0 4px 4px; border: 1px solid #dee2e6;">
             <div id="combined-chart" style="width: 100%; height: 100%;"></div>
@@ -599,10 +605,10 @@
 
     <!-- Stats below the chart -->
     <div class="module">
-        <div class="queue-header">Queue Status Summary</div>
+        <div class="queue-header">Workflow Status Summary</div>
         <div class="stats-container">
             <div class="stat-item">
-                <div class="stat-label">Active Queues</div>
+                <div class="stat-label">Queued Workflows</div>
                 <div class="stat-value" id="queue-count">-</div>
             </div>
             <div class="stat-item">
@@ -610,15 +616,15 @@
                 <div class="stat-value" id="queue-size">-</div>
             </div>
             <div class="stat-item">
-                <div class="stat-label">Task Queue</div>
+                <div class="stat-label">Total Workflows</div>
                 <div class="stat-value" id="task-queue">-</div>
             </div>
             <div class="stat-item">
-                <div class="stat-label">Result Queue</div>
+                <div class="stat-label">Completed</div>
                 <div class="stat-value" id="result-queue">-</div>
             </div>
             <div class="stat-item">
-                <div class="stat-label">Reincarnations</div>
+                <div class="stat-label">Failed</div>
                 <div class="stat-value" id="reincarnations">-</div>
             </div>
             <div class="stat-item">
@@ -630,16 +636,16 @@
 
     <div class="module">
         <table>
-            <caption>Active Queues</caption>
+            <caption>Workflow System Status</caption>
             <thead>
                 <tr>
-                    <th>Queue Name</th>
+                    <th>System</th>
                     <th>Type</th>
-                    <th>Pending Tasks</th>
-                    <th>Cluster ID</th>
+                    <th>Queued Workflows</th>
+                    <th>Instance ID</th>
                     <th>Workers</th>
                     <th>Status</th>
-                    <th>Uptime (sec)</th>
+                    <th>Uptime</th>
                 </tr>
             </thead>
             <tbody id="queue-table-body">
@@ -648,37 +654,33 @@
         </table>
     </div>
 
-    <!-- Add Legend for Queue Metrics -->
+    <!-- Add Legend for Workflow Metrics -->
     <div class="module">
-        <div class="queue-header">Queue Metrics Legend</div>
+        <div class="queue-header">Workflow Metrics Legend</div>
         <div style="padding: 15px; background-color: #ffffff; border-radius: 0 0 4px 4px; border: 1px solid #dee2e6;">
             <div style="margin-bottom: 15px;">
-                <h3 style="margin: 0 0 8px 0; color: #495057;">Pending</h3>
-                <p>Shows the total number of tasks waiting to be processed in the broker's queue. These are tasks that
-                    have been submitted but haven't yet been picked up by a worker process. This is the most direct
-                    measure of your current queue backlog.</p>
+                <h3 style="margin: 0 0 8px 0; color: #495057;">Queued Workflows</h3>
+                <p>Shows the total number of workflows waiting to be executed. These are workflows that
+                    have been submitted but are queued for processing. DBOS automatically manages the execution
+                    queue to ensure reliable processing.</p>
             </div>
 
             <div style="margin-bottom: 15px;">
-                <h3 style="margin: 0 0 8px 0; color: #495057;">Task Queue</h3>
-                <p>Counts the number of tasks in the queue. If this keeps rising, it means you are taking on more tasks
-                    than your cluster can handle. You can limit this by setting the <code>queue_limit</code> in your
-                    cluster configuration. If your task queue is always hitting its limit and you're running out of
-                    resources, it may be time to add another cluster.</p>
+                <h3 style="margin: 0 0 8px 0; color: #495057;">Total Workflows</h3>
+                <p>Counts all workflows that have been submitted to DBOS, including completed, running, and queued workflows.
+                    This gives you an overview of the total workflow activity in your system.</p>
             </div>
 
             <div style="margin-bottom: 15px;">
-                <h3 style="margin: 0 0 8px 0; color: #495057;">Result Queue</h3>
-                <p>Shows the number of results in the queue. Since results are only saved by a single process which has
-                    to access the database, it's normal for the result queue to take slightly longer to clear than the
-                    task queue.</p>
+                <h3 style="margin: 0 0 8px 0; color: #495057;">Completed</h3>
+                <p>Shows workflows that have successfully completed execution. DBOS ensures workflows are durable
+                    and will automatically recover from failures, so completed workflows have been reliably processed.</p>
             </div>
 
             <div>
-                <h3 style="margin: 0 0 8px 0; color: #495057;">Reincarnations</h3>
-                <p>Shows the amount of processes that have been reincarnated after a recycle, sudden death, or timeout.
-                    If this number is unusually high, you are either suffering from repeated task errors or severe
-                    timeouts and you should check your logs for details.</p>
+                <h3 style="margin: 0 0 8px 0; color: #495057;">Failed</h3>
+                <p>Shows workflows that encountered errors during execution. DBOS provides automatic retry mechanisms
+                    and durability guarantees, so failed workflows may be retried based on your configuration.</p>
             </div>
         </div>
     </div>

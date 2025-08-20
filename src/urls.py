@@ -24,7 +24,7 @@ from .api import api
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("admin/queue-monitor/", views.queue_monitor, name="admin_queue_monitor"),
+    path("admin/workflow-monitor/", views.workflow_monitor, name="admin_workflow_monitor"),
     path("api/", api.urls),
     path("accounts/", include("allauth.urls")),
     path("_allauth/", include("allauth.headless.urls")),

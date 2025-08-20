@@ -4,9 +4,9 @@
 {% block sidebar %}
 {{ block.super }}
 <div class="module" id="custom-admin-links">
-  <h2>{% trans 'Queue Management' %}</h2>
+  <h2>{% trans 'Workflow Management' %}</h2>
   <ul>
-    <li><a href="{% url 'admin_queue_monitor' %}">{% trans 'Queue Monitor' %}</a></li>
+    <li><a href="{% url 'admin_workflow_monitor' %}">{% trans 'Workflow Monitor' %}</a></li>
   </ul>
 </div>
 {% endblock %}

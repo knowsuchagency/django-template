@@ -173,8 +173,6 @@ INSTALLED_APPS = [
     "django_browser_reload",
     "widget_tweaks",
     "debug_toolbar",
-    "django_q",
-    "django_q_registry",
     "django_vite",
     "core",
 ]
@@ -460,11 +458,3 @@ LOGIN_URL = config(
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 USE_X_FORWARDED_HOST = True
 
-Q_CLUSTER = {
-    "name": "DjangORM",
-    "timeout": 90,
-    "retry": 120,
-    "compress": True,
-    "bulk": 10,
-    "orm": "default",
-}

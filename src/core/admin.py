@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.urls import path
 
 from .models import User, StockTicker
-from .views import queue_monitor
+from .views import workflow_monitor
 
 
 # Register our models with the default admin site
@@ -44,7 +44,7 @@ def custom_get_urls():
     urls = original_get_urls()
     custom_urls = [
         path(
-            "queue-monitor/", admin.site.admin_view(queue_monitor), name="queue_monitor"
+            "workflow-monitor/", admin.site.admin_view(workflow_monitor), name="workflow_monitor"
         ),
     ]
     return custom_urls + urls
@@ -54,18 +54,18 @@ def custom_get_urls():
 def custom_get_app_list(request, app_label=None):
     app_list = original_get_app_list(request, app_label)
 
-    # Add our Queue Monitor to the app list
+    # Add our Workflow Monitor to the app list
     app_dict = {
-        "name": "Queue Management",
-        "app_label": "queue_management",
+        "name": "Workflow Management",
+        "app_label": "workflow_management",
         "app_url": "#",
         "has_module_perms": True,
         "models": [
             {
-                "name": "Queue Monitor",
-                "object_name": "queue_monitor",
+                "name": "Workflow Monitor",
+                "object_name": "workflow_monitor",
                 "perms": {"add": False, "change": False, "delete": False, "view": True},
-                "admin_url": "/admin/queue-monitor/",
+                "admin_url": "/admin/workflow-monitor/",
                 "view_only": True,
             }
         ],

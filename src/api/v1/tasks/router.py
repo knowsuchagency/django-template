@@ -4,11 +4,10 @@ from typing import Optional, Any, List
 from datetime import datetime
 from pprint import pprint
 
-from dbos import DBOS, DBOSClient
+from dbos import DBOS
 from django.contrib.admin.views.decorators import staff_member_required
 from ninja import Router
 from loguru import logger
-from decouple import config as env_config
 
 from .schemas import WorkflowResult, WorkflowStatusResponse, WorkflowInfo, WorkflowListResponse
 
@@ -26,8 +25,7 @@ def test_job_workflow():
     return result
 
 
-@router.post("/test", summary="Submit Test Job(s)")
-@staff_member_required
+@router.post("/test", summary="Submit Test Job(s)", auth=None)
 def test_job(request, count: int = 1):
     try:
         workflow_ids = []
@@ -82,28 +80,15 @@ def get_result(request, workflow_id: str):
         )
 
 
-@router.get("/list", response=WorkflowListResponse, summary="List Workflows")
-@staff_member_required
+@router.get("/list", response=WorkflowListResponse, summary="List Workflows", auth=None)
 def list_workflows(request, limit: int = 50):
     """
     List recent workflows with their status.
     """
     try:
-        # Get database URL from environment
-        database_url = env_config("DBOS_DATABASE_URL", default=env_config("DATABASE_URL", default=""))
-        
-        if not database_url:
-            return WorkflowListResponse(
-                workflows=[],
-                total_count=0,
-                message="DBOS database not configured"
-            )
-        
-        # Create a DBOS client to query workflows
-        client = DBOSClient(database_url)
-        
-        # List recent workflows
-        workflow_list = client.list_workflows(limit=limit)
+        # Use the DBOS instance initialized in apps.py
+        # List recent workflows directly using DBOS
+        workflow_list = DBOS.list_workflows(limit=limit)
         
         workflows = []
         for wf in workflow_list:
@@ -136,23 +121,10 @@ def workflow_status(request):
     Get an overview of workflow status including queued workflows.
     """
     try:
-        # Get database URL from environment
-        database_url = env_config("DBOS_DATABASE_URL", default=env_config("DATABASE_URL", default=""))
-        
-        if not database_url:
-            return WorkflowStatusResponse(
-                total_workflows=0,
-                queued_workflows=0,
-                timestamp=datetime.now().strftime("%H:%M:%S"),
-                message="DBOS database not configured"
-            )
-        
-        # Create a DBOS client to query workflows
-        client = DBOSClient(database_url)
-        
-        # Get counts
-        all_workflows = client.list_workflows(limit=1000)
-        queued = client.list_queued_workflows()
+        # Use the DBOS instance initialized in apps.py
+        # Get counts directly using DBOS
+        all_workflows = DBOS.list_workflows(limit=1000)
+        queued = DBOS.list_queued_workflows()
         
         return WorkflowStatusResponse(
             total_workflows=len(all_workflows),

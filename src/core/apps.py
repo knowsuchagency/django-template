@@ -14,19 +14,32 @@ class CoreConfig(AppConfig):
 
         # Only initialize DBOS if we're in the main process (not in Django's autoreload subprocess)
         if not settings.DEBUG or os.environ.get('RUN_MAIN') == 'true':
-            # Use DBOS_DATABASE_URL if set, otherwise fall back to DATABASE_URL
+            # Get DATABASE_URL and transform it for DBOS by removing query params
             database_url = os.getenv("DATABASE_URL", "")
             
             # DBOS requires PostgreSQL, skip initialization if using SQLite
             if database_url and not database_url.startswith("sqlite"):
+                # Remove query parameters from DATABASE_URL for DBOS
+                # DBOS doesn't work well with search_path and other params
+                from urllib.parse import urlparse, urlunparse
+                parsed = urlparse(database_url)
+                # Rebuild URL without query params
+                dbos_database_url = urlunparse((
+                    parsed.scheme,
+                    parsed.netloc,
+                    parsed.path,
+                    '',  # params
+                    '',  # query
+                    ''   # fragment
+                ))
                 try:
                     dbos_config: DBOSConfig = {
                         "name": "django-template",
-                        "database_url": database_url,
+                        "database_url": dbos_database_url,
                     }
                     DBOS(config=dbos_config, conductor_key=settings.DBOS_CONDUCTOR_KEY)
                     DBOS.launch()
-                    logger.info("DBOS initialized successfully")
+                    logger.info(f"DBOS initialized successfully with URL: {dbos_database_url}")
                 except Exception as e:
                     logger.warning(f"DBOS initialization failed: {e}")
                     logger.info("DBOS requires PostgreSQL. Workflows will not be available.")

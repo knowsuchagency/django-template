@@ -123,9 +123,32 @@ def workflow_status(request):
         all_workflows = DBOS.list_workflows(limit=1000)
         queued = DBOS.list_queued_workflows()
         
+        # Count workflows by status
+        status_counts = {
+            "PENDING": 0,
+            "SUCCESS": 0,
+            "ERROR": 0,
+            "MAX_RECOVERY_ATTEMPTS_EXCEEDED": 0,
+            "CANCELLED": 0,
+            "ENQUEUED": 0,
+        }
+        
+        for wf in all_workflows:
+            if wf.status in status_counts:
+                status_counts[wf.status] += 1
+        
+        # Enqueued workflows are those in the queue
+        status_counts["ENQUEUED"] = len(queued)
+        
         return WorkflowStatusResponse(
             total_workflows=len(all_workflows),
             queued_workflows=len(queued),
+            pending=status_counts["PENDING"],
+            success=status_counts["SUCCESS"],
+            error=status_counts["ERROR"],
+            max_recovery_attempts_exceeded=status_counts["MAX_RECOVERY_ATTEMPTS_EXCEEDED"],
+            cancelled=status_counts["CANCELLED"],
+            enqueued=status_counts["ENQUEUED"],
             timestamp=datetime.now().strftime("%H:%M:%S"),
             message="DBOS workflows are running"
         )
@@ -134,6 +157,12 @@ def workflow_status(request):
         return WorkflowStatusResponse(
             total_workflows=0,
             queued_workflows=0,
+            pending=0,
+            success=0,
+            error=0,
+            max_recovery_attempts_exceeded=0,
+            cancelled=0,
+            enqueued=0,
             timestamp=datetime.now().strftime("%H:%M:%S"),
             message=f"Error: {str(e)}"
         )

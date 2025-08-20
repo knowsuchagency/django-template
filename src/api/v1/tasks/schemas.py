@@ -29,5 +29,11 @@ class WorkflowListResponse(Schema):
 class WorkflowStatusResponse(Schema):
     total_workflows: int
     queued_workflows: int = 0
+    pending: int = 0
+    success: int = 0
+    error: int = 0
+    max_recovery_attempts_exceeded: int = 0
+    cancelled: int = 0
+    enqueued: int = 0
     timestamp: str
     message: str

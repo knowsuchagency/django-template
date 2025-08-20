@@ -235,10 +235,12 @@
     document.addEventListener('DOMContentLoaded', function () {
         // Data storage for historical data
         const maxDataPoints = 60; // Store 1 minute of data
-        let taskQueueHistory = [];
-        let queueSizeHistory = [];
-        let resultQueueHistory = [];
-        let reincarnationsHistory = [];
+        let totalWorkflowsHistory = [];
+        let enqueuedHistory = [];
+        let pendingHistory = [];
+        let successHistory = [];
+        let errorHistory = [];
+        let cancelledHistory = [];
         let labels = [];
 
         // Polling controls
@@ -262,10 +264,12 @@
                 axisLine: '#ced4da',
                 axisLabel: '#495057',
                 splitLine: 'rgba(0, 0, 0, 0.1)',
-                taskQueue: 'rgb(53, 162, 235)',
-                pending: 'rgb(255, 99, 132)',
-                resultQueue: 'rgb(75, 192, 192)',
-                reincarnations: 'rgb(153, 102, 255)',
+                totalWorkflows: 'rgb(53, 162, 235)',
+                enqueued: 'rgb(255, 206, 86)',
+                pending: 'rgb(255, 159, 64)',
+                success: 'rgb(75, 192, 192)',
+                error: 'rgb(255, 99, 132)',
+                cancelled: 'rgb(153, 102, 255)',
                 background: '#ffffff'
             },
             dark: {
@@ -274,10 +278,12 @@
                 axisLine: '#555',
                 axisLabel: '#a0a0a0',
                 splitLine: 'rgba(255, 255, 255, 0.1)',
-                taskQueue: 'rgb(87, 189, 255)', // Lighter blue
-                pending: 'rgb(255, 138, 166)', // Lighter red
-                resultQueue: 'rgb(118, 218, 218)', // Lighter teal
-                reincarnations: 'rgb(188, 155, 255)', // Lighter purple
+                totalWorkflows: 'rgb(87, 189, 255)', // Lighter blue
+                enqueued: 'rgb(255, 235, 59)', // Yellow
+                pending: 'rgb(255, 183, 77)', // Orange
+                success: 'rgb(118, 218, 218)', // Lighter teal
+                error: 'rgb(255, 138, 166)', // Lighter red
+                cancelled: 'rgb(188, 155, 255)', // Lighter purple
                 background: '#2c2c2c' // Match container background
             }
         };
@@ -298,7 +304,7 @@
                 trigger: 'axis'
             },
             legend: {
-                data: ['Total Workflows', 'Queued', 'Completed', 'Failed'],
+                data: ['Total Workflows', 'Enqueued', 'Pending', 'Success', 'Error', 'Cancelled'],
                 top: 'bottom',
                 textStyle: {
                     color: currentColors.legend
@@ -345,33 +351,49 @@
                     name: 'Total Workflows',
                     type: 'line',
                     smooth: true,
-                    data: taskQueueHistory,
+                    data: totalWorkflowsHistory,
                     lineStyle: { width: 3 },
-                    itemStyle: { color: currentColors.taskQueue }
+                    itemStyle: { color: currentColors.totalWorkflows }
                 },
                 {
-                    name: 'Queued',
+                    name: 'Enqueued',
                     type: 'line',
                     smooth: true,
-                    data: queueSizeHistory,
+                    data: enqueuedHistory,
+                    lineStyle: { width: 3 },
+                    itemStyle: { color: currentColors.enqueued }
+                },
+                {
+                    name: 'Pending',
+                    type: 'line',
+                    smooth: true,
+                    data: pendingHistory,
                     lineStyle: { width: 3 },
                     itemStyle: { color: currentColors.pending }
                 },
                 {
-                    name: 'Completed',
+                    name: 'Success',
                     type: 'line',
                     smooth: true,
-                    data: resultQueueHistory,
+                    data: successHistory,
                     lineStyle: { width: 3 },
-                    itemStyle: { color: currentColors.resultQueue }
+                    itemStyle: { color: currentColors.success }
                 },
                 {
-                    name: 'Failed',
+                    name: 'Error',
                     type: 'line',
                     smooth: true,
-                    data: reincarnationsHistory,
+                    data: errorHistory,
                     lineStyle: { width: 3 },
-                    itemStyle: { color: currentColors.reincarnations }
+                    itemStyle: { color: currentColors.error }
+                },
+                {
+                    name: 'Cancelled',
+                    type: 'line',
+                    smooth: true,
+                    data: cancelledHistory,
+                    lineStyle: { width: 3 },
+                    itemStyle: { color: currentColors.cancelled }
                 }
             ],
             animation: false // Disable animation for performance
@@ -394,28 +416,40 @@
             // Add a new time label
             addTimeLabel();
 
-            // Update task queue history
-            taskQueueHistory.push(data.task_queue);
-            if (taskQueueHistory.length > maxDataPoints) {
-                taskQueueHistory.shift();
+            // Update total workflows history
+            totalWorkflowsHistory.push(data.total_workflows);
+            if (totalWorkflowsHistory.length > maxDataPoints) {
+                totalWorkflowsHistory.shift();
             }
 
-            // Update queue size history
-            queueSizeHistory.push(data.queue_size);
-            if (queueSizeHistory.length > maxDataPoints) {
-                queueSizeHistory.shift();
+            // Update enqueued history
+            enqueuedHistory.push(data.enqueued);
+            if (enqueuedHistory.length > maxDataPoints) {
+                enqueuedHistory.shift();
             }
 
-            // Update result queue history
-            resultQueueHistory.push(data.result_queue);
-            if (resultQueueHistory.length > maxDataPoints) {
-                resultQueueHistory.shift();
+            // Update pending history
+            pendingHistory.push(data.pending);
+            if (pendingHistory.length > maxDataPoints) {
+                pendingHistory.shift();
             }
 
-            // Update reincarnations history
-            reincarnationsHistory.push(data.reincarnations);
-            if (reincarnationsHistory.length > maxDataPoints) {
-                reincarnationsHistory.shift();
+            // Update success history
+            successHistory.push(data.success);
+            if (successHistory.length > maxDataPoints) {
+                successHistory.shift();
+            }
+
+            // Update error history
+            errorHistory.push(data.error);
+            if (errorHistory.length > maxDataPoints) {
+                errorHistory.shift();
+            }
+
+            // Update cancelled history
+            cancelledHistory.push(data.cancelled);
+            if (cancelledHistory.length > maxDataPoints) {
+                cancelledHistory.shift();
             }
 
             // Update the ECharts chart
@@ -424,10 +458,12 @@
                     data: labels
                 },
                 series: [
-                    { name: 'Total Workflows', data: taskQueueHistory },
-                    { name: 'Queued', data: queueSizeHistory },
-                    { name: 'Completed', data: resultQueueHistory },
-                    { name: 'Failed', data: reincarnationsHistory }
+                    { name: 'Total Workflows', data: totalWorkflowsHistory },
+                    { name: 'Enqueued', data: enqueuedHistory },
+                    { name: 'Pending', data: pendingHistory },
+                    { name: 'Success', data: successHistory },
+                    { name: 'Error', data: errorHistory },
+                    { name: 'Cancelled', data: cancelledHistory }
                 ]
             });
         }
@@ -442,12 +478,13 @@
             fetch('/api/v1/tasks/status')
                 .then(response => response.json())
                 .then(data => {
-                    // Update queue count and timestamp
-                    document.getElementById('queue-count').textContent = data.queued_workflows || 0;
-                    document.getElementById('task-queue').textContent = data.total_workflows || 0;
-                    document.getElementById('queue-size').textContent = data.queued_workflows || 0;
-                    document.getElementById('result-queue').textContent = 0; // DBOS doesn't have separate result queue
-                    document.getElementById('reincarnations').textContent = 0; // DBOS handles this internally
+                    // Update status counts and timestamp
+                    document.getElementById('enqueued-count').textContent = data.enqueued || 0;
+                    document.getElementById('pending-count').textContent = data.pending || 0;
+                    document.getElementById('total-count').textContent = data.total_workflows || 0;
+                    document.getElementById('success-count').textContent = data.success || 0;
+                    document.getElementById('error-count').textContent = data.error || 0;
+                    document.getElementById('cancelled-count').textContent = data.cancelled || 0;
                     document.getElementById('timestamp').textContent = data.timestamp;
 
                     // Update queue table - DBOS doesn't have multiple queues
@@ -469,10 +506,12 @@
 
                     // Update charts with new data (adapted for DBOS)
                     updateCharts({
-                        task_queue: data.total_workflows || 0,
-                        queue_size: data.queued_workflows || 0,
-                        result_queue: 0,
-                        reincarnations: 0
+                        total_workflows: data.total_workflows || 0,
+                        enqueued: data.enqueued || 0,
+                        pending: data.pending || 0,
+                        success: data.success || 0,
+                        error: data.error || 0,
+                        cancelled: data.cancelled || 0
                     });
                 })
                 .catch(error => {
@@ -559,10 +598,12 @@
                     axisLabel: { color: newColors.axisLabel }
                 },
                 series: [
-                    { name: 'Total Workflows', itemStyle: { color: newColors.taskQueue } },
-                    { name: 'Queued', itemStyle: { color: newColors.pending } },
-                    { name: 'Completed', itemStyle: { color: newColors.resultQueue } },
-                    { name: 'Failed', itemStyle: { color: newColors.reincarnations } }
+                    { name: 'Total Workflows', itemStyle: { color: newColors.totalWorkflows } },
+                    { name: 'Enqueued', itemStyle: { color: newColors.enqueued } },
+                    { name: 'Pending', itemStyle: { color: newColors.pending } },
+                    { name: 'Success', itemStyle: { color: newColors.success } },
+                    { name: 'Error', itemStyle: { color: newColors.error } },
+                    { name: 'Cancelled', itemStyle: { color: newColors.cancelled } }
                 ]
             });
         });
@@ -608,24 +649,28 @@
         <div class="queue-header">Workflow Status Summary</div>
         <div class="stats-container">
             <div class="stat-item">
-                <div class="stat-label">Queued Workflows</div>
-                <div class="stat-value" id="queue-count">-</div>
+                <div class="stat-label">Enqueued</div>
+                <div class="stat-value" id="enqueued-count">-</div>
             </div>
             <div class="stat-item">
                 <div class="stat-label">Pending</div>
-                <div class="stat-value" id="queue-size">-</div>
+                <div class="stat-value" id="pending-count">-</div>
             </div>
             <div class="stat-item">
                 <div class="stat-label">Total Workflows</div>
-                <div class="stat-value" id="task-queue">-</div>
+                <div class="stat-value" id="total-count">-</div>
             </div>
             <div class="stat-item">
-                <div class="stat-label">Completed</div>
-                <div class="stat-value" id="result-queue">-</div>
+                <div class="stat-label">Success</div>
+                <div class="stat-value" id="success-count">-</div>
             </div>
             <div class="stat-item">
-                <div class="stat-label">Failed</div>
-                <div class="stat-value" id="reincarnations">-</div>
+                <div class="stat-label">Error</div>
+                <div class="stat-value" id="error-count">-</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">Cancelled</div>
+                <div class="stat-value" id="cancelled-count">-</div>
             </div>
             <div class="stat-item">
                 <div class="stat-label">Last Updated</div>
@@ -659,28 +704,33 @@
         <div class="queue-header">Workflow Metrics Legend</div>
         <div style="padding: 15px; background-color: #ffffff; border-radius: 0 0 4px 4px; border: 1px solid #dee2e6;">
             <div style="margin-bottom: 15px;">
-                <h3 style="margin: 0 0 8px 0; color: #495057;">Queued Workflows</h3>
-                <p>Shows the total number of workflows waiting to be executed. These are workflows that
-                    have been submitted but are queued for processing. DBOS automatically manages the execution
-                    queue to ensure reliable processing.</p>
+                <h3 style="margin: 0 0 8px 0; color: #495057;">ENQUEUED</h3>
+                <p>Workflows waiting in the queue to be executed. These have been submitted but are waiting for resources.</p>
             </div>
 
             <div style="margin-bottom: 15px;">
-                <h3 style="margin: 0 0 8px 0; color: #495057;">Total Workflows</h3>
-                <p>Counts all workflows that have been submitted to DBOS, including completed, running, and queued workflows.
-                    This gives you an overview of the total workflow activity in your system.</p>
+                <h3 style="margin: 0 0 8px 0; color: #495057;">PENDING</h3>
+                <p>Workflows that are currently being executed or are about to start execution.</p>
             </div>
 
             <div style="margin-bottom: 15px;">
-                <h3 style="margin: 0 0 8px 0; color: #495057;">Completed</h3>
-                <p>Shows workflows that have successfully completed execution. DBOS ensures workflows are durable
-                    and will automatically recover from failures, so completed workflows have been reliably processed.</p>
+                <h3 style="margin: 0 0 8px 0; color: #495057;">SUCCESS</h3>
+                <p>Workflows that have successfully completed execution without errors.</p>
+            </div>
+
+            <div style="margin-bottom: 15px;">
+                <h3 style="margin: 0 0 8px 0; color: #495057;">ERROR</h3>
+                <p>Workflows that encountered errors during execution. DBOS may retry these based on your configuration.</p>
+            </div>
+
+            <div style="margin-bottom: 15px;">
+                <h3 style="margin: 0 0 8px 0; color: #495057;">MAX_RECOVERY_ATTEMPTS_EXCEEDED</h3>
+                <p>Workflows that failed after exhausting all retry attempts. These require manual intervention or debugging.</p>
             </div>
 
             <div>
-                <h3 style="margin: 0 0 8px 0; color: #495057;">Failed</h3>
-                <p>Shows workflows that encountered errors during execution. DBOS provides automatic retry mechanisms
-                    and durability guarantees, so failed workflows may be retried based on your configuration.</p>
+                <h3 style="margin: 0 0 8px 0; color: #495057;">CANCELLED</h3>
+                <p>Workflows that were manually cancelled before completion.</p>
             </div>
         </div>
     </div>

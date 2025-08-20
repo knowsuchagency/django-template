@@ -7,9 +7,15 @@ class CoreConfig(AppConfig):
 
     def ready(self):
         import os
+        import sys
         from dbos import DBOS, DBOSConfig
         from django.conf import settings
         from loguru import logger
+
+        # Only initialize DBOS when running the server
+        if 'runserver' not in sys.argv and 'granian' not in sys.argv[0] and 'gunicorn' not in sys.argv[0] and 'uvicorn' not in sys.argv[0]:
+            logger.info("Skipping DBOS initialization - not running server")
+            return
 
         # Only initialize DBOS if we're in the main process (not in Django's autoreload subprocess)
         if not settings.DEBUG or os.environ.get('RUN_MAIN') == 'true':

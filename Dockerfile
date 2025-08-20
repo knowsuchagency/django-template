@@ -40,11 +40,6 @@ COPY manage.py ./
 # Copy built frontend files from frontend-builder stage
 COPY --from=frontend-builder /app/frontend/dist ./frontend/dist
 
-# Worker stage
-FROM base AS worker
-
-CMD ["uv", "run", "python", "manage.py", "qcluster"]
-
 # Web stage
 FROM base AS web
 RUN uv run python manage.py collectstatic --noinput

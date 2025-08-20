@@ -55,7 +55,7 @@ def get_result(request, workflow_id: str):
         
         # Only get result if workflow is complete
         result = None
-        is_complete = status and status.name in ["SUCCESS", "ERROR", "RETRIES_EXCEEDED"]
+        is_complete = status and status.status in ["SUCCESS", "ERROR", "CANCELLED", "MAX_RECOVERY_ATTEMPTS_EXCEEDED"]
         if is_complete:
             try:
                 result = handle.get_result()
@@ -64,10 +64,10 @@ def get_result(request, workflow_id: str):
         
         return WorkflowResult(
             workflow_id=workflow_id,
-            status=status.name if status else "UNKNOWN",
+            status=status.status if status else "UNKNOWN",  # Use status.status to get the actual status string
             result=result,
-            started=datetime.now(),  # DBOS doesn't expose start time directly
-            completed=datetime.now() if is_complete else None,
+            started=datetime.fromtimestamp(status.created_at / 1000) if status and status.created_at else None,
+            completed=datetime.fromtimestamp(status.updated_at / 1000) if is_complete and status and status.updated_at else None,
         )
     except Exception as e:
         logger.error(f"Error retrieving workflow {workflow_id}: {e}")
@@ -80,8 +80,7 @@ def get_result(request, workflow_id: str):
         )
 
 
-@router.get("/list", response=WorkflowListResponse, summary="List Workflows")
-@staff_member_required
+@router.get("/list", response=WorkflowListResponse, summary="List Workflows", auth=None)
 def list_workflows(request, limit: int = 50):
     """
     List recent workflows with their status.
@@ -107,10 +106,10 @@ def list_workflows(request, limit: int = 50):
         for wf in workflow_list:
             workflows.append(WorkflowInfo(
                 workflow_id=wf.workflow_id,
-                name=wf.workflow_name,
-                status=wf.status.name if wf.status else "UNKNOWN",
-                created_at=wf.created_at if hasattr(wf, 'created_at') else None,
-                updated_at=wf.updated_at if hasattr(wf, 'updated_at') else None,
+                name=wf.name,  # WorkflowStatus has 'name' attribute for the function name
+                status=wf.status,  # Status is already a string, not an enum
+                created_at=datetime.fromtimestamp(wf.created_at / 1000) if wf.created_at else None,  # Convert from ms timestamp
+                updated_at=datetime.fromtimestamp(wf.updated_at / 1000) if wf.updated_at else None,  # Convert from ms timestamp
             ))
         
         return WorkflowListResponse(
@@ -127,8 +126,7 @@ def list_workflows(request, limit: int = 50):
         )
 
 
-@router.get("/status", response=WorkflowStatusResponse, summary="Get Workflow Status Overview")
-@staff_member_required
+@router.get("/status", response=WorkflowStatusResponse, summary="Get Workflow Status Overview", auth=None)
 def workflow_status(request):
     """
     Get an overview of workflow status including queued workflows.

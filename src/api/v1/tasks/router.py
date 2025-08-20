@@ -1,6 +1,6 @@
 import random
 import time
-from datetime import datetime
+from datetime import datetime, timezone
 from pprint import pprint
 
 from dbos import DBOS
@@ -69,8 +69,8 @@ def get_result(request, workflow_id: str):
             workflow_id=workflow_id,
             status=status.status if status else "UNKNOWN",  # Use status.status to get the actual status string
             result=result,
-            started=datetime.fromtimestamp(status.created_at / 1000) if status and status.created_at else None,
-            completed=datetime.fromtimestamp(status.updated_at / 1000) if is_complete and status and status.updated_at else None,
+            started=datetime.fromtimestamp(status.created_at / 1000, tz=timezone.utc) if status and status.created_at else None,
+            completed=datetime.fromtimestamp(status.updated_at / 1000, tz=timezone.utc) if is_complete and status and status.updated_at else None,
             input=workflow_input,
         )
     except Exception as e:
@@ -86,14 +86,17 @@ def get_result(request, workflow_id: str):
 
 
 @router.get("/list", response=WorkflowListResponse, summary="List Workflows")
-def list_workflows(request, limit: int = 50):
+def list_workflows(request, limit: int = 1000):
     """
     List recent workflows with their status.
+    
+    Args:
+        limit: Maximum number of workflows to retrieve (default: 1000)
     """
     try:
         # Use the DBOS instance initialized in apps.py
-        # List recent workflows directly using DBOS
-        workflow_list = DBOS.list_workflows(limit=limit)
+        # List recent workflows directly using DBOS, sorted by most recent first
+        workflow_list = DBOS.list_workflows(limit=limit, sort_desc=True)
         
         workflows = []
         for wf in workflow_list:
@@ -101,8 +104,8 @@ def list_workflows(request, limit: int = 50):
                 workflow_id=wf.workflow_id,
                 name=wf.name,  # WorkflowStatus has 'name' attribute for the function name
                 status=wf.status,  # Status is already a string, not an enum
-                created_at=datetime.fromtimestamp(wf.created_at / 1000) if wf.created_at else None,  # Convert from ms timestamp
-                updated_at=datetime.fromtimestamp(wf.updated_at / 1000) if wf.updated_at else None,  # Convert from ms timestamp
+                created_at=datetime.fromtimestamp(wf.created_at / 1000, tz=timezone.utc) if wf.created_at else None,  # Convert from ms timestamp to UTC
+                updated_at=datetime.fromtimestamp(wf.updated_at / 1000, tz=timezone.utc) if wf.updated_at else None,  # Convert from ms timestamp to UTC
                 app_version=wf.app_version if hasattr(wf, 'app_version') else None,
             ))
         
@@ -121,14 +124,17 @@ def list_workflows(request, limit: int = 50):
 
 
 @router.get("/status", response=WorkflowStatusResponse, summary="Get Workflow Status Overview")
-def workflow_status(request):
+def workflow_status(request, limit: int = 10000):
     """
     Get an overview of workflow status including queued workflows.
+    
+    Args:
+        limit: Maximum number of workflows to retrieve (default: 10000)
     """
     try:
         # Use the DBOS instance initialized in apps.py
-        # Get counts directly using DBOS
-        all_workflows = DBOS.list_workflows(limit=1000)
+        # Get counts directly using DBOS, sorted by most recent first
+        all_workflows = DBOS.list_workflows(limit=limit, sort_desc=True)
         queued = DBOS.list_queued_workflows()
         
         # Count workflows by status
@@ -231,8 +237,8 @@ def get_workflow_details(request, workflow_id: str):
                     step_id=step.step_id,
                     step_name=step.name,
                     status=step.status,
-                    started_at=datetime.fromtimestamp(step.created_at / 1000) if step.created_at else None,
-                    completed_at=datetime.fromtimestamp(step.updated_at / 1000) if step.updated_at else None,
+                    started_at=datetime.fromtimestamp(step.created_at / 1000, tz=timezone.utc) if step.created_at else None,
+                    completed_at=datetime.fromtimestamp(step.updated_at / 1000, tz=timezone.utc) if step.updated_at else None,
                     output=step.output if hasattr(step, 'output') else None,
                     error=step.error if hasattr(step, 'error') else None,
                 ))
@@ -243,8 +249,8 @@ def get_workflow_details(request, workflow_id: str):
             workflow_id=workflow_id,
             name=status.name if status else "Unknown",
             status=status.status if status else "UNKNOWN",
-            created_at=datetime.fromtimestamp(status.created_at / 1000) if status and status.created_at else None,
-            updated_at=datetime.fromtimestamp(status.updated_at / 1000) if status and status.updated_at else None,
+            created_at=datetime.fromtimestamp(status.created_at / 1000, tz=timezone.utc) if status and status.created_at else None,
+            updated_at=datetime.fromtimestamp(status.updated_at / 1000, tz=timezone.utc) if status and status.updated_at else None,
             app_version=status.app_version if status and hasattr(status, 'app_version') else None,
             input=status.input if status and hasattr(status, 'input') else None,
             output=result,
@@ -276,8 +282,8 @@ def get_workflow_steps(request, workflow_id: str):
                 "step_id": step.step_id,
                 "name": step.name,
                 "status": step.status,
-                "created_at": datetime.fromtimestamp(step.created_at / 1000).isoformat() if step.created_at else None,
-                "updated_at": datetime.fromtimestamp(step.updated_at / 1000).isoformat() if step.updated_at else None,
+                "created_at": datetime.fromtimestamp(step.created_at / 1000, tz=timezone.utc).isoformat() if step.created_at else None,
+                "updated_at": datetime.fromtimestamp(step.updated_at / 1000, tz=timezone.utc).isoformat() if step.updated_at else None,
                 "output": step.output if hasattr(step, 'output') else None,
                 "error": step.error if hasattr(step, 'error') else None,
             })

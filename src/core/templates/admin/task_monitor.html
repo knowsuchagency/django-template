@@ -735,7 +735,7 @@ function taskMonitor() {
         // Conductor methods
         async fetchWorkflows() {
             try {
-                const response = await fetch('/api/v1/tasks/list?limit=100');
+                const response = await fetch('/api/v1/tasks/list?limit=1000');
                 const data = await response.json();
                 
                 // Apply client-side filters
@@ -748,7 +748,8 @@ function taskMonitor() {
         },
         
         filterWorkflows(workflows) {
-            return workflows.filter(wf => {
+            // First filter the workflows
+            const filtered = workflows.filter(wf => {
                 // Status filter
                 if (this.filters.status && wf.status !== this.filters.status) {
                     return false;
@@ -783,6 +784,13 @@ function taskMonitor() {
                 }
                 
                 return true;
+            });
+            
+            // Sort by created_at in descending order (most recent first)
+            return filtered.sort((a, b) => {
+                const dateA = new Date(a.created_at || 0);
+                const dateB = new Date(b.created_at || 0);
+                return dateB - dateA;
             });
         },
         
@@ -826,16 +834,27 @@ function taskMonitor() {
         
         formatDateTime(dateStr, includeTime = false) {
             if (!dateStr) return '-';
+            // Parse the date - it should come from backend as UTC ISO string
             const date = new Date(dateStr);
+            
+            // Check if date is valid
+            if (isNaN(date.getTime())) {
+                return '-';
+            }
+            
+            // Format in user's local timezone
             const dateOptions = {
                 year: 'numeric',
                 month: '2-digit',
-                day: '2-digit'
+                day: '2-digit',
+                timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
             };
             const timeOptions = {
                 hour: '2-digit',
                 minute: '2-digit',
-                second: '2-digit'
+                second: '2-digit',
+                hour12: true,
+                timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
             };
             
             if (includeTime) {

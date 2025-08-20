@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.urls import path
 
 from .models import User, StockTicker
-from .views import workflow_monitor
+from .views import workflow_monitor, conductor
 
 
 # Register our models with the default admin site
@@ -46,6 +46,9 @@ def custom_get_urls():
         path(
             "workflow-monitor/", admin.site.admin_view(workflow_monitor), name="workflow_monitor"
         ),
+        path(
+            "conductor/", admin.site.admin_view(conductor), name="conductor"
+        ),
     ]
     return custom_urls + urls
 
@@ -66,6 +69,13 @@ def custom_get_app_list(request, app_label=None):
                 "object_name": "workflow_monitor",
                 "perms": {"add": False, "change": False, "delete": False, "view": True},
                 "admin_url": "/admin/workflow-monitor/",
+                "view_only": True,
+            },
+            {
+                "name": "DBOS Conductor",
+                "object_name": "conductor",
+                "perms": {"add": False, "change": False, "delete": False, "view": True},
+                "admin_url": "/admin/conductor/",
                 "view_only": True,
             }
         ],

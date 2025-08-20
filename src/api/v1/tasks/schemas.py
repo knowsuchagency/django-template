@@ -1,4 +1,4 @@
-from typing import Any, Optional, List
+from typing import Any, Optional, List, Dict
 from datetime import datetime
 
 from ninja import Schema
@@ -10,6 +10,7 @@ class WorkflowResult(Schema):
     result: Optional[Any] = None
     started: Optional[datetime] = None
     completed: Optional[datetime] = None
+    input: Optional[Any] = None  # Added for conductor detail view
 
 
 class WorkflowInfo(Schema):
@@ -18,6 +19,7 @@ class WorkflowInfo(Schema):
     status: str
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
+    app_version: Optional[str] = None  # Added for conductor view
 
 
 class WorkflowListResponse(Schema):
@@ -37,3 +39,27 @@ class WorkflowStatusResponse(Schema):
     enqueued: int = 0
     timestamp: str
     message: str
+
+
+class WorkflowStepInfo(Schema):
+    step_id: str
+    step_name: str
+    status: str
+    started_at: Optional[datetime] = None
+    completed_at: Optional[datetime] = None
+    output: Optional[Any] = None
+    error: Optional[str] = None
+
+
+class WorkflowDetailResponse(Schema):
+    workflow_id: str
+    name: str
+    status: str
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
+    app_version: Optional[str] = None
+    input: Optional[Any] = None
+    output: Optional[Any] = None
+    error: Optional[str] = None
+    recovery_attempts: int = 0
+    steps: List[WorkflowStepInfo] = []

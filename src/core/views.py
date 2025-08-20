@@ -28,3 +28,9 @@ def spa_fallback(request, path):
 def workflow_monitor(request):
     """Workflow monitoring view for the admin interface"""
     return render(request, "admin/workflow_monitor.html")
+
+
+@staff_member_required
+def conductor(request):
+    """DBOS Conductor view for detailed workflow management"""
+    return render(request, "admin/conductor.html")

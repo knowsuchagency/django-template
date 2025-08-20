@@ -7,7 +7,7 @@ from dbos import DBOS
 from ninja import Router
 from loguru import logger
 
-from .schemas import WorkflowResult, WorkflowStatusResponse, WorkflowInfo, WorkflowListResponse
+from .schemas import WorkflowResult, WorkflowStatusResponse, WorkflowInfo, WorkflowListResponse, WorkflowDetailResponse, WorkflowStepInfo
 from core.cron_jobs import data_aggregation_task
 
 
@@ -60,12 +60,18 @@ def get_result(request, workflow_id: str):
             except Exception as e:
                 result = f"Error getting result: {str(e)}"
         
+        # Get input from status if available
+        workflow_input = None
+        if status and hasattr(status, 'input'):
+            workflow_input = status.input
+        
         return WorkflowResult(
             workflow_id=workflow_id,
             status=status.status if status else "UNKNOWN",  # Use status.status to get the actual status string
             result=result,
             started=datetime.fromtimestamp(status.created_at / 1000) if status and status.created_at else None,
             completed=datetime.fromtimestamp(status.updated_at / 1000) if is_complete and status and status.updated_at else None,
+            input=workflow_input,
         )
     except Exception as e:
         logger.error(f"Error retrieving workflow {workflow_id}: {e}")
@@ -75,6 +81,7 @@ def get_result(request, workflow_id: str):
             result=str(e),
             started=None,
             completed=None,
+            input=None,
         )
 
 
@@ -96,6 +103,7 @@ def list_workflows(request, limit: int = 50):
                 status=wf.status,  # Status is already a string, not an enum
                 created_at=datetime.fromtimestamp(wf.created_at / 1000) if wf.created_at else None,  # Convert from ms timestamp
                 updated_at=datetime.fromtimestamp(wf.updated_at / 1000) if wf.updated_at else None,  # Convert from ms timestamp
+                app_version=wf.app_version if hasattr(wf, 'app_version') else None,
             ))
         
         return WorkflowListResponse(
@@ -190,4 +198,120 @@ def trigger_aggregation(request, time_range: str = "1h"):
         return {
             "message": "Error starting aggregation",
             "error": str(e)
+        }
+
+
+@router.get("/workflow/{workflow_id}/details", response=WorkflowDetailResponse, summary="Get Workflow Details")
+def get_workflow_details(request, workflow_id: str):
+    """
+    Get detailed information about a workflow including steps.
+    """
+    try:
+        handle = DBOS.retrieve_workflow(workflow_id)
+        status = handle.get_status()
+        
+        # Get workflow result if complete
+        result = None
+        error = None
+        is_complete = status and status.status in ["SUCCESS", "ERROR", "CANCELLED", "MAX_RECOVERY_ATTEMPTS_EXCEEDED"]
+        if is_complete:
+            try:
+                result = handle.get_result()
+            except Exception as e:
+                error = str(e)
+        elif status and status.status == "ERROR":
+            error = status.error if hasattr(status, 'error') else None
+        
+        # Get workflow steps
+        steps = []
+        try:
+            step_list = DBOS.list_workflow_steps(workflow_id)
+            for step in step_list:
+                steps.append(WorkflowStepInfo(
+                    step_id=step.step_id,
+                    step_name=step.name,
+                    status=step.status,
+                    started_at=datetime.fromtimestamp(step.created_at / 1000) if step.created_at else None,
+                    completed_at=datetime.fromtimestamp(step.updated_at / 1000) if step.updated_at else None,
+                    output=step.output if hasattr(step, 'output') else None,
+                    error=step.error if hasattr(step, 'error') else None,
+                ))
+        except Exception as e:
+            logger.warning(f"Could not retrieve steps for workflow {workflow_id}: {e}")
+        
+        return WorkflowDetailResponse(
+            workflow_id=workflow_id,
+            name=status.name if status else "Unknown",
+            status=status.status if status else "UNKNOWN",
+            created_at=datetime.fromtimestamp(status.created_at / 1000) if status and status.created_at else None,
+            updated_at=datetime.fromtimestamp(status.updated_at / 1000) if status and status.updated_at else None,
+            app_version=status.app_version if status and hasattr(status, 'app_version') else None,
+            input=status.input if status and hasattr(status, 'input') else None,
+            output=result,
+            error=error,
+            recovery_attempts=status.recovery_attempts if status and hasattr(status, 'recovery_attempts') else 0,
+            steps=steps,
+        )
+    except Exception as e:
+        logger.error(f"Error getting workflow details for {workflow_id}: {e}")
+        return WorkflowDetailResponse(
+            workflow_id=workflow_id,
+            name="Error",
+            status="ERROR",
+            error=str(e),
+        )
+
+
+@router.get("/workflow/{workflow_id}/steps", summary="Get Workflow Steps")
+def get_workflow_steps(request, workflow_id: str):
+    """
+    Get the execution steps of a workflow.
+    """
+    try:
+        steps = DBOS.list_workflow_steps(workflow_id)
+        step_list = []
+        
+        for step in steps:
+            step_list.append({
+                "step_id": step.step_id,
+                "name": step.name,
+                "status": step.status,
+                "created_at": datetime.fromtimestamp(step.created_at / 1000).isoformat() if step.created_at else None,
+                "updated_at": datetime.fromtimestamp(step.updated_at / 1000).isoformat() if step.updated_at else None,
+                "output": step.output if hasattr(step, 'output') else None,
+                "error": step.error if hasattr(step, 'error') else None,
+            })
+        
+        return {
+            "workflow_id": workflow_id,
+            "steps": step_list,
+            "total_steps": len(step_list),
+        }
+    except Exception as e:
+        logger.error(f"Error getting steps for workflow {workflow_id}: {e}")
+        return {
+            "workflow_id": workflow_id,
+            "steps": [],
+            "total_steps": 0,
+            "error": str(e),
+        }
+
+
+@router.post("/workflow/{workflow_id}/cancel", summary="Cancel Workflow")
+def cancel_workflow(request, workflow_id: str):
+    """
+    Cancel a running workflow.
+    """
+    try:
+        DBOS.cancel_workflow(workflow_id)
+        return {
+            "message": f"Workflow {workflow_id} cancelled successfully",
+            "workflow_id": workflow_id,
+        }
+    except Exception as e:
+        logger.error(f"Error cancelling workflow {workflow_id}: {e}")
+        return {
+            "message": f"Error cancelling workflow",
+            "workflow_id": workflow_id,
+            "error": str(e),
         }

@@ -42,25 +42,31 @@ Before you begin, ensure you have the following installed:
    cd <project-directory>
    ```
 
-2. Initialize the project:
+2. Install dependencies:
    ```bash
-   mise run init
-   ```
-   This command will:
-   - Install all dependencies
-   - Set up the database
-   - Run migrations
-   - Install frontend packages
-   - Build frontend assets
-
-3. Create a superuser (optional):
-   ```bash
-   mise createsuperuser
+   mise install
    ```
 
-4. Start the development servers:
+3. Initialize environment variables (optional, requires 1Password CLI):
    ```bash
-   mise runserver  # Starts both Django and Vite
+   mise run init  # Creates .env from .env.template using 1Password
+   ```
+   This command uses the 1Password CLI to inject secrets from your vault into a local `.env` file.
+   If you don't use 1Password, manually create `.env` from `.env.template`.
+
+4. Run database migrations:
+   ```bash
+   mise run migrate
+   ```
+
+5. Create a superuser (optional):
+   ```bash
+   mise run createsuperuser
+   ```
+
+6. Start the development servers:
+   ```bash
+   mise run runserver  # Starts both Django and Vite
    ```
 
 ## Development

@@ -1,0 +1,864 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+    <a href="{% url 'admin:index' %}">{% trans 'Home' %}</a>
+    &rsaquo; {% trans 'Task Monitor' %}
+</div>
+{% endblock %}
+
+{% block extrahead %}
+{{ block.super }}
+<!-- Tailwind CSS, DaisyUI, and Alpine.js -->
+<link href="https://cdn.jsdelivr.net/npm/daisyui@5" rel="stylesheet" type="text/css" />
+<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+<script src="//unpkg.com/alpinejs" defer></script>
+<!-- ECharts for visualization -->
+<script src="https://cdn.jsdelivr.net/npm/echarts@5.5.1/dist/echarts.min.js"></script>
+<script>
+    // Set DaisyUI theme based on system preference
+    function setThemeFromSystemPreference() {
+        const prefersDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        document.documentElement.setAttribute('data-theme', prefersDarkMode ? 'dark' : 'light');
+    }
+    setThemeFromSystemPreference();
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', setThemeFromSystemPreference);
+</script>
+<style>
+    .workflow-id {
+        font-family: 'Courier New', monospace;
+        font-size: 0.875rem;
+    }
+    .json-viewer {
+        font-family: 'Courier New', monospace;
+        font-size: 0.875rem;
+        background: rgba(0,0,0,0.05);
+        padding: 0.5rem;
+        border-radius: 0.25rem;
+        overflow-x: auto;
+    }
+    [data-theme="dark"] .json-viewer {
+        background: rgba(255,255,255,0.05);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div id="content-main" x-data="taskMonitor()" x-init="init()">
+    <h1 class="text-2xl font-bold mb-4">Task Monitor</h1>
+
+    <!-- Workflow Monitor Section -->
+    <!-- Compact Control Panel with Inline Stats -->
+    <div class="bg-base-200 rounded-lg p-4 mb-4">
+        <div class="flex flex-wrap gap-4 items-center justify-between">
+            <div class="grid grid-cols-3 gap-2 items-center">
+                <button 
+                    @click="togglePolling()" 
+                    :class="isPolling ? 'btn-error' : 'btn-success'"
+                    class="btn btn-sm"
+                    x-text="isPolling ? 'Stop Polling' : 'Start Polling'">
+                </button>
+                
+                <button @click="fetchData()" class="btn btn-primary btn-sm">
+                    <span x-show="isPolling" class="loading loading-spinner loading-xs"></span>
+                    <span x-show="!isPolling">Refresh Now</span>
+                </button>
+                
+                <select 
+                    x-model="pollingInterval" 
+                    @change="changeInterval()"
+                    class="select select-bordered select-sm w-full">
+                    <option value="500">0.5s</option>
+                    <option value="1000">1s</option>
+                    <option value="2000">2s</option>
+                    <option value="5000">5s</option>
+                    <option value="10000">10s</option>
+                    <option value="30000">30s</option>
+                    <option value="60000">1m</option>
+                </select>
+            </div>
+            
+            <!-- Inline Stats -->
+            <div class="flex gap-4 text-sm items-center">
+                <div><span class="font-semibold text-warning">Enqueued:</span> <span x-text="stats.enqueued">0</span></div>
+                <div><span class="font-semibold text-info">Pending:</span> <span x-text="stats.pending">0</span></div>
+                <div><span class="font-semibold text-success">Success:</span> <span x-text="stats.success">0</span></div>
+                <div><span class="font-semibold text-error">Error:</span> <span x-text="stats.error">0</span></div>
+                <div><span class="font-semibold text-secondary">Cancelled:</span> <span x-text="stats.cancelled">0</span></div>
+                <div><span class="font-semibold">Total:</span> <span x-text="stats.total">0</span></div>
+                <div><span class="font-semibold text-xs">Updated:</span> <span class="text-xs opacity-70" x-text="stats.timestamp">-</span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chart -->
+    <div class="bg-base-200 rounded-lg p-4 mb-6">
+        <div id="combined-chart" class="w-full h-64"></div>
+    </div>
+
+    <!-- Conductor Section -->
+    <!-- Control Panel -->
+    <div class="card bg-base-200 shadow-xl mb-6">
+        <div class="card-body">
+            <div class="flex flex-wrap gap-4 items-center">
+                <!-- Time Range Filter -->
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text">Time Range:</span>
+                    </label>
+                    <select x-model="filters.timeRange" @change="fetchWorkflows()" class="select select-bordered">
+                        <option value="1h">Last Hour</option>
+                        <option value="6h">Last 6 Hours</option>
+                        <option value="24h">Last 24 Hours</option>
+                        <option value="7d">Last 7 Days</option>
+                        <option value="all">All Time</option>
+                    </select>
+                </div>
+
+                <!-- Status Filter -->
+                <div class="form-control">
+                    <label class="label">
+                        <span class="label-text">Status:</span>
+                    </label>
+                    <select x-model="filters.status" @change="fetchWorkflows()" class="select select-bordered">
+                        <option value="">All Statuses</option>
+                        <option value="SUCCESS">Success</option>
+                        <option value="ERROR">Error</option>
+                        <option value="PENDING">Pending</option>
+                        <option value="ENQUEUED">Enqueued</option>
+                        <option value="CANCELLED">Cancelled</option>
+                    </select>
+                </div>
+
+                <!-- Search -->
+                <div class="form-control flex-grow">
+                    <label class="label">
+                        <span class="label-text">Search:</span>
+                    </label>
+                    <input 
+                        type="text" 
+                        x-model="filters.search" 
+                        @input.debounce.300ms="fetchWorkflows()"
+                        placeholder="Search by workflow ID or name..." 
+                        class="input input-bordered w-full"
+                    />
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Workflows Table -->
+    <div class="card bg-base-200 shadow-xl mb-6">
+        <div class="card-body">
+            <h2 class="card-title mb-4">
+                Workflows 
+                <span class="badge badge-primary" x-text="workflows.length"></span>
+                <span x-show="isPolling" class="loading loading-spinner loading-sm ml-2"></span>
+            </h2>
+            <div class="overflow-x-auto">
+                <table class="table table-zebra">
+                    <thead>
+                        <tr>
+                            <th>Created At</th>
+                            <th>Steps</th>
+                            <th>App Version</th>
+                            <th>Workflow ID</th>
+                            <th>Workflow Name</th>
+                            <th>Status</th>
+                            <th>Controls</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <template x-for="workflow in workflows" :key="workflow.workflow_id">
+                            <tr class="hover cursor-pointer" @click="selectedWorkflow = workflow; showDetails = true; fetchWorkflowDetails(workflow.workflow_id)">
+                                <td x-text="formatDateTime(workflow.created_at)"></td>
+                                <td>
+                                    <div class="badge badge-ghost">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                                        </svg>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="text-sm opacity-70" x-text="workflow.app_version || '-'"></span>
+                                </td>
+                                <td>
+                                    <div class="flex items-center gap-2">
+                                        <span class="workflow-id" x-text="truncateId(workflow.workflow_id)"></span>
+                                        <button 
+                                            @click.stop="copyToClipboard(workflow.workflow_id)" 
+                                            class="btn btn-ghost btn-xs"
+                                            title="Copy full ID"
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v7M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </td>
+                                <td x-text="workflow.name"></td>
+                                <td>
+                                    <span 
+                                        class="badge"
+                                        :class="{
+                                            'badge-success': workflow.status === 'SUCCESS',
+                                            'badge-error': workflow.status === 'ERROR' || workflow.status === 'MAX_RECOVERY_ATTEMPTS_EXCEEDED',
+                                            'badge-warning': workflow.status === 'ENQUEUED',
+                                            'badge-info': workflow.status === 'PENDING',
+                                            'badge-secondary': workflow.status === 'CANCELLED'
+                                        }"
+                                        x-text="workflow.status"
+                                    ></span>
+                                </td>
+                                <td>
+                                    <button 
+                                        @click.stop="selectedWorkflow = workflow; showDetails = true; fetchWorkflowDetails(workflow.workflow_id)" 
+                                        class="btn btn-ghost btn-sm"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                        </svg>
+                                    </button>
+                                </td>
+                            </tr>
+                        </template>
+                    </tbody>
+                </table>
+                <div x-show="workflows.length === 0" class="text-center py-8 opacity-50">
+                    No workflows found
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Workflow Details Panel (Slide-over) -->
+    <div 
+        x-show="showDetails" 
+        x-transition:enter="transition ease-out duration-300"
+        x-transition:enter-start="opacity-0"
+        x-transition:enter-end="opacity-100"
+        x-transition:leave="transition ease-in duration-200"
+        x-transition:leave-start="opacity-100"
+        x-transition:leave-end="opacity-0"
+        class="fixed inset-0 bg-black bg-opacity-50 z-40"
+        @click="showDetails = false"
+    ></div>
+    
+    <div 
+        x-show="showDetails"
+        x-transition:enter="transition ease-out duration-300"
+        x-transition:enter-start="translate-x-full"
+        x-transition:enter-end="translate-x-0"
+        x-transition:leave="transition ease-in duration-200"
+        x-transition:leave-start="translate-x-0"
+        x-transition:leave-end="translate-x-full"
+        class="fixed right-0 top-0 h-full w-full md:w-2/3 lg:w-1/2 bg-base-100 shadow-2xl z-50 overflow-y-auto"
+    >
+        <div class="p-6" x-show="selectedWorkflow">
+            <!-- Header -->
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-bold">Workflow Details</h2>
+                <button @click="showDetails = false" class="btn btn-ghost btn-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Basic Information -->
+            <div class="card bg-base-200 mb-4">
+                <div class="card-body">
+                    <h3 class="card-title text-lg">Basic Information</h3>
+                    <div class="space-y-2">
+                        <div class="flex justify-between">
+                            <span class="font-semibold">Workflow Name:</span>
+                            <span x-text="selectedWorkflow?.name"></span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="font-semibold">Workflow Class Name:</span>
+                            <span x-text="selectedWorkflow?.name"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Workflow Config -->
+            <div class="card bg-base-200 mb-4">
+                <div class="card-body">
+                    <h3 class="card-title text-lg">Workflow Config Name</h3>
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-center">
+                            <span class="font-semibold">Workflow ID:</span>
+                            <div class="flex items-center gap-2">
+                                <span class="workflow-id text-xs" x-text="selectedWorkflow?.workflow_id"></span>
+                                <button 
+                                    @click="copyToClipboard(selectedWorkflow?.workflow_id)" 
+                                    class="btn btn-ghost btn-xs"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v7M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="font-semibold">Executor ID:</span>
+                            <span class="text-sm">local</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Application Version -->
+            <div class="card bg-base-200 mb-4">
+                <div class="card-body">
+                    <h3 class="card-title text-lg">Application Version</h3>
+                    <span x-text="selectedWorkflow?.app_version || currentAppVersion"></span>
+                </div>
+            </div>
+
+            <!-- Status Information -->
+            <div class="card bg-base-200 mb-4">
+                <div class="card-body">
+                    <h3 class="card-title text-lg">Status Information</h3>
+                    <div class="space-y-2">
+                        <div class="flex justify-between">
+                            <span class="font-semibold">Status:</span>
+                            <span 
+                                class="badge"
+                                :class="{
+                                    'badge-success': selectedWorkflow?.status === 'SUCCESS',
+                                    'badge-error': selectedWorkflow?.status === 'ERROR' || selectedWorkflow?.status === 'MAX_RECOVERY_ATTEMPTS_EXCEEDED',
+                                    'badge-warning': selectedWorkflow?.status === 'ENQUEUED',
+                                    'badge-info': selectedWorkflow?.status === 'PENDING',
+                                    'badge-secondary': selectedWorkflow?.status === 'CANCELLED'
+                                }"
+                                x-text="selectedWorkflow?.status"
+                            ></span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="font-semibold">Created At:</span>
+                            <span x-text="formatDateTime(selectedWorkflow?.created_at, true)"></span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="font-semibold">Updated At:</span>
+                            <span x-text="formatDateTime(selectedWorkflow?.updated_at, true)"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Data Section -->
+            <div class="card bg-base-200 mb-4">
+                <div class="card-body">
+                    <h3 class="card-title text-lg">Data</h3>
+                    
+                    <!-- Workflow Input -->
+                    <div class="mb-4">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="font-semibold">Workflow Input</span>
+                            <button 
+                                @click="copyToClipboard(JSON.stringify(workflowDetails?.input || {}, null, 2))" 
+                                class="btn btn-ghost btn-xs"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v7M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="json-viewer">
+                            <pre x-text="JSON.stringify(workflowDetails?.input || {}, null, 2)"></pre>
+                        </div>
+                    </div>
+                    
+                    <!-- Workflow Output -->
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="font-semibold">Workflow Output</span>
+                            <button 
+                                @click="copyToClipboard(JSON.stringify(workflowDetails?.result || {}, null, 2))" 
+                                class="btn btn-ghost btn-xs"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v7M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="json-viewer">
+                            <pre x-text="JSON.stringify(workflowDetails?.result || {}, null, 2)"></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="flex gap-2">
+                <button 
+                    x-show="selectedWorkflow?.status === 'PENDING' || selectedWorkflow?.status === 'ENQUEUED'"
+                    @click="cancelWorkflow(selectedWorkflow?.workflow_id)"
+                    class="btn btn-error"
+                >
+                    Cancel Workflow
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function taskMonitor() {
+    return {
+        // Workflow Monitor State
+        isPolling: false,
+        pollingInterval: 1000,
+        pollingIntervalId: null,
+        chart: null,
+        
+        // Data
+        stats: {
+            enqueued: 0,
+            pending: 0,
+            total: 0,
+            success: 0,
+            error: 0,
+            cancelled: 0,
+            timestamp: '-'
+        },
+        queueData: [],
+        
+        // Chart data
+        maxDataPoints: 60,
+        chartData: {
+            labels: [],
+            totalWorkflows: [],
+            enqueued: [],
+            pending: [],
+            success: [],
+            error: [],
+            cancelled: []
+        },
+        
+        // Conductor State
+        workflows: [],
+        selectedWorkflow: null,
+        workflowDetails: null,
+        showDetails: false,
+        currentAppVersion: '464612ab01226d15d7b8377d7c1a5e33',
+        
+        // Filters
+        filters: {
+            timeRange: '1h',
+            status: '',
+            search: ''
+        },
+        
+        init() {
+            this.initChart();
+            this.fetchData();
+            this.fetchWorkflows();
+        },
+        
+        initChart() {
+            const chartDom = document.getElementById('combined-chart');
+            this.chart = echarts.init(chartDom);
+            
+            // Get current theme
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+            
+            const option = {
+                backgroundColor: 'transparent',
+                title: {
+                    text: '',
+                },
+                tooltip: {
+                    trigger: 'axis'
+                },
+                legend: {
+                    data: ['Total Workflows', 'Enqueued', 'Pending', 'Success', 'Error', 'Cancelled'],
+                    bottom: 0,
+                    textStyle: {
+                        color: isDark ? '#a6adba' : '#374151'
+                    }
+                },
+                grid: {
+                    left: '3%',
+                    right: '4%',
+                    bottom: '15%',
+                    containLabel: true
+                },
+                xAxis: {
+                    type: 'category',
+                    boundaryGap: false,
+                    data: this.chartData.labels,
+                    axisLine: {
+                        lineStyle: {
+                            color: isDark ? '#4a5568' : '#e5e7eb'
+                        }
+                    },
+                    axisLabel: {
+                        color: isDark ? '#a6adba' : '#6b7280'
+                    }
+                },
+                yAxis: {
+                    type: 'value',
+                    axisLine: {
+                        show: true,
+                        lineStyle: {
+                            color: isDark ? '#4a5568' : '#e5e7eb'
+                        }
+                    },
+                    splitLine: {
+                        lineStyle: {
+                            color: isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)'
+                        }
+                    },
+                    axisLabel: {
+                        color: isDark ? '#a6adba' : '#6b7280'
+                    }
+                },
+                series: [
+                    {
+                        name: 'Total Workflows',
+                        type: 'line',
+                        smooth: true,
+                        data: this.chartData.totalWorkflows,
+                        lineStyle: { width: 2 },
+                        itemStyle: { color: '#3b82f6' }
+                    },
+                    {
+                        name: 'Enqueued',
+                        type: 'line',
+                        smooth: true,
+                        data: this.chartData.enqueued,
+                        lineStyle: { width: 2 },
+                        itemStyle: { color: '#f59e0b' }
+                    },
+                    {
+                        name: 'Pending',
+                        type: 'line',
+                        smooth: true,
+                        data: this.chartData.pending,
+                        lineStyle: { width: 2 },
+                        itemStyle: { color: '#06b6d4' }
+                    },
+                    {
+                        name: 'Success',
+                        type: 'line',
+                        smooth: true,
+                        data: this.chartData.success,
+                        lineStyle: { width: 2 },
+                        itemStyle: { color: '#10b981' }
+                    },
+                    {
+                        name: 'Error',
+                        type: 'line',
+                        smooth: true,
+                        data: this.chartData.error,
+                        lineStyle: { width: 2 },
+                        itemStyle: { color: '#ef4444' }
+                    },
+                    {
+                        name: 'Cancelled',
+                        type: 'line',
+                        smooth: true,
+                        data: this.chartData.cancelled,
+                        lineStyle: { width: 2 },
+                        itemStyle: { color: '#8b5cf6' }
+                    }
+                ],
+                animation: false
+            };
+            
+            this.chart.setOption(option);
+            
+            // Handle resize
+            window.addEventListener('resize', () => {
+                this.chart.resize();
+            });
+            
+            // Update theme when it changes
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+                this.updateChartTheme();
+            });
+        },
+        
+        updateChartTheme() {
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+            this.chart.setOption({
+                legend: {
+                    textStyle: {
+                        color: isDark ? '#a6adba' : '#374151'
+                    }
+                },
+                xAxis: {
+                    axisLine: {
+                        lineStyle: {
+                            color: isDark ? '#4a5568' : '#e5e7eb'
+                        }
+                    },
+                    axisLabel: {
+                        color: isDark ? '#a6adba' : '#6b7280'
+                    }
+                },
+                yAxis: {
+                    axisLine: {
+                        lineStyle: {
+                            color: isDark ? '#4a5568' : '#e5e7eb'
+                        }
+                    },
+                    splitLine: {
+                        lineStyle: {
+                            color: isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)'
+                        }
+                    },
+                    axisLabel: {
+                        color: isDark ? '#a6adba' : '#6b7280'
+                    }
+                }
+            });
+        },
+        
+        fetchData() {
+            // Fetch both stats and workflows
+            Promise.all([
+                fetch('/api/v1/tasks/status').then(r => r.json()),
+                this.fetchWorkflows()
+            ]).then(([data]) => {
+                // Update stats
+                this.stats = {
+                    enqueued: data.enqueued || 0,
+                    pending: data.pending || 0,
+                    total: data.total_workflows || 0,
+                    success: data.success || 0,
+                    error: data.error || 0,
+                    cancelled: data.cancelled || 0,
+                    timestamp: data.timestamp || '-'
+                };
+                
+                // Update queue table
+                this.queueData = [{
+                    name: 'DBOS Workflows',
+                    type: 'workflow',
+                    queued: data.queued_workflows || 0,
+                    instance: '-',
+                    workers: '-',
+                    status: data.message || 'Running',
+                    uptime: '-'
+                }];
+                
+                // Update chart data
+                this.updateChartData();
+            }).catch(error => {
+                console.error('Error fetching data:', error);
+                this.stats.timestamp = 'Error';
+            });
+        },
+        
+        updateChartData() {
+            // Add timestamp
+            const now = new Date();
+            const timeString = now.toLocaleTimeString([], { 
+                hour: '2-digit', 
+                minute: '2-digit', 
+                second: '2-digit' 
+            });
+            
+            this.chartData.labels.push(timeString);
+            this.chartData.totalWorkflows.push(this.stats.total);
+            this.chartData.enqueued.push(this.stats.enqueued);
+            this.chartData.pending.push(this.stats.pending);
+            this.chartData.success.push(this.stats.success);
+            this.chartData.error.push(this.stats.error);
+            this.chartData.cancelled.push(this.stats.cancelled);
+            
+            // Keep only last maxDataPoints
+            if (this.chartData.labels.length > this.maxDataPoints) {
+                this.chartData.labels.shift();
+                this.chartData.totalWorkflows.shift();
+                this.chartData.enqueued.shift();
+                this.chartData.pending.shift();
+                this.chartData.success.shift();
+                this.chartData.error.shift();
+                this.chartData.cancelled.shift();
+            }
+            
+            // Update chart
+            this.chart.setOption({
+                xAxis: {
+                    data: this.chartData.labels
+                },
+                series: [
+                    { data: this.chartData.totalWorkflows },
+                    { data: this.chartData.enqueued },
+                    { data: this.chartData.pending },
+                    { data: this.chartData.success },
+                    { data: this.chartData.error },
+                    { data: this.chartData.cancelled }
+                ]
+            });
+        },
+        
+        startPolling() {
+            if (!this.isPolling) {
+                this.isPolling = true;
+                this.pollingIntervalId = setInterval(() => {
+                    this.fetchData();
+                }, this.pollingInterval);
+            }
+        },
+        
+        stopPolling() {
+            if (this.isPolling) {
+                this.isPolling = false;
+                clearInterval(this.pollingIntervalId);
+                this.pollingIntervalId = null;
+            }
+        },
+        
+        togglePolling() {
+            if (this.isPolling) {
+                this.stopPolling();
+            } else {
+                this.startPolling();
+            }
+        },
+        
+        changeInterval() {
+            if (this.isPolling) {
+                this.stopPolling();
+                this.startPolling();
+            }
+        },
+        
+        // Conductor methods
+        async fetchWorkflows() {
+            try {
+                const response = await fetch('/api/v1/tasks/list?limit=100');
+                const data = await response.json();
+                
+                // Apply client-side filters
+                this.workflows = this.filterWorkflows(data.workflows || []);
+                return data;
+            } catch (error) {
+                console.error('Error fetching workflows:', error);
+                throw error;
+            }
+        },
+        
+        filterWorkflows(workflows) {
+            return workflows.filter(wf => {
+                // Status filter
+                if (this.filters.status && wf.status !== this.filters.status) {
+                    return false;
+                }
+                
+                // Search filter
+                if (this.filters.search) {
+                    const search = this.filters.search.toLowerCase();
+                    if (!wf.workflow_id.toLowerCase().includes(search) && 
+                        !wf.name.toLowerCase().includes(search)) {
+                        return false;
+                    }
+                }
+                
+                // Time range filter
+                if (this.filters.timeRange !== 'all' && wf.created_at) {
+                    const now = new Date();
+                    const created = new Date(wf.created_at);
+                    const hours = {
+                        '1h': 1,
+                        '6h': 6,
+                        '24h': 24,
+                        '7d': 168
+                    }[this.filters.timeRange];
+                    
+                    if (hours) {
+                        const cutoff = new Date(now - hours * 60 * 60 * 1000);
+                        if (created < cutoff) {
+                            return false;
+                        }
+                    }
+                }
+                
+                return true;
+            });
+        },
+        
+        async fetchWorkflowDetails(workflowId) {
+            try {
+                const response = await fetch(`/api/v1/tasks/result?workflow_id=${workflowId}`);
+                const data = await response.json();
+                this.workflowDetails = data;
+            } catch (error) {
+                console.error('Error fetching workflow details:', error);
+            }
+        },
+        
+        async cancelWorkflow(workflowId) {
+            if (!confirm('Are you sure you want to cancel this workflow?')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/v1/tasks/workflow/${workflowId}/cancel`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]')?.value || ''
+                    }
+                });
+                const data = await response.json();
+                
+                if (response.ok) {
+                    alert('Workflow cancelled successfully');
+                    this.showDetails = false;
+                    this.fetchWorkflows();
+                    this.fetchData();
+                } else {
+                    alert(`Error: ${data.error || 'Failed to cancel workflow'}`);
+                }
+            } catch (error) {
+                console.error('Error cancelling workflow:', error);
+                alert('Failed to cancel workflow');
+            }
+        },
+        
+        formatDateTime(dateStr, includeTime = false) {
+            if (!dateStr) return '-';
+            const date = new Date(dateStr);
+            const dateOptions = {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit'
+            };
+            const timeOptions = {
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            };
+            
+            if (includeTime) {
+                return date.toLocaleString('en-US', { ...dateOptions, ...timeOptions });
+            }
+            return date.toLocaleDateString('en-US', dateOptions) + ' ' + date.toLocaleTimeString('en-US', timeOptions);
+        },
+        
+        truncateId(id) {
+            if (!id) return '-';
+            if (id.length <= 20) return id;
+            return id.substring(0, 8) + '...' + id.substring(id.length - 8);
+        },
+        
+        copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                // Could add a toast notification here
+                console.log('Copied to clipboard');
+            }).catch(err => {
+                console.error('Failed to copy:', err);
+            });
+        }
+    };
+}
+</script>
+{% endblock %}

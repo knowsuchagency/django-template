@@ -34,3 +34,9 @@ def workflow_monitor(request):
 def conductor(request):
     """DBOS Conductor view for detailed workflow management"""
     return render(request, "admin/conductor.html")
+
+
+@staff_member_required
+def task_monitor(request):
+    """Combined Task Monitor view with workflow monitoring and conductor"""
+    return render(request, "admin/task_monitor.html")

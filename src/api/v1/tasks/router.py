@@ -26,7 +26,8 @@ def test_job_workflow():
     return result
 
 
-@router.post("/test", summary="Submit Test Job(s)", auth=None)
+@router.post("/test", summary="Submit Test Job(s)")
+@staff_member_required
 def test_job(request, count: int = 1):
     try:
         workflow_ids = []
@@ -47,7 +48,8 @@ def test_job(request, count: int = 1):
         raise
 
 
-@router.get("/result", response=WorkflowResult, summary="Get Workflow Result", auth=None)
+@router.get("/result", response=WorkflowResult, summary="Get Workflow Result")
+@staff_member_required
 def get_result(request, workflow_id: str):
     try:
         handle = DBOS.retrieve_workflow(workflow_id)
@@ -80,7 +82,8 @@ def get_result(request, workflow_id: str):
         )
 
 
-@router.get("/list", response=WorkflowListResponse, summary="List Workflows", auth=None)
+@router.get("/list", response=WorkflowListResponse, summary="List Workflows")
+@staff_member_required
 def list_workflows(request, limit: int = 50):
     """
     List recent workflows with their status.
@@ -126,7 +129,8 @@ def list_workflows(request, limit: int = 50):
         )
 
 
-@router.get("/status", response=WorkflowStatusResponse, summary="Get Workflow Status Overview", auth=None)
+@router.get("/status", response=WorkflowStatusResponse, summary="Get Workflow Status Overview")
+@staff_member_required
 def workflow_status(request):
     """
     Get an overview of workflow status including queued workflows.

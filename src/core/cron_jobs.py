@@ -6,12 +6,12 @@ from dbos import DBOS
 from loguru import logger
 
 
-@DBOS.scheduled("*/30 * * * * *")
+@DBOS.scheduled("0 * * * * *")
 @DBOS.workflow()
 def stock_price_tracker(scheduled_time: datetime, actual_time: datetime):
     """
     Example cron job that simulates tracking stock prices.
-    Runs every 30 seconds to demonstrate DBOS scheduled workflows.
+    Runs every minute to demonstrate DBOS scheduled workflows.
     
     Args:
         scheduled_time: The scheduled execution time

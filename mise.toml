@@ -30,6 +30,10 @@ run = [
     "uvx ruff format"
 ]
 
+[tasks.init]
+description = "initialize .env file from .env.template using 1Password CLI"
+run = "op inject -i .env.template -o .env"
+
 [tasks.install-frontend]
 description = "install frontend dependencies"
 run = "cd frontend && bun install"
@@ -51,6 +55,7 @@ run = "uv run python manage.py makemigrations"
 [tasks.migrate]
 description = "migrate"
 run = [
+    "./scripts/ensure_pg_schema.sh",
     "uv run python manage.py migrate",
     "uv run python manage.py createcachetable"
 ]

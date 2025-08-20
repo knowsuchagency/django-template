@@ -2,6 +2,7 @@ x-environment: &default-environment
   DATABASE_URL: postgresql://postgres:postgres@postgres:5432/postgres
   REDIS_URL: redis://redis:6379
   SECRET_KEY: ${SECRET_KEY:-django-insecure-your-secret-key-here}
+  X_API_KEY: ${X_API_KEY}
 
 services:
   backend:
@@ -19,24 +20,6 @@ services:
       AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
       AWS_REGION: ${AWS_REGION:-us-east-2}
       LOG_REQUESTS: ${LOG_REQUESTS:-true}
-    depends_on:
-      postgres:
-        condition: service_started
-      redis:
-        condition: service_started
-      migrations:
-        condition: service_completed_successfully
-      create_cache_table:
-        condition: service_completed_successfully
-
-  worker:
-    build:
-      context: .
-      target: worker
-    environment:
-      <<: *default-environment
-    deploy:
-      replicas: ${WORKER_REPLICAS:-0}
     depends_on:
       postgres:
         condition: service_started

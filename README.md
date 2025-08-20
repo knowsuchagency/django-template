@@ -21,8 +21,8 @@ A modern Django + React application with authentication, API, and task queue sup
 - **State Management**: Zustand for client state
 - **API Client**: TanStack Query (React Query) for server state
 - **Authentication**: Django-allauth + @knowsuchagency/django-allauth (with built-in TanStack Query)
-- **Task Queue**: DBOS for durable workflow execution
-- **Database**: SQLite (development) / PostgreSQL (production)
+- **Background Tasks**: [DBOS](https://www.dbos.dev/) for durable workflow execution
+- **Database**: PostgreSQL
 - **Build Tools**: Vite (frontend), uv (Python), mise (task runner)
 
 ## Prerequisites
@@ -42,31 +42,25 @@ Before you begin, ensure you have the following installed:
    cd <project-directory>
    ```
 
-2. Install dependencies:
+2. Initialize the project:
    ```bash
-   mise install
+   mise run init
+   ```
+   This command will:
+   - Install all dependencies
+   - Set up the database
+   - Run migrations
+   - Install frontend packages
+   - Build frontend assets
+
+3. Create a superuser (optional):
+   ```bash
+   mise createsuperuser
    ```
 
-3. Run database migrations:
+4. Start the development servers:
    ```bash
-   mise run migrate
-   ```
-
-4. Create a superuser (optional):
-   ```bash
-   mise run createsuperuser
-   ```
-
-5. Install frontend dependencies:
-   ```bash
-   cd frontend
-   bun install
-   cd ..
-   ```
-
-6. Start the development servers:
-   ```bash
-   mise run runserver  # Starts both Django and Vite
+   mise runserver  # Starts both Django and Vite
    ```
 
 ## Development
@@ -75,7 +69,6 @@ The project uses `mise` for task management. All Python commands are automatical
 
 - Django server runs on http://localhost:8000
 - Vite dev server runs on http://localhost:5173
-- React app is served at http://localhost:8000/app/
 
 ## Project Structure
 
@@ -101,6 +94,9 @@ frontend/
 
 ## Available Commands
 
+### Setup
+- `mise run init` - Initialize the project (install deps, setup DB, migrations, frontend)
+
 ### Development
 - `mise run runserver` - Start dev servers (Django on 8000, Vite on 5173)
 - `mise run migrate` - Apply database migrations
@@ -124,8 +120,8 @@ bun run build            # Build for production
 ### Static Files
 - `mise run collectstatic` - Collect static files
 
-### DBOS Task Queue
-DBOS provides durable workflow execution with automatic retries and workflow recovery. Tasks are stored in PostgreSQL for reliability.
+### DBOS TaskS
+DBOS provides durable background task execution with automatic retries and workflow recovery. It also supports cron jobs. Tasks are stored in PostgreSQL for reliability.
 
 Note: DBOS requires a PostgreSQL database connection configured via `DATABASE_URL` environment variable.
 
@@ -203,7 +199,7 @@ const response = await fetch('/api/v1/example', {
 
 The project uses `mise.toml` for environment variables:
 
-- `DATABASE_URL` - Database connection (default: `sqlite:///data.db`). Required for DBOS workflows.
+- `DATABASE_URL` - Database connection.
 - `REDIS_URL` - Redis connection for cache (optional, no longer needed for task queue)
 - `SECRET_KEY` - Django secret key
 - `DEBUG` - Development mode flag
@@ -212,13 +208,8 @@ The project uses `mise.toml` for environment variables:
 
 ## Notes
 
-### Lovable Preview
-To use Lovable's built-in preview window, you'll need to note the request's actual unique origin (e.g., `https://id-preview--d9666ffa-29be-443f-9013-25d5cd5c1beb.lovable.app`) and add it to `CSRF_TRUSTED_ORIGINS`.
-
 ### Docker Support
 The project includes Docker configuration for production deployment:
 ```bash
 docker-compose up  # Full stack with PostgreSQL
 ```
-
-DBOS workflows run automatically within the main Django process, providing durable task execution without separate worker processes.

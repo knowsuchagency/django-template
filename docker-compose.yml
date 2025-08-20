@@ -86,16 +86,5 @@ services:
       migrations:
         condition: service_completed_successfully
 
-  setup_periodic_tasks:
-    build:
-      context: .
-      target: web
-    command: uv run manage.py register_tasks
-    environment:
-      <<: *default-environment
-    depends_on:
-      migrations:
-        condition: service_completed_successfully
-
 volumes:
   postgres_data:

@@ -10,7 +10,6 @@ class CoreConfig(AppConfig):
         from dbos import DBOS, DBOSConfig
         from django.conf import settings
         from loguru import logger
-        from decouple import config
 
         # Only initialize DBOS if we're in the main process (not in Django's autoreload subprocess)
         if not settings.DEBUG or os.environ.get('RUN_MAIN') == 'true':
@@ -40,6 +39,10 @@ class CoreConfig(AppConfig):
                     DBOS(config=dbos_config, conductor_key=settings.DBOS_CONDUCTOR_KEY)
                     DBOS.launch()
                     logger.info(f"DBOS initialized successfully with URL: {dbos_database_url}")
+                    
+                    # Import cron jobs to register them with DBOS
+                    from . import cron_jobs  # noqa: F401
+                    logger.info("DBOS cron jobs registered")
                 except Exception as e:
                     logger.warning(f"DBOS initialization failed: {e}")
                     logger.info("DBOS requires PostgreSQL. Workflows will not be available.")

@@ -10,6 +10,7 @@ from ninja import Router
 from loguru import logger
 
 from .schemas import WorkflowResult, WorkflowStatusResponse, WorkflowInfo, WorkflowListResponse
+from core.cron_jobs import data_aggregation_task
 
 
 router = Router()
@@ -140,3 +141,28 @@ def workflow_status(request):
             timestamp=datetime.now().strftime("%H:%M:%S"),
             message=f"Error: {str(e)}"
         )
+
+
+@router.post("/aggregate", summary="Trigger Data Aggregation", auth=None)
+def trigger_aggregation(request, time_range: str = "1h"):
+    """
+    Manually trigger a data aggregation workflow.
+    
+    Args:
+        time_range: Time range for aggregation (e.g., "1h", "5m", "1d")
+    """
+    try:
+        workflow_handle = DBOS.start_workflow(data_aggregation_task, time_range)
+        workflow_id = workflow_handle.get_workflow_id()
+        
+        return {
+            "message": "Data aggregation started",
+            "workflow_id": workflow_id,
+            "time_range": time_range
+        }
+    except Exception as e:
+        logger.error(f"Error starting aggregation workflow: {e}")
+        return {
+            "message": "Error starting aggregation",
+            "error": str(e)
+        }

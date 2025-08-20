@@ -15,7 +15,7 @@ class CoreConfig(AppConfig):
         # Only initialize DBOS if we're in the main process (not in Django's autoreload subprocess)
         if not settings.DEBUG or os.environ.get('RUN_MAIN') == 'true':
             # Use DBOS_DATABASE_URL if set, otherwise fall back to DATABASE_URL
-            database_url = config("DBOS_DATABASE_URL", default=config("DATABASE_URL", default=""))
+            database_url = os.getenv("DATABASE_URL", "")
             
             # DBOS requires PostgreSQL, skip initialization if using SQLite
             if database_url and not database_url.startswith("sqlite"):
@@ -24,7 +24,7 @@ class CoreConfig(AppConfig):
                         "name": "django-template",
                         "database_url": database_url,
                     }
-                    DBOS(config=dbos_config)
+                    DBOS(config=dbos_config, conductor_key=settings.DBOS_CONDUCTOR_KEY)
                     DBOS.launch()
                     logger.info("DBOS initialized successfully")
                 except Exception as e:

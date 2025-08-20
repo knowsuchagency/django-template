@@ -13,9 +13,5 @@ class StockTickerOut(Schema):
     date: date
 
 
-class AddOutput(Schema):
-    result: int
-
-
 class GreetOutput(Schema):
     message: str

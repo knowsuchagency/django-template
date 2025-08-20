@@ -4,15 +4,10 @@ from ninja import Router
 
 from core.models import StockTicker
 
-from .schemas import AddOutput, GreetOutput, StockTickerOut
+from .schemas import GreetOutput, StockTickerOut
 
 
 router = Router()
-
-
-@router.post("/add", auth=None, response=AddOutput)
-def add(request, a: int, b: int):
-    return {"result": a + b}
 
 
 @router.post("/greet", response=GreetOutput)

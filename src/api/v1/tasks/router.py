@@ -1,11 +1,9 @@
 import random
 import time
-from typing import Optional, Any, List
 from datetime import datetime
 from pprint import pprint
 
 from dbos import DBOS
-from django.contrib.admin.views.decorators import staff_member_required
 from ninja import Router
 from loguru import logger
 
@@ -26,7 +24,7 @@ def test_job_workflow():
     return result
 
 
-@router.post("/test", summary="Submit Test Job(s)", auth=None)
+@router.post("/test", summary="Submit Test Job(s)")
 def test_job(request, count: int = 1):
     try:
         workflow_ids = []
@@ -48,7 +46,6 @@ def test_job(request, count: int = 1):
 
 
 @router.get("/result", response=WorkflowResult, summary="Get Workflow Result")
-@staff_member_required
 def get_result(request, workflow_id: str):
     try:
         handle = DBOS.retrieve_workflow(workflow_id)
@@ -81,7 +78,7 @@ def get_result(request, workflow_id: str):
         )
 
 
-@router.get("/list", response=WorkflowListResponse, summary="List Workflows", auth=None)
+@router.get("/list", response=WorkflowListResponse, summary="List Workflows")
 def list_workflows(request, limit: int = 50):
     """
     List recent workflows with their status.
@@ -116,7 +113,6 @@ def list_workflows(request, limit: int = 50):
 
 
 @router.get("/status", response=WorkflowStatusResponse, summary="Get Workflow Status Overview")
-@staff_member_required
 def workflow_status(request):
     """
     Get an overview of workflow status including queued workflows.
@@ -143,7 +139,7 @@ def workflow_status(request):
         )
 
 
-@router.post("/aggregate", summary="Trigger Data Aggregation", auth=None)
+@router.post("/aggregate", summary="Trigger Data Aggregation")
 def trigger_aggregation(request, time_range: str = "1h"):
     """
     Manually trigger a data aggregation workflow.

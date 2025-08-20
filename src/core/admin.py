@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.urls import path
 
 from .models import User, StockTicker
-from .views import workflow_monitor, conductor, task_monitor
+from .views import task_monitor
 
 
 # Register our models with the default admin site
@@ -44,12 +44,6 @@ def custom_get_urls():
     urls = original_get_urls()
     custom_urls = [
         path(
-            "workflow-monitor/", admin.site.admin_view(workflow_monitor), name="workflow_monitor"
-        ),
-        path(
-            "conductor/", admin.site.admin_view(conductor), name="conductor"
-        ),
-        path(
             "task-monitor/", admin.site.admin_view(task_monitor), name="task_monitor"
         ),
     ]
@@ -60,7 +54,7 @@ def custom_get_urls():
 def custom_get_app_list(request, app_label=None):
     app_list = original_get_app_list(request, app_label)
 
-    # Add our Workflow Monitor to the app list
+    # Add our Task Monitor to the app list
     app_dict = {
         "name": "Workflow Management",
         "app_label": "workflow_management",
@@ -72,20 +66,6 @@ def custom_get_app_list(request, app_label=None):
                 "object_name": "task_monitor",
                 "perms": {"add": False, "change": False, "delete": False, "view": True},
                 "admin_url": "/admin/task-monitor/",
-                "view_only": True,
-            },
-            {
-                "name": "Workflow Monitor",
-                "object_name": "workflow_monitor",
-                "perms": {"add": False, "change": False, "delete": False, "view": True},
-                "admin_url": "/admin/workflow-monitor/",
-                "view_only": True,
-            },
-            {
-                "name": "DBOS Conductor",
-                "object_name": "conductor",
-                "perms": {"add": False, "change": False, "delete": False, "view": True},
-                "admin_url": "/admin/conductor/",
                 "view_only": True,
             }
         ],

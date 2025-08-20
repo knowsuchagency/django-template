@@ -1,25 +1,19 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
 import { RefreshCw } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useAuthStore } from '@/stores/authStore'
 import { useThemeStore } from '@/stores/themeStore'
-
-interface StockData {
-  id: number
-  symbol: string
-  price: number
-  volume: number
-  date: string
-}
+import { useStocks, useStockSymbols } from '@/api/stocks'
 
 export const Dashboard: React.FC = () => {
   const user = useAuthStore((state) => state.user)
   const effectiveTheme = useThemeStore((state) => state.effectiveTheme)
-  const [stockData, setStockData] = useState<StockData[]>([])
   const [selectedSymbol, setSelectedSymbol] = useState<string>('')
-  const [availableSymbols, setAvailableSymbols] = useState<string[]>([])
-  const [loading, setLoading] = useState(false)
+  
+  // Use TanStack Query hooks
+  const { data: stockData = [], isLoading, refetch } = useStocks(selectedSymbol || undefined)
+  const { data: availableSymbols = [] } = useStockSymbols()
   
   // Chart theme based on mode
   const chartTheme = React.useMemo(() => ({
@@ -36,69 +30,6 @@ export const Dashboard: React.FC = () => {
       '#b8e986'   // Green
     ]
   }), [effectiveTheme])
-
-  const fetchStockData = async () => {
-    setLoading(true)
-    try {
-      let url = '/api/v1/example/stocks'
-      if (selectedSymbol) {
-        url += `?symbol=${selectedSymbol}`
-      }
-      
-      // Use fetch with credentials for custom API endpoints
-      // The AllauthClient handles auth for allauth endpoints only
-      const response = await fetch(url, {
-        credentials: 'include',
-        headers: {
-          'Accept': 'application/json',
-        }
-      })
-      if (!response.ok) {
-        throw new Error('Failed to fetch stock data')
-      }
-      
-      const data = await response.json()
-      setStockData(data)
-      
-      // Only update available symbols if we're fetching all stocks
-      // This prevents the dropdown from losing options when filtering
-      if (!selectedSymbol) {
-        const symbols = [...new Set(data.map((stock: StockData) => stock.symbol))].sort() as string[]
-        setAvailableSymbols(symbols)
-      }
-    } catch (error) {
-      console.error('Error fetching stock data:', error)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  // Fetch all available symbols on mount
-  useEffect(() => {
-    const fetchAllSymbols = async () => {
-      try {
-        const response = await fetch('/api/v1/example/stocks', {
-          credentials: 'include',
-          headers: {
-            'Accept': 'application/json',
-          }
-        })
-        if (response.ok) {
-          const data = await response.json()
-          const symbols = [...new Set(data.map((stock: StockData) => stock.symbol))].sort() as string[]
-          setAvailableSymbols(symbols)
-        }
-      } catch (error) {
-        console.error('Error fetching all symbols:', error)
-      }
-    }
-    
-    fetchAllSymbols()
-  }, [])
-
-  useEffect(() => {
-    fetchStockData()
-  }, [selectedSymbol])
 
   // Process data for charts
   const processedData = React.useMemo(() => {
@@ -132,11 +63,11 @@ export const Dashboard: React.FC = () => {
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-2xl font-semibold text-foreground">Stock Data</h2>
           <Button
-            onClick={fetchStockData}
-            disabled={loading}
+            onClick={() => refetch()}
+            disabled={isLoading}
             className="flex items-center gap-2"
           >
-            <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
             Refresh
           </Button>
         </div>

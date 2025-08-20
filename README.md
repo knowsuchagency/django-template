@@ -1,6 +1,6 @@
-# Django Template
+# Django Project
 
-A modern Django + React template with authentication, API, and task queue support.
+A modern Django + React application with authentication, API, and task queue support.
 
 ## Table of Contents
 
@@ -18,9 +18,10 @@ A modern Django + React template with authentication, API, and task queue suppor
 
 - **Backend**: Django 5.1.1 with Django Ninja API (`/api/v1/`)
 - **Frontend**: React + TypeScript + Tailwind CSS + shadcn/ui
-- **State Management**: Zustand with persist middleware
-- **Authentication**: Django-allauth + @knowsuchagency/django-allauth
-- **Task Queue**: Django-Q2 with Redis
+- **State Management**: Zustand for client state
+- **API Client**: TanStack Query (React Query) for server state
+- **Authentication**: Django-allauth + @knowsuchagency/django-allauth (with built-in TanStack Query)
+- **Task Queue**: DBOS for durable workflow execution
 - **Database**: SQLite (development) / PostgreSQL (production)
 - **Build Tools**: Vite (frontend), uv (Python), mise (task runner)
 
@@ -37,8 +38,8 @@ Before you begin, ensure you have the following installed:
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/knowsuchagency/django-template.git
-   cd django-template
+   git clone <repository-url>
+   cd <project-directory>
    ```
 
 2. Install dependencies:
@@ -89,7 +90,9 @@ src/
 
 frontend/
 ├── src/
+│   ├── api/           # TanStack Query hooks and API functions
 │   ├── components/    # React components
+│   ├── lib/           # Utilities and query client config
 │   ├── pages/         # Page components
 │   ├── stores/        # Zustand stores
 │   └── types/         # TypeScript types
@@ -121,10 +124,10 @@ bun run build            # Build for production
 ### Static Files
 - `mise run collectstatic` - Collect static files
 
-### Django-Q Task Queue
-- `mise run qcluster` - Run task queue cluster
-- `mise run qmonitor` - Monitor queue status
-- `mise run setup_periodic_tasks` - Initialize periodic tasks
+### DBOS Task Queue
+DBOS provides durable workflow execution with automatic retries and workflow recovery. Tasks are stored in PostgreSQL for reliability.
+
+Note: DBOS requires a PostgreSQL database connection configured via `DATABASE_URL` environment variable.
 
 ## Key Patterns
 
@@ -177,9 +180,19 @@ const {
 } = useAuth()
 ```
 
-### API Calls
+### API Calls with TanStack Query
 ```typescript
-// For custom endpoints
+// Using custom hooks with automatic caching and refetching
+import { useStocks, useStockSymbols } from '@/api/stocks'
+
+function Component() {
+  const { data, isLoading, error, refetch } = useStocks()
+  const { data: symbols } = useStockSymbols()
+  
+  // Data is automatically cached, deduplicated, and refetched
+}
+
+// Legacy fetch approach (for one-off requests)
 const response = await fetch('/api/v1/example', {
   credentials: 'include',
   headers: { 'Accept': 'application/json' }
@@ -190,8 +203,8 @@ const response = await fetch('/api/v1/example', {
 
 The project uses `mise.toml` for environment variables:
 
-- `DATABASE_URL` - Database connection (default: `sqlite:///data.db`)
-- `REDIS_URL` - Redis connection for cache/queue (optional)
+- `DATABASE_URL` - Database connection (default: `sqlite:///data.db`). Required for DBOS workflows.
+- `REDIS_URL` - Redis connection for cache (optional, no longer needed for task queue)
 - `SECRET_KEY` - Django secret key
 - `DEBUG` - Development mode flag
 - `ALLOWED_HOSTS` - Comma-separated list of allowed hosts
@@ -205,13 +218,7 @@ To use Lovable's built-in preview window, you'll need to note the request's actu
 ### Docker Support
 The project includes Docker configuration for production deployment:
 ```bash
-docker-compose up  # Full stack with PostgreSQL and Redis (no workers by default)
-
-# Run with workers enabled
-WORKER_REPLICAS=1 docker-compose up
-
-# Run with multiple workers
-WORKER_REPLICAS=3 docker-compose up
+docker-compose up  # Full stack with PostgreSQL
 ```
 
-Workers are disabled by default (`WORKER_REPLICAS=0`). Set the `WORKER_REPLICAS` environment variable to enable background task processing.
+DBOS workflows run automatically within the main Django process, providing durable task execution without separate worker processes.

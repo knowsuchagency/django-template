@@ -460,4 +460,4 @@ USE_X_FORWARDED_HOST = True
 
 DBOS_CONDUCTOR_KEY = config("DBOS_CONDUCTOR_KEY", default="") or None
 
-X_API_KEY = os.environ["X_API_KEY"]
+X_API_KEY = config("X_API_KEY", default="")

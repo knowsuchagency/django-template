@@ -9,7 +9,7 @@ class ApiKey(APIKeyHeader):
     param_name = "X-API-Key"
 
     def authenticate(self, request, key):
-        if key == settings.X_API_KEY:
+        if key and key == settings.X_API_KEY:
             return key
 
 

@@ -149,3 +149,7 @@ staticfiles/
 # Playwright test results
 test-results/
 playwright-report/
+
+# Claude local configuration
+.claude/settings.local.json
+CLAUDE.local.md

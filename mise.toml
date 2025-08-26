@@ -82,24 +82,6 @@ run = [
     "cd frontend && bun run test:e2e"
 ]
 
-[tasks.setup_periodic_tasks]
-description = "set up periodic tasks"
-depends = ["migrate"]
-run = "uv run python manage.py setup_periodic_tasks"
-
-[tasks.qcluster]
-description = "run q cluster"
-depends = ["setup_periodic_tasks"]
-run = "uv run python manage.py qcluster"
-
-[tasks.qmonitor]
-description = "monitor q cluster"
-run = "uv run python manage.py qmonitor"
-
-[tasks.qinfo]
-description = "view q info"
-run = "uv run python manage.py qinfo"
-
 [tasks.shell]
 description = "django shell"
 run = "uv run python manage.py shell"

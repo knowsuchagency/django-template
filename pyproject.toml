@@ -23,7 +23,7 @@ dependencies = [
     "django-debug-toolbar>=5.0.1",
     "django-redis>=5.4.0",
     "django-vite>=3.0.2",
-    "dbos>=1.12.0",
+    "dbos>=2.1.0",
 ]
 
 [dependency-groups]

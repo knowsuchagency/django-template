@@ -64,7 +64,7 @@ cd frontend && bun run dev
 
 ### Database Configuration
 - Development: SQLite by default
-- Production: PostgreSQL required for DBOS workflows
+- Production: PostgreSQL recommended but not required
 - `DATABASE_URL` auto-transforms to `DBOS_DATABASE_URL` for workflow execution
 
 ## Development Workflow
@@ -90,7 +90,7 @@ mise run test    # Run all tests
 ## Environment Variables
 
 Key variables in `mise.toml`:
-- `DATABASE_URL` - Required for DBOS (PostgreSQL in production)
+- `DATABASE_URL` - Optional database connection string (SQLite or PostgreSQL)
 - `CSRF_TRUSTED_ORIGINS` - Must include frontend origin for API calls
 - `DEBUG` - Enables development features
 - `SECRET_KEY` - Auto-generated if not set

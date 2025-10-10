@@ -126,10 +126,8 @@ bun run build            # Build for production
 ### Static Files
 - `mise run collectstatic` - Collect static files
 
-### DBOS TaskS
-DBOS provides durable background task execution with automatic retries and workflow recovery. It also supports cron jobs. Tasks are stored in PostgreSQL for reliability.
-
-Note: DBOS requires a PostgreSQL database connection configured via `DATABASE_URL` environment variable.
+### DBOS Tasks
+DBOS provides durable background task execution with automatic retries and workflow recovery. It also supports cron jobs.
 
 ## Key Patterns
 
@@ -206,7 +204,7 @@ const response = await fetch('/api/v1/example', {
 The project uses `mise.toml` for environment variables:
 
 - `DATABASE_URL` - Database connection.
-- `REDIS_URL` - Redis connection for cache (optional, no longer needed for task queue)
+- `REDIS_URL` - Redis connection for cache (optional)
 - `SECRET_KEY` - Django secret key
 - `DEBUG` - Development mode flag
 - `ALLOWED_HOSTS` - Comma-separated list of allowed hosts

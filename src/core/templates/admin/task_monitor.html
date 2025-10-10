@@ -796,7 +796,7 @@ function taskMonitor() {
         
         async fetchWorkflowDetails(workflowId) {
             try {
-                const response = await fetch(`/api/v1/tasks/result?workflow_id=${workflowId}`);
+                const response = await fetch(`/api/v1/tasks/result?workflow_id=${encodeURIComponent(workflowId)}`);
                 const data = await response.json();
                 this.workflowDetails = data;
             } catch (error) {

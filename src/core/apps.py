@@ -22,10 +22,10 @@ class CoreConfig(AppConfig):
             # Get DATABASE_URL and transform it for DBOS by removing query params
             database_url = os.getenv("DATABASE_URL", "")
             
-            # DBOS requires PostgreSQL, skip initialization if using SQLite
-            if database_url and not database_url.startswith("sqlite"):
-                # Remove query parameters from DATABASE_URL for DBOS
-                # DBOS doesn't work well with search_path and other params
+            # Remove query parameters from DATABASE_URL for DBOS if provided
+            # DBOS doesn't work well with search_path and other params
+            dbos_database_url = None
+            if database_url:
                 from urllib.parse import urlparse, urlunparse
                 parsed = urlparse(database_url)
                 # Rebuild URL without query params
@@ -37,22 +37,25 @@ class CoreConfig(AppConfig):
                     '',  # query
                     ''   # fragment
                 ))
-                try:
-                    dbos_config: DBOSConfig = {
-                        "name": "django-template",
-                        "database_url": dbos_database_url,
-                    }
-                    DBOS(config=dbos_config, conductor_key=settings.DBOS_CONDUCTOR_KEY)
-                    DBOS.launch()
-                    logger.info(f"DBOS initialized successfully with URL: {dbos_database_url}")
+            
+            try:
+                dbos_config: DBOSConfig = {
+                    "name": "django-template",
+                }
+                if dbos_database_url:
+                    dbos_config["database_url"] = dbos_database_url
                     
-                    # Import cron jobs to register them with DBOS
-                    from . import cron_jobs  # noqa: F401
-                    logger.info("DBOS cron jobs registered")
-                except Exception as e:
-                    logger.warning(f"DBOS initialization failed: {e}")
-                    logger.info("DBOS requires PostgreSQL. Workflows will not be available.")
-            elif database_url.startswith("sqlite"):
-                logger.info("DBOS requires PostgreSQL. Using SQLite, workflows disabled.")
-            else:
-                logger.warning("DBOS_DATABASE_URL not configured, DBOS not initialized")
+                DBOS(config=dbos_config, conductor_key=settings.DBOS_CONDUCTOR_KEY)
+                DBOS.launch()
+                
+                if dbos_database_url:
+                    logger.info(f"DBOS initialized successfully with URL: {dbos_database_url}")
+                else:
+                    logger.info("DBOS initialized successfully without database URL")
+                
+                # Import cron jobs to register them with DBOS
+                from . import cron_jobs  # noqa: F401
+                logger.info("DBOS cron jobs registered")
+            except Exception as e:
+                logger.warning(f"DBOS initialization failed: {e}")
+                logger.info("Workflows will not be available.")

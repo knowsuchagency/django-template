@@ -142,9 +142,9 @@ dist
 
 .ruff_cache/
 
-db.sqlite3
+*.sqlite
+*.sqlite3
 data.db
-django_template.sqlite
 staticfiles/
 
 # Playwright test results

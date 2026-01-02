@@ -1,0 +1,19 @@
+{% raw %}{% load django_vite %}{% endraw %}
+{% raw %}{% load static %}{% endraw %}
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    {% raw %}{% vite_hmr_client %}{% endraw %}
+
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="{% raw %}{% static 'vite.svg' %}{% endraw %}" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{ project_name }}</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    {% raw %}{% vite_react_refresh %}{% endraw %}
+    {% raw %}{% vite_asset 'src/main.tsx' %}{% endraw %}
+  </body>
+</html>

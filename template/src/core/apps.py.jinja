@@ -40,7 +40,7 @@ class CoreConfig(AppConfig):
             
             try:
                 dbos_config: DBOSConfig = {
-                    "name": "django-template",
+                    "name": "{{ project_slug }}",
                 }
                 if dbos_database_url:
                     dbos_config["database_url"] = dbos_database_url

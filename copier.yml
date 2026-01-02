@@ -1,0 +1,67 @@
+_min_copier_version: "9.0.0"
+
+_subdirectory: template
+
+_skip_if_exists:
+  - ".env"
+
+_exclude:
+  - ".git"
+  - "__pycache__"
+  - "*.pyc"
+  - "node_modules"
+  - ".venv"
+  - "staticfiles"
+  - "*.sqlite3"
+  - "data.db"
+  - "frontend/dist"
+  - "uv.lock"
+  - "frontend/bun.lock"
+  - "test-results"
+  - "playwright-report"
+  - ".copier-answers.yml"
+
+project_name:
+  type: str
+  help: "The human-readable name of your project"
+
+project_slug:
+  type: str
+  help: "The slug for your project (used in package names, URLs)"
+  default: "{{ project_name | lower | replace(' ', '_') | replace('-', '_') }}"
+
+project_description:
+  type: str
+  help: "A brief description of your project"
+  default: "A Django + React application"
+
+author_name:
+  type: str
+  help: "Author name"
+  default: ""
+
+author_email:
+  type: str
+  help: "Author email"
+  default: ""
+
+default_from_email:
+  type: str
+  help: "Default sender email address"
+  default: "noreply@example.com"
+
+_tasks:
+  - "ln -sf CLAUDE.md .cursorrules"
+  - "uv lock"
+  - "cd frontend && bun install"
+
+_message_after_copy: |
+  Your project "{{ project_name }}" has been created!
+
+  Next steps:
+    cd {{ _copier_conf.dst_path }}
+    mise install
+    mise run migrate
+    mise run runserver
+
+  For more information, see README.md

@@ -3,7 +3,7 @@ python = "3.12"
 
 [settings]
 experimental = true
-python.venv_auto_create = true
+python.uv_venv_auto = true
 python.venv_stdlib = false
 
 [env]

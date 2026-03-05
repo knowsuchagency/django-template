@@ -7,21 +7,8 @@ python.uv_venv_auto = true
 python.venv_stdlib = false
 
 [env]
-_.file = ".env"
-PYTHONPATH = "src"
-# SECRET_KEY = "thisisthesupersecretkey"
-# DATABASE_URL = "sqlite:///data.db"
-# REDIS_URL = "redis://localhost:6379"
-# CACHE_PREFIX = "django_cache"
-ALLOWED_HOSTS = "localhost,127.0.0.1"
-CSRF_TRUSTED_ORIGINS = "http://localhost:8000,http://localhost:8080"
-LOG_REQUESTS = "true"
-DEBUG = "true"
+_.file = ".env.{{env.MISE_ENV | default(value='development')}}"
 COMPOSE_BAKE = "true"
-# AWS_ACCESS_KEY_ID = "op://dev/ses/access_key_id"
-# AWS_SECRET_ACCESS_KEY = "op://dev/ses/secret_access_key"
-# AWS_DEFAULT_REGION = "op://dev/ses/region"
-# SENTRY_DSN = "op://dev/sentry/sandbox_dsn"
 
 [tasks.format]
 description = "format/fix code"
@@ -29,10 +16,6 @@ run = [
     "uvx ruff check --fix",
     "uvx ruff format"
 ]
-
-[tasks.init]
-description = "initialize .env file from .env.template using 1Password CLI"
-run = "op inject -i .env.template -o .env"
 
 [tasks.install-frontend]
 description = "install frontend dependencies"

@@ -2,8 +2,6 @@ _min_copier_version: "9.0.0"
 
 _subdirectory: template
 
-_skip_if_exists:
-  - ".env"
 
 _exclude:
   - ".git"

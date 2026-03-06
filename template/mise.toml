@@ -49,7 +49,12 @@ run = "uv run python manage.py flush"
 
 [tasks.createsuperuser]
 description = "create superuser"
-run = "uv run python manage.py createsuperuser"
+usage = '''
+arg "<email>" help="Superuser email address"
+arg "<password>" help="Superuser password"
+flag "--username <username>" help="Username (defaults to email prefix)"
+'''
+run = 'DJANGO_SUPERUSER_USERNAME=${usage_username:-${usage_email%%@*}} DJANGO_SUPERUSER_EMAIL=${usage_email?} DJANGO_SUPERUSER_PASSWORD=${usage_password?} uv run python manage.py createsuperuser --noinput'
 
 [tasks.collectstatic]
 description = "build theme and collect static files"

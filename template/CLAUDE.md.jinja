@@ -24,7 +24,7 @@ cd frontend && bun run dev
 
 ## Code Patterns
 
-- Use `@route` decorator from djecorator for Django views
+- Define views as plain functions and wire them in `urls.py` with `path()`
 - Use Django Ninja routers for API endpoints
 - Access Zustand stores with selector pattern: `useStore((state) => state.value)`
 - Use `useAllauth()` hook for authentication operations
@@ -41,7 +41,7 @@ cd frontend && bun run dev
 - **Django Ninja API** at `/api/v1/` - RESTful API with automatic OpenAPI generation
 - **DBOS Workflows** - Durable task execution replacing Django-Q2, runs in main process
 - **Custom User Model** in `core.models` - Extended Django User with UUID primary key
-- **View Routing** - Uses `djecorator.Route` for cleaner URL patterns in views
+- **View Routing** - Standard Django URL patterns with `path()` in `urls.py`
 
 ### Frontend Architecture
 - **React SPA** served at `/app/` in production, `/static/` in development

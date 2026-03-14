@@ -2,7 +2,7 @@
 URL configuration for {{ project_name }} project.
 
 The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/5.0/topics/http/urls/
+    https://docs.djangoproject.com/en/6.0/topics/http/urls/
 Examples:
 Function views
     1. Add an import:  from my_app import views
@@ -30,5 +30,9 @@ urlpatterns = [
     path("__reload__/", include("django_browser_reload.urls")),
 ]
 
-urlpatterns += views.route.patterns
+urlpatterns += [
+    path("", views.root_redirect, name="root_redirect"),
+    path("app/", views.index, name="index"),
+    path("app/<path:path>", views.spa_fallback, name="spa_fallback"),
+]
 urlpatterns += debug_toolbar_urls()

@@ -16,7 +16,7 @@
 
 ## Tech Stack
 
-- **Backend**: Django 5.1.1 with Django Ninja API (`/api/v1/`)
+- **Backend**: Django 6.0 with Django Ninja API (`/api/v1/`)
 - **Frontend**: React + TypeScript + Tailwind CSS + shadcn/ui
 - **State Management**: Zustand for client state
 - **API Client**: TanStack Query (React Query) for server state
@@ -83,7 +83,7 @@ src/
 ├── api/v1/            # Django Ninja API endpoints
 ├── core/              # Main Django app
 │   ├── models.py      # Custom User model
-│   ├── views.py       # Views using @route decorator
+│   ├── views.py       # Django views
 │   └── templates/index.html  # React app entry
 └── settings.py
 
@@ -131,14 +131,16 @@ DBOS provides durable background task execution with automatic retries and workf
 
 ## Key Patterns
 
-### Django Views (using djecorator)
+### Django Views
 ```python
-from djecorator import Route
-route = Route()
-
-@route("/app/")
+# views.py
 def index(request):
     return render(request, "index.html")
+
+# urls.py
+urlpatterns += [
+    path("app/", views.index, name="index"),
+]
 ```
 
 ### API Endpoints (Django Ninja)
@@ -204,7 +206,7 @@ const response = await fetch('/api/v1/example', {
 The project uses `mise.toml` for environment variables:
 
 - `DATABASE_URL` - Database connection.
-- `REDIS_URL` - Redis connection for cache (optional)
+- `VALKEY_URL` - Valkey connection for cache (optional)
 - `SECRET_KEY` - Django secret key
 - `DEBUG` - Development mode flag
 - `ALLOWED_HOSTS` - Comma-separated list of allowed hosts

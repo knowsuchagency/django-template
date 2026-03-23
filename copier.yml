@@ -59,7 +59,7 @@ _message_after_copy: |
   Next steps:
     cd {{ _copier_conf.dst_path }}
     mise install
-    mise run migrate
+    mise run init
     mise run runserver
 
   For more information, see README.md

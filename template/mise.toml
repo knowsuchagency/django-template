@@ -70,6 +70,17 @@ run = [
     "cd frontend && bun run test:e2e"
 ]
 
+[tasks.init]
+description = "bootstrap project: install deps, migrate, create superuser"
+depends = ["install-frontend"]
+run = [
+    "uv sync",
+    "./scripts/ensure_pg_schema.sh",
+    "uv run python manage.py migrate",
+    "uv run python manage.py createcachetable",
+    "uv run python manage.py createsuperuser --noinput || true",
+]
+
 [tasks.shell]
 description = "django shell"
 run = "uv run python manage.py shell"

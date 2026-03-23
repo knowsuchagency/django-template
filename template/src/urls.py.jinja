@@ -28,7 +28,9 @@ urlpatterns = [
     path("accounts/", include("allauth.urls")),
     path("_allauth/", include("allauth.headless.urls")),
     path("__reload__/", include("django_browser_reload.urls")),
+    path("", views.root_redirect),
+    path("app/", views.index),
+    path("app/<path:path>", views.spa_fallback),
 ]
 
-urlpatterns += views.route.patterns
 urlpatterns += debug_toolbar_urls()

@@ -16,7 +16,7 @@
 
 ## Tech Stack
 
-- **Backend**: Django 5.1.1 with Django Ninja API (`/api/v1/`)
+- **Backend**: Django 6.0 with Django Ninja API (`/api/v1/`)
 - **Frontend**: React + TypeScript + Tailwind CSS + shadcn/ui
 - **State Management**: Zustand for client state
 - **API Client**: TanStack Query (React Query) for server state
@@ -190,7 +190,7 @@ const response = await fetch('/api/v1/example', {
 The project uses `mise.toml` for environment variables:
 
 - `DATABASE_URL` - Database connection.
-- `REDIS_URL` - Redis connection for cache (optional)
+- `VALKEY_URL` - Valkey connection for cache (optional)
 - `SECRET_KEY` - Django secret key
 - `DEBUG` - Development mode flag
 - `ALLOWED_HOSTS` - Comma-separated list of allowed hosts

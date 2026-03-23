@@ -2,7 +2,7 @@ from django.test import TestCase, Client
 from django.contrib.auth import get_user_model
 from datetime import date
 from django.conf import settings
-from django_redis import get_redis_connection
+from django_valkey import get_valkey_connection
 
 from core.models import StockTicker
 
@@ -19,10 +19,10 @@ class ViewTests(TestCase):
         )
 
     def tearDown(self):
-        # Only flush Redis if it's configured and available
-        if "redis" in settings.CACHES and settings.CACHES["redis"]["LOCATION"] != "redis://localhost:6379":
+        # Only flush Valkey if it's configured and available
+        if "valkey" in settings.CACHES and settings.CACHES["valkey"]["LOCATION"] != "valkey://localhost:6379":
             try:
-                get_redis_connection("redis").flushall()
+                get_valkey_connection("valkey").flushall()
             except:
                 pass
 
@@ -73,10 +73,10 @@ class APITests(TestCase):
         )
 
     def tearDown(self):
-        # Only flush Redis if it's configured and available
-        if "redis" in settings.CACHES and settings.CACHES["redis"]["LOCATION"] != "redis://localhost:6379":
+        # Only flush Valkey if it's configured and available
+        if "valkey" in settings.CACHES and settings.CACHES["valkey"]["LOCATION"] != "valkey://localhost:6379":
             try:
-                get_redis_connection("redis").flushall()
+                get_valkey_connection("valkey").flushall()
             except:
                 pass
 

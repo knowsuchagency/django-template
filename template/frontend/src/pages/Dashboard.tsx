@@ -20,16 +20,17 @@ export const Dashboard: React.FC = () => {
     grid: effectiveTheme === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)',
     axis: effectiveTheme === 'dark' ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.1)',
     tick: effectiveTheme === 'dark' ? 'rgba(255, 255, 255, 0.6)' : 'rgba(0, 0, 0, 0.6)',
-    colors: [
-      '#0070f3',  // Vercel blue
-      '#7928ca',  // Purple
-      '#ff0080',  // Pink
-      '#ff4458',  // Red
-      '#f5a623',  // Orange
-      '#50e3c2',  // Teal
-      '#b8e986'   // Green
-    ]
+    colors: effectiveTheme === 'dark'
+      ? ['#60a5fa', '#a78bfa', '#f472b6', '#fb7185', '#fbbf24', '#34d399', '#22d3ee']
+      : ['#2563eb', '#7c3aed', '#db2777', '#dc2626', '#ea580c', '#059669', '#0891b2']
   }), [effectiveTheme])
+
+  const volumeFormatter = (value: number) => {
+    if (value >= 1_000_000_000) return `${(value / 1_000_000_000).toFixed(1)}B`
+    if (value >= 1_000_000) return `${(value / 1_000_000).toFixed(0)}M`
+    if (value >= 1_000) return `${(value / 1_000).toFixed(0)}K`
+    return String(value)
+  }
 
   // Process data for charts
   const processedData = React.useMemo(() => {
@@ -102,14 +103,14 @@ export const Dashboard: React.FC = () => {
                   tick={{ fill: chartTheme.tick }}
                   axisLine={{ stroke: chartTheme.axis }}
                 />
-                <Tooltip 
-                  contentStyle={{ 
-                    backgroundColor: 'hsl(var(--background))', 
-                    border: '1px solid hsl(var(--border))',
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: 'var(--background)',
+                    border: '1px solid var(--border)',
                     borderRadius: '6px',
                     boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)'
                   }}
-                  labelStyle={{ color: 'hsl(var(--foreground))' }}
+                  labelStyle={{ color: 'var(--foreground)' }}
                 />
                 <Legend 
                   wrapperStyle={{ paddingTop: '20px' }}
@@ -134,27 +135,29 @@ export const Dashboard: React.FC = () => {
           <div>
             <h3 className="text-lg font-semibold mb-4 text-foreground">Trading Volume Over Time</h3>
             <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={processedData} margin={{ left: 20, right: 5, top: 5, bottom: 5 }}>
+              <BarChart data={processedData} margin={{ left: 5, right: 5, top: 5, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke={chartTheme.grid} vertical={false} />
-                <XAxis 
-                  dataKey="date" 
+                <XAxis
+                  dataKey="date"
                   stroke={chartTheme.axis}
                   tick={{ fill: chartTheme.tick }}
                   axisLine={{ stroke: chartTheme.axis }}
                 />
-                <YAxis 
+                <YAxis
                   stroke={chartTheme.axis}
                   tick={{ fill: chartTheme.tick }}
                   axisLine={{ stroke: chartTheme.axis }}
+                  tickFormatter={volumeFormatter}
+                  width={50}
                 />
-                <Tooltip 
-                  contentStyle={{ 
-                    backgroundColor: 'hsl(var(--background))', 
-                    border: '1px solid hsl(var(--border))',
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: 'var(--background)',
+                    border: '1px solid var(--border)',
                     borderRadius: '6px',
                     boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)'
                   }}
-                  labelStyle={{ color: 'hsl(var(--foreground))' }}
+                  labelStyle={{ color: 'var(--foreground)' }}
                 />
                 <Legend 
                   wrapperStyle={{ paddingTop: '20px' }}
@@ -165,7 +168,6 @@ export const Dashboard: React.FC = () => {
                     dataKey={`${symbol}_volume`}
                     name={symbol}
                     fill={chartTheme.colors[index % chartTheme.colors.length]}
-                    opacity={0.8}
                   />
                 ))}
               </BarChart>

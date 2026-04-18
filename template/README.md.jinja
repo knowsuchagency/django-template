@@ -192,9 +192,11 @@ The project uses `mise.toml` for environment variables:
 - `DATABASE_URL` - Database connection.
 - `VALKEY_URL` - Valkey connection for cache (optional)
 - `SECRET_KEY` - Django secret key
-- `DEBUG` - Development mode flag
+- `DEBUG` - Development mode flag (when `True`, email defaults to the console backend)
 - `ALLOWED_HOSTS` - Comma-separated list of allowed hosts
 - `CSRF_TRUSTED_ORIGINS` - Required for cross-origin requests
+- `CLOUDFLARE_ACCOUNT_ID` / `CLOUDFLARE_API_TOKEN` - Cloudflare Email Sending credentials (production email)
+- `DEFAULT_FROM_EMAIL` - Default sender address for outbound email
 
 ## Notes
 

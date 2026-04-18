@@ -21,6 +21,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with th
 - **`WildcardCSRFMiddleware`** (`src/core/middleware.py`) enables wildcard patterns in `CSRF_TRUSTED_ORIGINS` — useful for preview environments.
 - **SPA at `/app/`** with a `spa_fallback` view catching unknown sub-routes so client-side routing (react-router) works on reload.
 - **Session-based auth (not JWT).** django-allauth headless mode with CSRF cookies. Frontend uses `useAllauth()` hooks from `@knowsuchagency/django-allauth`; `useAuthStore` mirrors auth state into Zustand for non-React-Query consumers.
+- **Email via Cloudflare Email Sending.** `src/core/email_backends.py` implements a stdlib-only `CloudflareEmailBackend` that POSTs to Cloudflare's REST API. In `DEBUG` the backend defaults to Django's console backend; otherwise it uses the Cloudflare backend. Configured with `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN` (account-scoped Email Sending Write token).
 
 ## Commands
 
@@ -49,7 +50,7 @@ All Python commands go through `uv run`; all frontend commands through `bun`. Th
 
 Generated projects load `.env.development` or `.env.production` based on `MISE_ENV` (default `development`).
 
-Key vars: `DATABASE_URL`, `SECRET_KEY`, `DEBUG`, `ALLOWED_HOSTS`, `CSRF_TRUSTED_ORIGINS`, `REDIS_URL`, `DBOS_CONDUCTOR_KEY`, `X_API_KEY`, `DJANGO_SUPERUSER_{USERNAME,EMAIL,PASSWORD}`.
+Key vars: `DATABASE_URL`, `SECRET_KEY`, `DEBUG`, `ALLOWED_HOSTS`, `CSRF_TRUSTED_ORIGINS`, `REDIS_URL`, `DBOS_CONDUCTOR_KEY`, `X_API_KEY`, `DJANGO_SUPERUSER_{USERNAME,EMAIL,PASSWORD}`, `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_API_TOKEN`, `DEFAULT_FROM_EMAIL`.
 
 `DATABASE_URL` is automatically mirrored into `DBOS_DATABASE_URL` for workflow execution — don't set both.
 

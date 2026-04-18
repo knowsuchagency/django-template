@@ -11,7 +11,6 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
 import logging.config
-import os
 from functools import partial
 from pathlib import Path
 import platform
@@ -494,15 +493,19 @@ HEADLESS_FRONTEND_URLS = {
 
 # Email settings
 
-EMAIL_BACKEND = "anymail.backends.amazon_ses.EmailBackend"
-EMAIL_HOST = "email-smtp.us-east-2.amazonaws.com"
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = config("AWS_ACCESS_KEY_ID", default="")
-EMAIL_HOST_PASSWORD = config("AWS_SECRET_ACCESS_KEY", default="")
-AWS_DEFAULT_REGION = os.environ["AWS_DEFAULT_REGION"] = config(
-    "AWS_DEFAULT_REGION", default="us-east-2"
-)
+if DEBUG:
+    EMAIL_BACKEND = config(
+        "EMAIL_BACKEND",
+        default="django.core.mail.backends.console.EmailBackend",
+    )
+else:
+    EMAIL_BACKEND = config(
+        "EMAIL_BACKEND",
+        default="core.email_backends.CloudflareEmailBackend",
+    )
+
+CLOUDFLARE_ACCOUNT_ID = config("CLOUDFLARE_ACCOUNT_ID", default="")
+CLOUDFLARE_API_TOKEN = config("CLOUDFLARE_API_TOKEN", default="")
 DEFAULT_FROM_EMAIL = config("DEFAULT_FROM_EMAIL", default="{{ default_from_email }}")
 
 # Authentication settings

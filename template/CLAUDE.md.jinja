@@ -2,94 +2,90 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with the {{ project_name }} codebase.
 
-## Important Notes
+## Stack
 
-- All Python commands must be prefixed with `uv run`
-- Use `bun` instead of `npm` for frontend package management
-- Always run `mise run test` after making changes
-- Run `mise run format` to format Python code with ruff
+**Backend:** Django 6.0 + Django Ninja (`/api/v1/`) + DBOS durable workflows
+**Frontend:** React 19 + TypeScript + Vite + Tailwind CSS v4 + shadcn/ui
+**Auth:** django-allauth (headless) + `@knowsuchagency/django-allauth` React hooks
+**State:** Zustand (client) + TanStack Query (server)
+**DB:** SQLite (dev) / PostgreSQL (prod), via `DATABASE_URL`
+**Cache/queue:** Valkey (Redis-compatible), via `REDIS_URL`
+**Task runner:** mise (`mise.toml`), Python via `uv run`, JS via `bun`
 
-## Quick Commands
+## Key Architecture Decisions
+
+- **Custom `User` model** in `src/core/models.py` — extends `AbstractUser` with a `uuid` field for external-facing identifiers (e.g. unsubscribe links). The default integer PK is retained.
+- **Django Ninja (not DRF)** for the API — auto-generates OpenAPI at `/api/v1/docs`. Feature routers live under `src/api/v1/<feature>/` and are composed in `src/api/v1/router.py`.
+- **DBOS replaces Django-Q2/Celery.** Background tasks run in-process as durable workflows — no separate worker process. Scheduled workflows live in `src/core/cron_jobs.py` (`@DBOS.scheduled` + `@DBOS.workflow`).
+- **WhiteNoise + django-vite.** WhiteNoise serves static assets in production; django-vite bridges Vite's dev server during development and the built manifest in production. Vite emits to `frontend/dist/`, which is collected into Django's static pipeline.
+- **`WildcardCSRFMiddleware`** (`src/core/middleware.py`) enables wildcard patterns in `CSRF_TRUSTED_ORIGINS` — useful for preview environments.
+- **SPA at `/app/`** with a `spa_fallback` view catching unknown sub-routes so client-side routing (react-router) works on reload.
+- **Session-based auth (not JWT).** django-allauth headless mode with CSRF cookies. Frontend uses `useAllauth()` hooks from `@knowsuchagency/django-allauth`; `useAuthStore` mirrors auth state into Zustand for non-React-Query consumers.
+
+## Commands
 
 ```bash
-# Start development servers
-mise run runserver
-
-# Run tests
-mise run test
-
-# Frontend development
-cd frontend && bun run dev
+mise run runserver          # Django (8000) + Vite (5173) concurrently
+mise run test               # Django unit tests (in-memory SQLite) + Playwright e2e
+mise run format             # ruff check --fix && ruff format
+mise run migrate            # ensure_pg_schema + migrate + createcachetable
+mise run makemigrations
+mise run createsuperuser <email> <password> [--username <name>]
+mise run shell              # Django shell
+mise run init               # One-shot bootstrap: install deps, migrate, create superuser
+cd frontend && bun run dev  # Vite dev server only
 ```
 
-## Code Patterns
-
-- Define views as plain functions and wire them in `urls.py` with `path()`
-- Use Django Ninja routers for API endpoints
-- Access Zustand stores with selector pattern: `useStore((state) => state.value)`
-- Use `useAllauth()` hook for authentication operations
+All Python commands go through `uv run`; all frontend commands through `bun`. The CLAUDE global tool prefs already enforce this.
 
 ## Testing
 
-- Django tests use in-memory SQLite
-- Always verify authentication flows work correctly
-- Check that theme persistence works across sessions
+- **Backend:** `uv run python manage.py test src.core.tests` (in-memory SQLite; no Postgres required).
+- **Frontend e2e:** `cd frontend && bun run test:e2e` (Playwright — Chromium, Firefox, WebKit).
+- `mise run test` runs both sequentially.
+- When adding a feature, verify auth flows and theme persistence still work — both are common regression points.
 
-## Architecture Overview
+## Environment
 
-### Backend Structure
-- **Django Ninja API** at `/api/v1/` - RESTful API with automatic OpenAPI generation
-- **DBOS Workflows** - Durable task execution replacing Django-Q2, runs in main process
-- **Custom User Model** in `core.models` - Extended Django User with UUID primary key
-- **View Routing** - Standard Django URL patterns with `path()` in `urls.py`
+Generated projects load `.env.development` or `.env.production` based on `MISE_ENV` (default `development`).
 
-### Frontend Architecture
-- **React SPA** served at `/app/` in production, `/static/` in development
-- **TanStack Query** - Server state management with automatic caching, refetching, and deduplication
-- **Zustand** - Client state for auth sync and theme persistence
-- **django-allauth integration** - Authentication with built-in TanStack Query support
+Key vars: `DATABASE_URL`, `SECRET_KEY`, `DEBUG`, `ALLOWED_HOSTS`, `CSRF_TRUSTED_ORIGINS`, `REDIS_URL`, `DBOS_CONDUCTOR_KEY`, `X_API_KEY`, `DJANGO_SUPERUSER_{USERNAME,EMAIL,PASSWORD}`.
 
-### API Integration Pattern
-```typescript
-// 1. Define query functions in src/api/
-// 2. Create custom hooks with useQuery/useMutation
-// 3. Use hooks in components for automatic state management
-```
+`DATABASE_URL` is automatically mirrored into `DBOS_DATABASE_URL` for workflow execution — don't set both.
 
-### Authentication Flow
-- django-allauth handles backend auth with session cookies
-- `@knowsuchagency/django-allauth` provides React hooks with TanStack Query
-- `useAuthStore` syncs auth state from allauth hooks to Zustand
-- Protected routes check `isAuthenticated` from store
+## Docker
 
-### Database Configuration
-- Development: SQLite by default
-- Production: PostgreSQL recommended but not required
-- `DATABASE_URL` auto-transforms to `DBOS_DATABASE_URL` for workflow execution
+`docker-compose.yml` provides: `backend` (Granian), `postgres`, `redis` (Valkey), `migrations` (runs on boot), `createcachetable`. Services use `expose` rather than `ports` so a reverse proxy can route them. The multi-stage `Dockerfile` builds the frontend with bun, then collects static files into the final image.
 
-## Development Workflow
+## Code Patterns
 
-```bash
-# Initial setup
-mise install
-mise run init
+### Backend
 
-# Development
-mise run runserver  # Runs Django + Vite concurrently
+- **API endpoints:** create a feature directory under `src/api/v1/<feature>/`, define a Django Ninja `Router` with schemas, and register it in `src/api/v1/router.py`. Use Pydantic schemas for request/response bodies — don't return raw dicts.
+- **Views that aren't API:** plain function-based views wired in `src/urls.py` with `path()`. Keep them thin; push logic into services or model methods.
+- **Background work:** DBOS workflows. Decorate with `@DBOS.workflow()`; steps with `@DBOS.step()`; recurring jobs with `@DBOS.scheduled("<cron>")`. Workflows are durable — they resume after a crash. See `src/core/cron_jobs.py` for working examples.
+- **Models:** in `src/<app>/models.py`. Add `created_at = models.DateTimeField(auto_now_add=True)` and `updated_at = models.DateTimeField(auto_now=True)` to any model that'll be audited — there's no shared base class.
 
-# Database changes
-mise run makemigrations
-mise run migrate
+### Frontend
 
-# Code quality
-mise run format  # Auto-format with ruff
-mise run test    # Run all tests
-```
+- **API calls:** wrap fetch in a query function under `src/api/`, then expose it as a custom hook using `useQuery`/`useMutation` from TanStack Query. Don't call fetch directly from components.
+- **Auth:** use the `useAllauth()` hook for login/logout/signup and `useAuthStore((s) => s.user)` for read-only access to the current user.
+- **State:** Zustand stores live in `src/stores/`. Access with the selector pattern: `useStore((state) => state.value)` — never destructure the whole store (causes unnecessary re-renders).
+- **Styling:** use shadcn/ui components + semantic Tailwind tokens (`bg-background`, `text-muted-foreground`). Never raw colors like `bg-blue-500`. For chart colors, read from CSS variables directly (`var(--background)`, not `hsl(var(--background))` — the template uses `oklch()` values).
+- **Icons:** `@phosphor-icons/react` with the `Icon` suffix (`SunIcon`, `ArrowClockwiseIcon`). Lucide is no longer bundled.
+- **Routing:** react-router v7. Sub-routes of `/app/` must be handled client-side; the Django `spa_fallback` view catches unknown paths and serves the SPA.
 
-## Environment Variables
+## Auth Flow (reference)
 
-Key variables in `mise.toml`:
-- `DATABASE_URL` - Optional database connection string (SQLite or PostgreSQL)
-- `CSRF_TRUSTED_ORIGINS` - Must include frontend origin for API calls
-- `DEBUG` - Enables development features
-- `SECRET_KEY` - Auto-generated if not set
+1. User submits login via the SPA → `useAllauth().login()` POSTs to the headless endpoint.
+2. django-allauth sets a session cookie + returns the user.
+3. `useAuthStore` syncs user state from the allauth hook into Zustand.
+4. Protected routes/components read `isAuthenticated` or `user` from `useAuthStore`.
+5. API calls include the session cookie automatically; CSRF is enforced via the `csrftoken` cookie.
+
+## Gotchas
+
+- **CSRF errors in dev:** verify the frontend origin is in `CSRF_TRUSTED_ORIGINS` (default includes `:5173`, `:8000`, `:8080`).
+- **`DATABASE_URL` vs `DBOS_DATABASE_URL`:** don't set DBOS_ explicitly; it's derived.
+- **Vite HMR + Django static:** during dev, django-vite serves from the Vite dev server; in prod, it reads `frontend/dist/.vite/manifest.json`. Run `mise run build` before `collectstatic` for production.
+- **Migrations on SQLite vs Postgres:** `mise run migrate` calls `ensure_pg_schema.sh` first, which is a no-op on SQLite but creates the schema on Postgres.

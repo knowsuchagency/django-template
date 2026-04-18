@@ -3,9 +3,9 @@ import time
 from datetime import datetime, timezone
 from pprint import pprint
 
+import structlog
 from dbos import DBOS
 from ninja import Router
-from loguru import logger
 
 from .schemas import (
     WorkflowResult,
@@ -19,12 +19,13 @@ from core.cron_jobs import data_aggregation_task
 
 
 router = Router()
+logger = structlog.get_logger(__name__)
 
 
 @DBOS.workflow()
 def test_job_workflow():
     seconds = random.randint(1, 5)
-    logger.info(f"Sleeping for {seconds} seconds...")
+    logger.info("test_job_sleeping", seconds=seconds)
     time.sleep(seconds)
     result = {"message": "Job completed", "seconds": seconds}
     pprint(result)
@@ -88,7 +89,7 @@ def get_result(request, workflow_id: str):
             input=workflow_input,
         )
     except Exception as e:
-        logger.error(f"Error retrieving workflow {workflow_id}: {e}")
+        logger.error("workflow_retrieve_failed", workflow_id=workflow_id, error=str(e), exc_info=True)
         return WorkflowResult(
             workflow_id=workflow_id,
             status="ERROR",
@@ -139,7 +140,7 @@ def list_workflows(request, limit: int = 1000):
             message="Successfully retrieved workflows",
         )
     except Exception as e:
-        logger.error(f"Error listing workflows: {e}")
+        logger.error("workflow_list_failed", error=str(e), exc_info=True)
         return WorkflowListResponse(
             workflows=[], total_count=0, message=f"Error: {str(e)}"
         )
@@ -193,7 +194,7 @@ def workflow_status(request, limit: int = 10000):
             message="DBOS workflows are running",
         )
     except Exception as e:
-        logger.error(f"Error getting workflow status: {e}")
+        logger.error("workflow_status_failed", error=str(e), exc_info=True)
         return WorkflowStatusResponse(
             total_workflows=0,
             queued_workflows=0,
@@ -226,7 +227,7 @@ def trigger_aggregation(request, time_range: str = "1h"):
             "time_range": time_range,
         }
     except Exception as e:
-        logger.error(f"Error starting aggregation workflow: {e}")
+        logger.error("aggregation_start_failed", error=str(e), exc_info=True)
         return {"message": "Error starting aggregation", "error": str(e)}
 
 
@@ -289,7 +290,7 @@ def get_workflow_details(request, workflow_id: str):
                     )
                 )
         except Exception as e:
-            logger.warning(f"Could not retrieve steps for workflow {workflow_id}: {e}")
+            logger.warning("workflow_steps_retrieve_failed", workflow_id=workflow_id, error=str(e))
 
         return WorkflowDetailResponse(
             workflow_id=workflow_id,
@@ -321,7 +322,7 @@ def get_workflow_details(request, workflow_id: str):
             steps=steps,
         )
     except Exception as e:
-        logger.error(f"Error getting workflow details for {workflow_id}: {e}")
+        logger.error("workflow_details_failed", workflow_id=workflow_id, error=str(e), exc_info=True)
         return WorkflowDetailResponse(
             workflow_id=workflow_id,
             name="Error",
@@ -370,7 +371,7 @@ def get_workflow_steps(request, workflow_id: str):
             "total_steps": len(step_list),
         }
     except Exception as e:
-        logger.error(f"Error getting steps for workflow {workflow_id}: {e}")
+        logger.error("workflow_steps_failed", workflow_id=workflow_id, error=str(e), exc_info=True)
         return {
             "workflow_id": workflow_id,
             "steps": [],
@@ -391,7 +392,7 @@ def cancel_workflow(request, workflow_id: str):
             "workflow_id": workflow_id,
         }
     except Exception as e:
-        logger.error(f"Error cancelling workflow {workflow_id}: {e}")
+        logger.error("workflow_cancel_failed", workflow_id=workflow_id, error=str(e), exc_info=True)
         return {
             "message": f"Error cancelling workflow",
             "workflow_id": workflow_id,

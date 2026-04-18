@@ -2,8 +2,10 @@ import random
 from datetime import datetime
 from typing import Dict, Any
 
+import structlog
 from dbos import DBOS
-from loguru import logger
+
+logger = structlog.get_logger(__name__)
 
 
 @DBOS.scheduled("0 * * * * *")
@@ -40,7 +42,7 @@ def stock_price_tracker(scheduled_time: datetime, actual_time: datetime):
         "market_status": "open" if datetime.now().hour >= 9 and datetime.now().hour < 16 else "closed"
     }
     
-    logger.info(f"Stock prices updated at {timestamp}: {prices}")
+    logger.info("stock_prices_updated", timestamp=timestamp, prices=prices)
     return result
 
 
@@ -70,7 +72,7 @@ def hourly_report(scheduled_time: datetime, actual_time: datetime):
         }
     }
     
-    logger.info(f"Hourly report generated: {report}")
+    logger.info("hourly_report_generated", report=report)
     return report
 
 
@@ -95,7 +97,7 @@ def daily_cleanup(scheduled_time: datetime, actual_time: datetime):
         "status": "success"
     }
     
-    logger.info(f"Daily cleanup completed: {result}")
+    logger.info("daily_cleanup_completed", result=result)
     return result
 
 
@@ -115,7 +117,7 @@ def data_aggregation_task(time_range: str = "1h") -> Dict[str, Any]:
         "processing_time_ms": random.randint(10, 100)
     }
     
-    logger.info(f"Data aggregation completed for {time_range}: {aggregation}")
+    logger.info("data_aggregation_completed", time_range=time_range, aggregation=aggregation)
     return aggregation
 
 

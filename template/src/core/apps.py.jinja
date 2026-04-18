@@ -8,13 +8,15 @@ class CoreConfig(AppConfig):
     def ready(self):
         import os
         import sys
+        import structlog
         from dbos import DBOS, DBOSConfig
         from django.conf import settings
-        from loguru import logger
+
+        logger = structlog.get_logger(__name__)
 
         # Only initialize DBOS when running the server
         if 'runserver' not in sys.argv and 'granian' not in sys.argv[0] and 'gunicorn' not in sys.argv[0] and 'uvicorn' not in sys.argv[0]:
-            logger.info("Skipping DBOS initialization - not running server")
+            logger.info("dbos_init_skipped", reason="not_running_server")
             return
 
         # Only initialize DBOS if we're in the main process (not in Django's autoreload subprocess)
@@ -47,15 +49,11 @@ class CoreConfig(AppConfig):
                     
                 DBOS(config=dbos_config, conductor_key=settings.DBOS_CONDUCTOR_KEY)
                 DBOS.launch()
-                
-                if dbos_database_url:
-                    logger.info(f"DBOS initialized successfully with URL: {dbos_database_url}")
-                else:
-                    logger.info("DBOS initialized successfully without database URL")
-                
+
+                logger.info("dbos_initialized", database_url=dbos_database_url)
+
                 # Import cron jobs to register them with DBOS
                 from . import cron_jobs  # noqa: F401
-                logger.info("DBOS cron jobs registered")
+                logger.info("dbos_cron_jobs_registered")
             except Exception as e:
-                logger.warning(f"DBOS initialization failed: {e}")
-                logger.info("Workflows will not be available.")
+                logger.warning("dbos_init_failed", error=str(e), exc_info=True)

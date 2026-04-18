@@ -1,13 +1,12 @@
-import pprint
 import re
 from typing import List
 
+import structlog
 from django.conf import settings
 from django.http import HttpRequest, HttpResponse
 from django.middleware.csrf import CsrfViewMiddleware
-import logging
 
-logger = logging.getLogger(__name__)
+logger = structlog.get_logger(__name__)
 
 
 class RequestLoggingMiddleware:
@@ -15,33 +14,24 @@ class RequestLoggingMiddleware:
         self.get_response = get_response
 
     def __call__(self, request: HttpRequest) -> HttpResponse:
-        # Process request metadata before the view
         self._log_request(request)
-
-        # Get response from view
-        response = self.get_response(request)
-
-        return response
+        return self.get_response(request)
 
     def _log_request(self, request: HttpRequest) -> None:
-        """Pretty print request metadata including headers and cookies."""
-        request_data = {
-            "path": request.path,
-            "method": request.method,
-            "scheme": request.scheme,
-            "get_params": dict(request.GET),
-            "post_params": dict(request.POST),
-            "headers": dict(request.headers),
-            "cookies": dict(request.COOKIES),
-            "user": str(request.user),
-            "is_secure": request.is_secure(),
-            "is_ajax": request.headers.get("X-Requested-With") == "XMLHttpRequest",
-            "client_ip": request.META.get("REMOTE_ADDR"),
-        }
-
-        print("\n" + "=" * 50 + " REQUEST METADATA " + "=" * 50)
-        pprint.pprint(request_data, indent=2, width=120)
-        print("=" * 120 + "\n")
+        logger.info(
+            "request_received",
+            path=request.path,
+            method=request.method,
+            scheme=request.scheme,
+            get_params=dict(request.GET),
+            post_params=dict(request.POST),
+            headers=dict(request.headers),
+            cookies=dict(request.COOKIES),
+            user=str(request.user),
+            is_secure=request.is_secure(),
+            is_ajax=request.headers.get("X-Requested-With") == "XMLHttpRequest",
+            client_ip=request.META.get("REMOTE_ADDR"),
+        )
 
 
 class WildcardCSRFMiddleware(CsrfViewMiddleware):

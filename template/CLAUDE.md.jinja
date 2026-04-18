@@ -16,7 +16,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with th
 
 - **Custom `User` model** in `src/core/models.py` — extends `AbstractUser` with a `uuid` field for external-facing identifiers (e.g. unsubscribe links). The default integer PK is retained.
 - **Django Ninja (not DRF)** for the API — auto-generates OpenAPI at `/api/v1/docs`. Feature routers live under `src/api/v1/<feature>/` and are composed in `src/api/v1/router.py`.
-- **DBOS replaces Django-Q2/Celery.** Background tasks run in-process as durable workflows — no separate worker process. Scheduled workflows live in `src/core/cron_jobs.py` (`@DBOS.scheduled` + `@DBOS.workflow`).
+- **DBOS for background tasks.** Tasks run in-process as durable workflows — no separate worker process. Scheduled workflows live in `src/core/cron_jobs.py` (`@DBOS.scheduled` + `@DBOS.workflow`).
 - **WhiteNoise + django-vite.** WhiteNoise serves static assets in production; django-vite bridges Vite's dev server during development and the built manifest in production. Vite emits to `frontend/dist/`, which is collected into Django's static pipeline.
 - **`WildcardCSRFMiddleware`** (`src/core/middleware.py`) enables wildcard patterns in `CSRF_TRUSTED_ORIGINS` — useful for preview environments.
 - **SPA at `/app/`** with a `spa_fallback` view catching unknown sub-routes so client-side routing (react-router) works on reload.
